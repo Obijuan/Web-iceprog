@@ -3,6 +3,8 @@ const usbVendor = 0x0403;
 const usbProduct = 0x6010;
 const BITMODE_MPSSE  = 0x02;
 const INTERFACE_A   = 1;
+const SIO_RESET_REQUEST = 0;  //-- Reset the port
+const SIO_RESET_SIO = 0;
 
 
 //-- Important information
@@ -16,53 +18,43 @@ const display = document.getElementById('display');
 const btn_list = document.getElementById('btn_list');
 const btn_close = document.getElementById('btn_close');
 
+//-- FTDI: Reset cmd
+async function ftdi_reset(device) {
+
+  let status = await device.controlTransferOut({
+    requestType: 'vendor',
+    recipient: 'device',
+    request: SIO_RESET_REQUEST,
+    value: SIO_RESET_SIO,
+    index: INTERFACE_A
+  });
+  
+  console.log(status);
+  console.log("Reset: OK");
+}
+
 if ('usb' in navigator == false) {
     console.log("WEB-USB NO SOPORTADO!")
 }
 
 let device;
 
-const LIBUSB_REQUEST_TYPE_VENDOR = (0x02 << 5);
-const LIBUSB_RECIPIENT_DEVICE = 0X00;
-const LIBUSB_ENDPOINT_OUT =  0x00;
-const LIBUSB_ENDPOINT_IN = 0x80;
-const FTDI_DEVICE_OUT_REQTYPE = LIBUSB_REQUEST_TYPE_VENDOR |
-                                LIBUSB_RECIPIENT_DEVICE |
-                                LIBUSB_ENDPOINT_OUT; 
-const SIO_RESET_REQUEST = 0;  //-- Reset the port
-const SIO_RESET_SIO = 0;
-
-btn_usb.onclick = () => {
+btn_usb.onclick = async () => {
     console.log("Connect to USB");
 
-    navigator.usb.requestDevice({ filters: [{ vendorId: 0x0403 }] })
-    .then(sel_device => {
-       device = sel_device;
-       display.innerHTML = device.productName + " " + device.manufacturerName;
-       return device.open();
-       })
-    .then ( () => device.controlTransferOut({
-          requestType: 'vendor',
-          recipient: 'device',
-          request: SIO_RESET_REQUEST,
-          value: SIO_RESET_SIO,
-          index: INTERFACE_A
-        }))
-    .then ( status => {
-        console.log("Control transfer out...");
-        console.log("Promise: ");
-        console.log(status);
-        console.log("Ya...");
-    })
-//  if (libusb_control_transfer(ftdi->usb_dev, FTDI_DEVICE_OUT_REQTYPE,
-//      SIO_RESET_REQUEST, SIO_RESET_SIO,
-//      ftdi->index, NULL, 0, ftdi->usb_write_timeout) < 0)
-//    ftdi_error_return(-1,"FTDI reset failed");
+   //-- filters: [{ vendorId: 0x0403 }]
+   device = await  navigator.usb.requestDevice({ filters: [] });
+   await device.open();
+   
+   //-- Show the device on the screen
+   display.innerHTML = device.productName + " " + device.manufacturerName;
 
-        
-    .catch(error => { 
-        console.error(error); 
-    });
+   //-- Todo..
+   //await device.selectConfiguration(1);
+   //await device.claimInterface(0);
+   
+   //-- Reset cmd
+   ftdi_reset(device);
 
 }
 
