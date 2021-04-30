@@ -3,9 +3,11 @@ const usbVendor = 0x0403;
 const usbProduct = 0x6010;
 const BITMODE_MPSSE  = 0x02;
 const INTERFACE_A   = 1;
+
 const SIO_RESET_REQUEST = 0;  //-- Reset the port
 const SIO_RESET_SIO = 0;
-
+const SIO_RESET_PURGE_RX = 1;
+const SIO_RESET_PURGE_TX = 2;
 
 //-- Important information
 // ftdi->interface = 0;
@@ -21,7 +23,7 @@ const btn_close = document.getElementById('btn_close');
 //-- FTDI: Reset cmd
 async function ftdi_reset(device) {
 
-  let status = await device.controlTransferOut({
+  let result = await device.controlTransferOut({
     requestType: 'vendor',
     recipient: 'device',
     request: SIO_RESET_REQUEST,
@@ -29,9 +31,37 @@ async function ftdi_reset(device) {
     index: INTERFACE_A
   });
   
-  console.log(status);
-  console.log("Reset: OK");
+  console.log("Reset: " + result.status);
 }
+
+//-- FTDI: Purge RX buffer
+async function ftdi_purge_rx_buffer(device) {
+
+  let result = await device.controlTransferOut({
+    requestType: 'vendor',
+    recipient: 'device',
+    request: SIO_RESET_REQUEST,
+    value: SIO_RESET_PURGE_RX,
+    index: INTERFACE_A
+  });
+
+  console.log("Purge RX: " + result.status);
+}
+
+//-- FTDI: Purge TX Buffer
+async function ftdi_usb_purge_tx_buffer(device) {
+
+  let result = await device.controlTransferOut({
+    requestType: 'vendor',
+    recipient: 'device',
+    request: SIO_RESET_REQUEST,
+    value: SIO_RESET_PURGE_TX,
+    index: INTERFACE_A
+  });
+
+  console.log("Purge TX: " + result.status);
+}
+
 
 if ('usb' in navigator == false) {
     console.log("WEB-USB NO SOPORTADO!")
@@ -40,21 +70,25 @@ if ('usb' in navigator == false) {
 let device;
 
 btn_usb.onclick = async () => {
-    console.log("Connect to USB");
+  console.log("Connect to USB");
 
-   //-- filters: [{ vendorId: 0x0403 }]
-   device = await  navigator.usb.requestDevice({ filters: [] });
-   await device.open();
+  //-- filters: [{ vendorId: 0x0403 }]
+  device = await  navigator.usb.requestDevice({ filters: [] });
+  await device.open();
    
-   //-- Show the device on the screen
-   display.innerHTML = device.productName + " " + device.manufacturerName;
+  //-- Show the device on the screen
+  display.innerHTML = device.productName + " " + device.manufacturerName;
 
-   //-- Todo..
-   //await device.selectConfiguration(1);
-   //await device.claimInterface(0);
+  //-- Todo..
+  //await device.selectConfiguration(1);
+  //await device.claimInterface(0);
    
-   //-- Reset cmd
-   ftdi_reset(device);
+  //-- Initialization commands
+  ftdi_reset(device);
+  ftdi_purge_rx_buffer(device);
+  ftdi_usb_purge_tx_buffer(device);
+
+  // ftdi_usb_purge_buffers
 
 }
 
