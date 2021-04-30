@@ -149,6 +149,20 @@ async function ftdi_set_bitmode(device, bitmask, mode) {
               " -> Written: " + usb_val.toString(16));
 }
 
+//-- MPSSE: Send one byte
+async function mpsse_send_byte(b) {
+
+  let data = new Uint8Array(1);
+  data[0] = b;
+  let result = await device.transferOut(IN_EP, data); 
+
+  console.log("MPSSE: Send_byte: " + result.status);
+  console.log("  -> Written: " + result.bytesWritten + ", Value: " + b.toString(16));
+}
+
+
+
+
 if ('usb' in navigator == false) {
     console.log("WEB-USB NO SOPORTADO!")
 }
@@ -192,23 +206,20 @@ btn_usb.onclick = async () => {
   await ftdi_set_bitmode(device, 0xFF, BITMODE_MPSSE);
 
   // enable clock divide by 5
-	//mpsse_send_byte(MC_TCK_D5);
+	mpsse_send_byte(MC_TCK_D5);
 
-  let data = new Uint8Array(1);
-  data[0] = MC_TCK_D5;
-  let result = await device.transferOut(2, data);  //-- IN_EP
-  console.log(result);
+ 
 
 
-  function mpsse_send_byte(data)
-  {
-    let buf = new Buffer.alloc(1);
-    buf[0] = data;
-    var rc = libftdi.ftdi_write_data(ctx, buf, 1)
-    if (rc != 1) {
-      mpsse_error(rc, "Write error (single byte, rc=" + rc + "expected 1)");
-    }
-  }
+  // function mpsse_send_byte(data)
+  // {
+  //   let buf = new Buffer.alloc(1);
+  //   buf[0] = data;
+  //   var rc = libftdi.ftdi_write_data(ctx, buf, 1)
+  //   if (rc != 1) {
+  //     mpsse_error(rc, "Write error (single byte, rc=" + rc + "expected 1)");
+  //   }
+  // }
 
 //   int ftdi_write_data(struct ftdi_context *ftdi, const unsigned char *buf, int size)
 // {
