@@ -172,7 +172,8 @@ btn_usb.onclick = async () => {
 
   //--- TODO
   //-- Pendign to FIX BUG. Error:  'Unable to claim interface' 
-  //await device.claimInterface(1);
+  //-- It works!!! It should be checked again....
+  await device.claimInterface(0);
    
 
   //-- Initialization commands
@@ -195,8 +196,8 @@ btn_usb.onclick = async () => {
 
   let data = new Uint8Array(1);
   data[0] = MC_TCK_D5;
-  //let result = await device.transferOut(IN_EP, data);
-  //console.log(result);
+  let result = await device.transferOut(2, data);  //-- IN_EP
+  console.log(result);
 
 
   function mpsse_send_byte(data)
