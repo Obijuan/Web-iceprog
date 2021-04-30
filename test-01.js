@@ -160,6 +160,33 @@ async function mpsse_send_byte(b) {
   console.log("  -> Written: " + result.bytesWritten + ", Value: " + b.toString(16));
 }
 
+//-- MPSSE: Init
+async function mpsse_init(ctx) {
+  //-- Initialization commands
+  await ftdi_reset(device);
+  await ftdi_usb_purge_buffers(device);
+
+  let latency = await ftdi_get_latency_timer(device);
+  console.log("Latency: " + latency);
+
+  //-- Set latency to 1 (fastest)
+  //-- 1 is the fastest polling, it means 1 kHz polling
+  await ftdi_set_latency_timer(device, 1);
+
+  // Enter MPSSE (Multi-Protocol Synchronous Serial Engine) mode.
+  // Set all pins to output
+  await ftdi_set_bitmode(device, 0xFF, BITMODE_MPSSE);
+
+  // enable clock divide by 5
+  await mpsse_send_byte(MC_TCK_D5);
+
+  // set 6 MHz clock
+  await mpsse_send_byte(MC_SET_CLK_DIV);
+  await mpsse_send_byte(0x00);
+  await mpsse_send_byte(0x00);
+
+  console.log("MPSSE: INIT: OK!")
+}
 
 
 
@@ -184,31 +211,15 @@ btn_usb.onclick = async () => {
   await device.selectConfiguration(1);
   console.log("Configuration value: " + device.configuration.configurationValue);
 
-  //--- TODO
-  //-- Pendign to FIX BUG. Error:  'Unable to claim interface' 
-  //-- It works!!! It should be checked again....
+  //-- Claim the interface
+  //-- NOTE: [LINUX]: Make sure the ftdi_sio modules has been unloaded previously!!!
   await device.claimInterface(0);
-   
+  
+  //-- Init the FTDI
+  await mpsse_init(device);
 
-  //-- Initialization commands
-  await ftdi_reset(device);
-  await ftdi_usb_purge_buffers(device);
 
-  let latency = await ftdi_get_latency_timer(device);
-  console.log("Latency: " + latency);
-
-  //-- Set latency to 1 (fastest)
-  //-- 1 is the fastest polling, it means 1 kHz polling
-  await ftdi_set_latency_timer(device, 1);
-
-  // Enter MPSSE (Multi-Protocol Synchronous Serial Engine) mode.
-  // Set all pins to output
-  await ftdi_set_bitmode(device, 0xFF, BITMODE_MPSSE);
-
-  // enable clock divide by 5
-	mpsse_send_byte(MC_TCK_D5);
-
- 
+  
 
 
   // function mpsse_send_byte(data)
