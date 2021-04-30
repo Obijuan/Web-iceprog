@@ -85,6 +85,25 @@ async function ftdi_usb_purge_buffers(device) {
   await ftdi_usb_purge_tx_buffer(device);
 }
 
+async function ftdi_get_latency_timer(device) {
+
+  //-- Read 1 byte from the FTDI
+  let result = await device.controlTransferIn({
+    requestType: 'vendor',
+    recipient: 'device',
+    request: SIO_GET_LATENCY_TIMER_REQUEST,
+    value: 0,
+    index: INTERFACE_A
+  }, 1);
+
+  console.log("Get Latency: " + result.status +
+              " -> Bytes: " + result.data.byteLength +
+              ", Value: " + result.data.getUint8(0)
+              );
+
+  return result.data.getUint8(0);
+}
+
 
 if ('usb' in navigator == false) {
     console.log("WEB-USB NO SOPORTADO!")
@@ -107,35 +126,13 @@ btn_usb.onclick = async () => {
   //await device.claimInterface(0);
    
   //-- Initialization commands
-  ftdi_reset(device);
-  ftdi_usb_purge_buffers(device);
+  await ftdi_reset(device);
+  await ftdi_usb_purge_buffers(device);
 
-  //-- FTDI_DEVICE_IN_REQTYPE
-
-
-  let result = await device.controlTransferIn({
-    requestType: 'vendor',
-    recipient: 'device',
-    request: SIO_GET_LATENCY_TIMER_REQUEST,
-    value: 0,
-    index: INTERFACE_A
-  }, 1);
-
-  console.log("Get Latency: " + result.status +
-              " -> Bytes: " + result.data.byteLength +
-              ", Value: " + result.data.getUint8(0)
-              );
-
-  // if (libusb_control_transfer(ftdi->usb_dev, 
-  //   FTDI_DEVICE_IN_REQTYPE, 
-  //   SIO_GET_LATENCY_TIMER_REQUEST, 
-  //   0, 
-  //   ftdi->index, 
-  //   (unsigned char *)&usb_val, 1, ftdi->usb_read_timeout) != 1);
-  //   ftdi_error_return(-1, "reading latency timer failed");
-
-  //*latency = (unsigned char)usb_val;
+  let latency = await ftdi_get_latency_timer(device);
+  console.log("Latency: " + latency);
 }
+
 
 btn_list.onclick = async () => {
     let devices = await navigator.usb.getDevices();
