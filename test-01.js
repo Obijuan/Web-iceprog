@@ -62,6 +62,12 @@ async function ftdi_usb_purge_tx_buffer(device) {
   console.log("Purge TX: " + result.status);
 }
 
+//-- FTDI: Purge Buffers
+async function ftdi_usb_purge_buffers(device) {
+  await ftdi_purge_rx_buffer(device);
+  await ftdi_usb_purge_tx_buffer(device);
+}
+
 
 if ('usb' in navigator == false) {
     console.log("WEB-USB NO SOPORTADO!")
@@ -85,11 +91,7 @@ btn_usb.onclick = async () => {
    
   //-- Initialization commands
   ftdi_reset(device);
-  ftdi_purge_rx_buffer(device);
-  ftdi_usb_purge_tx_buffer(device);
-
-  // ftdi_usb_purge_buffers
-
+  ftdi_usb_purge_buffers(device);
 }
 
 btn_list.onclick = async () => {
