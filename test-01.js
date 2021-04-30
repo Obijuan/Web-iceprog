@@ -13,7 +13,7 @@ const SIO_RESET_REQUEST = 0;  //-- Reset the port
 // #define SIO_POLL_MODEM_STATUS_REQUEST 0x05
 // #define SIO_SET_EVENT_CHAR_REQUEST    0x06
 // #define SIO_SET_ERROR_CHAR_REQUEST    0x07
-// #define SIO_SET_LATENCY_TIMER_REQUEST 0x09
+const SIO_SET_LATENCY_TIMER_REQUEST = 0x09;
 const SIO_GET_LATENCY_TIMER_REQUEST = 0x0A;
 // #define SIO_SET_BITMODE_REQUEST       0x0B
 // #define SIO_READ_PINS_REQUEST         0x0C
@@ -85,6 +85,7 @@ async function ftdi_usb_purge_buffers(device) {
   await ftdi_usb_purge_tx_buffer(device);
 }
 
+//-- FTDI: Get latency timer
 async function ftdi_get_latency_timer(device) {
 
   //-- Read 1 byte from the FTDI
@@ -104,6 +105,19 @@ async function ftdi_get_latency_timer(device) {
   return result.data.getUint8(0);
 }
 
+//-- FTDI: Set latency timer
+async function ftdi_set_latency_timer(device, latency) {
+
+  let result = await device.controlTransferOut({
+    requestType: 'vendor',
+    recipient: 'device',
+    request: SIO_SET_LATENCY_TIMER_REQUEST,
+    value: latency,
+    index: INTERFACE_A
+  });
+
+  console.log("Set Latency: " + result.status);
+}
 
 if ('usb' in navigator == false) {
     console.log("WEB-USB NO SOPORTADO!")
@@ -131,6 +145,11 @@ btn_usb.onclick = async () => {
 
   let latency = await ftdi_get_latency_timer(device);
   console.log("Latency: " + latency);
+
+  //-- Set latency to 1 (fastest)
+  //-- 1 is the fastest polling, it means 1 kHz polling
+  await ftdi_set_latency_timer(device, 1);
+
 }
 
 
