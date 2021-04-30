@@ -28,7 +28,7 @@ const SIO_SET_LATENCY_TIMER_REQUEST = 0x09;
 const SIO_GET_LATENCY_TIMER_REQUEST = 0x0A;
 const SIO_SET_BITMODE_REQUEST = 0x0B;
 // #define SIO_READ_PINS_REQUEST         0x0C
-// #define SIO_READ_EEPROM_REQUEST       0x90
+const SIO_READ_EEPROM_REQUEST = 0x90
 // #define SIO_WRITE_EEPROM_REQUEST      0x91
 // #define SIO_ERASE_EEPROM_REQUEST      0x92
 
@@ -149,6 +149,66 @@ async function ftdi_set_bitmode(device, bitmask, mode) {
               " -> Written: " + usb_val.toString(16));
 }
 
+function ftdi_read_chipid_shift(value)
+{
+    return ((value & 1) << 1) |
+           ((value & 2) << 5) |
+           ((value & 4) >> 2) |
+           ((value & 8) << 4) |
+           ((value & 16) >> 1) |
+           ((value & 32) >> 1) |
+           ((value & 64) >> 4) |
+           ((value & 128) >> 2);
+}
+
+//-- FTDI: Read Chip ID
+async function ftdi_read_chipid(device) {
+
+  let result = await device.controlTransferIn({
+    requestType: 'vendor',
+    recipient: 'device',
+    request: SIO_READ_EEPROM_REQUEST,
+    value: 0,
+    index: 0x43
+  }, 2);
+
+  console.log("Read: " + result.status +
+  " -> Bytes: " + result.data.byteLength +
+  ", Value: " + result.data.getUint16(0)
+  );
+
+  let a = result.data.getUint16(0);
+  console.log("a: " + a.toString(16));
+
+  a = a << 8 | a >> 8;
+
+  result = await device.controlTransferIn({
+    requestType: 'vendor',
+    recipient: 'device',
+    request: SIO_READ_EEPROM_REQUEST,
+    value: 0,
+    index: 0x44
+  }, 2);
+
+  console.log("Read: " + result.status +
+  " -> Bytes: " + result.data.byteLength +
+  ", Value: " + result.data.getUint16(0)
+  );
+
+  let b = result.data.getUint16(0);
+  console.log("b: " + b.toString(16));
+
+  b = b << 8 | b >> 8;
+  a = (a << 16) | (b & 0xFFFF);
+
+  a = ftdi_read_chipid_shift(a) | ftdi_read_chipid_shift(a>>8)<<8
+      ftdi_read_chipid_shift(a>>16)<<16 | ftdi_read_chipid_shift(a>>24)<<24;
+
+  let chipid = a ^ 0xa5f0f7d1;
+
+  console.log("Chipid: " + chipid.toString(16));
+}
+
 //-- MPSSE: Send one byte
 async function mpsse_send_byte(b) {
 
@@ -218,56 +278,9 @@ btn_usb.onclick = async () => {
   //-- Init the FTDI
   await mpsse_init(device);
 
-
+  //-- Test: Read FTDI chip id
+  await ftdi_read_chipid(device);
   
-
-
-  // function mpsse_send_byte(data)
-  // {
-  //   let buf = new Buffer.alloc(1);
-  //   buf[0] = data;
-  //   var rc = libftdi.ftdi_write_data(ctx, buf, 1)
-  //   if (rc != 1) {
-  //     mpsse_error(rc, "Write error (single byte, rc=" + rc + "expected 1)");
-  //   }
-  // }
-
-//   int ftdi_write_data(struct ftdi_context *ftdi, const unsigned char *buf, int size)
-// {
-//     int offset = 0;
-//     int actual_length;
-
-//     if (ftdi == NULL || ftdi->usb_dev == NULL)
-//         ftdi_error_return(-666, "USB device unavailable");
-
-//     while (offset < size)
-//     {
-//         int write_size = ftdi->writebuffer_chunksize;
-
-//         if (offset+write_size > size)
-//             write_size = size-offset;
-
-//         if (libusb_bulk_transfer(ftdi->usb_dev, ftdi->in_ep, (unsigned char *)buf+offset, write_size, &actual_length, ftdi->usb_write_timeout) < 0)
-//             ftdi_error_return(-1, "usb bulk write failed");
-
-//         offset += actual_length;
-//     }
-
-//     return offset;
-// }
-
-
-  // ftdi_write_data(ctx, buf, 1)
-
-  
-  // if (libusb_bulk_transfer(
-  //       ftdi->usb_dev, 
-  //       ftdi->in_ep, 
-  //       (unsigned char *)buf+offset, 
-  //       write_size, 
-  //       &actual_length, 
-  //       ftdi->usb_write_timeout) < 0)
-  // ftdi_error_return(-1, "usb bulk write failed");
 
 
 }
