@@ -15,7 +15,7 @@ const SIO_RESET_REQUEST = 0;  //-- Reset the port
 // #define SIO_SET_ERROR_CHAR_REQUEST    0x07
 const SIO_SET_LATENCY_TIMER_REQUEST = 0x09;
 const SIO_GET_LATENCY_TIMER_REQUEST = 0x0A;
-// #define SIO_SET_BITMODE_REQUEST       0x0B
+const SIO_SET_BITMODE_REQUEST = 0x0B;
 // #define SIO_READ_PINS_REQUEST         0x0C
 // #define SIO_READ_EEPROM_REQUEST       0x90
 // #define SIO_WRITE_EEPROM_REQUEST      0x91
@@ -119,6 +119,24 @@ async function ftdi_set_latency_timer(device, latency) {
   console.log("Set Latency: " + result.status);
 }
 
+//-- FTDI: Set Bitmode
+async function ftdi_set_bitmode(device, bitmask, mode) {
+
+  //-- Calculate the value to sent to the FTDI
+  let usb_val = (mode << 8) | bitmask;  //-- Low byte: bitmask
+
+  let result = await device.controlTransferOut({
+    requestType: 'vendor',
+    recipient: 'device',
+    request: SIO_SET_BITMODE_REQUEST,
+    value: usb_val,
+    index: INTERFACE_A
+  });
+
+  console.log("Set Bitmode: " + result.status + 
+              " -> Written: " + usb_val.toString(16));
+}
+
 if ('usb' in navigator == false) {
     console.log("WEB-USB NO SOPORTADO!")
 }
@@ -149,6 +167,13 @@ btn_usb.onclick = async () => {
   //-- Set latency to 1 (fastest)
   //-- 1 is the fastest polling, it means 1 kHz polling
   await ftdi_set_latency_timer(device, 1);
+
+  // Enter MPSSE (Multi-Protocol Synchronous Serial Engine) mode.
+  // Set all pins to output
+  await ftdi_set_bitmode(device, 0xFF, BITMODE_MPSSE);
+
+
+
 
 }
 
