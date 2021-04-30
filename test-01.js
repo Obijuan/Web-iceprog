@@ -40,9 +40,8 @@ const SIO_RESET_PURGE_TX = 2;
 //-- Important information
 // ftdi->interface = 0;
 // ftdi->index     = INTERFACE_A;
-// ftdi->in_ep     = 0x02; //-- Endpoint!
 const IN_EP = 0x02; //-- Endpoint for transfering data from host to device
-// ftdi->out_ep    = 0x81; //-- Endpoint!
+const OUT_EP = 0x01; //-- Endpoint!  0x81
 
 const btn_usb = document.getElementById('btn_usb');
 const display = document.getElementById('display');
@@ -221,7 +220,7 @@ async function mpsse_send_byte(b) {
 }
 
 //-- MPSSE: Init
-async function mpsse_init(ctx) {
+async function mpsse_init(device) {
   //-- Initialization commands
   await ftdi_reset(device);
   await ftdi_usb_purge_buffers(device);
@@ -248,6 +247,70 @@ async function mpsse_init(ctx) {
   console.log("MPSSE: INIT: OK!")
 }
 
+//-------- MPSSE: mpsse_recv_byte()
+async function mpsse_recv_byte(device) {
+
+  console.log("queue length: " + queue.length);
+
+  //-- Byte to read
+  let data;
+
+  //-- There at least 1 byte in the buffer. There is no need to
+  //-- access the USB
+  if (queue.length >= 1) {
+
+    //-- Read the first element in the buffer
+    data = queue.shift();
+
+    console.log("MPSSE: recv_byte. Byte in buffer: " + data.toString(16));
+    return data;
+  }
+
+  //-- Buffer is empty. Read data from the USB
+  let result = await device.transferIn(OUT_EP, 4096);
+
+  console.log("TransferIn: " + result.status +
+  " -> Bytes: " + result.data.byteLength);
+
+  let cad = "";
+
+  //-- Insert the data in the queue
+  for (let i = 0; i < result.data.byteLength; i = i + 1) {
+    queue.push(result.data.getUint8(i));
+    cad = cad + "0x" + result.data.getUint8(i).toString(16) + " ";
+  }
+
+  console.log("QUEUE: [ " + cad + "]");
+
+  //-- Read the first element in the queue
+  data = queue.shift();
+
+  console.log("MPSSE: recv_byte. Read: " + data.toString(16) + 
+              ", Buffer size: " + queue.length);
+
+  return data;
+}
+
+
+//-------- MPSSE: readb_low()
+async function mpsse_readb_low(device) 
+{
+  await mpsse_send_byte(MC_READB_LOW);
+  let data = await mpsse_recv_byte(device);
+  console.log("MPSSE: readb_low(): 0x" + data.toString(16));
+}
+
+async function get_cdone()
+{
+  let data = await mpsse_readb_low(device);
+  let cdone = (data & 0x40) != 0;
+
+  console.log("MPSSE: get_cdone(): " + cdone);
+  return cdone;
+ }
+
+
+//----------------- Main ---------------------
 
 
 if ('usb' in navigator == false) {
@@ -255,6 +318,9 @@ if ('usb' in navigator == false) {
 }
 
 let device;
+
+//-- Buffer for storing incomming data from usb
+let queue = [];
 
 btn_usb.onclick = async () => {
   console.log("Connect to USB");
@@ -281,6 +347,17 @@ btn_usb.onclick = async () => {
   //-- Test: Read FTDI chip id
   await ftdi_read_chipid(device);
   
+  console.log("**************************get_cdone()");
+
+  let cdone = await get_cdone();
+  console.log("Cdone: " + (cdone ? "high" : "low"));
+
+  
+
+
+
+
+ 
 
 
 }
