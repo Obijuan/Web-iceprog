@@ -4,6 +4,17 @@ const usbProduct = 0x6010;
 const BITMODE_MPSSE  = 0x02;
 const INTERFACE_A   = 1;
 
+/* Mode commands */
+const	MC_SETB_LOW = 0x80;    // Set Data bits LowByte
+const MC_READB_LOW = 0x81;   // Read Data bits LowByte
+const MC_TCK_D5 = 0x8B;      // Enable /5 div, backward compat to FT2232D
+const MC_SET_CLK_DIV = 0x86; // Set clock divisor
+
+const MC_DATA_IN  =  0x20 // When set read data (Data IN)
+const MC_DATA_OUT =  0x10 // When set write data (Data OUT)
+const MC_DATA_OCN = 0x01  // When set update data on negative clock edge
+const MC_DATA_BITS = 0x02 // When set count bits not bytes
+
 //-- Request
 const SIO_RESET_REQUEST = 0;  //-- Reset the port
 // #define SIO_SET_BAUDRATE_REQUEST      SIO_SET_BAUD_RATE
@@ -30,6 +41,7 @@ const SIO_RESET_PURGE_TX = 2;
 // ftdi->interface = 0;
 // ftdi->index     = INTERFACE_A;
 // ftdi->in_ep     = 0x02; //-- Endpoint!
+const IN_EP = 0x02; //-- Endpoint for transfering data from host to device
 // ftdi->out_ep    = 0x81; //-- Endpoint!
 
 const btn_usb = document.getElementById('btn_usb');
@@ -153,10 +165,16 @@ btn_usb.onclick = async () => {
   //-- Show the device on the screen
   display.innerHTML = device.productName + " " + device.manufacturerName;
 
-  //-- Todo..
-  //await device.selectConfiguration(1);
-  //await device.claimInterface(0);
+  //-- Select the configuration (the FTDI chip only have 1, which value is 1)
+  //--- (given by bConfigurationValue)
+  await device.selectConfiguration(1);
+  console.log("Configuration value: " + device.configuration.configurationValue);
+
+  //--- TODO
+  //-- Pendign to FIX BUG. Error:  'Unable to claim interface' 
+  //await device.claimInterface(1);
    
+
   //-- Initialization commands
   await ftdi_reset(device);
   await ftdi_usb_purge_buffers(device);
@@ -172,7 +190,61 @@ btn_usb.onclick = async () => {
   // Set all pins to output
   await ftdi_set_bitmode(device, 0xFF, BITMODE_MPSSE);
 
+  // enable clock divide by 5
+	//mpsse_send_byte(MC_TCK_D5);
 
+  let data = new Uint8Array(1);
+  data[0] = MC_TCK_D5;
+  //let result = await device.transferOut(IN_EP, data);
+  //console.log(result);
+
+
+  function mpsse_send_byte(data)
+  {
+    let buf = new Buffer.alloc(1);
+    buf[0] = data;
+    var rc = libftdi.ftdi_write_data(ctx, buf, 1)
+    if (rc != 1) {
+      mpsse_error(rc, "Write error (single byte, rc=" + rc + "expected 1)");
+    }
+  }
+
+//   int ftdi_write_data(struct ftdi_context *ftdi, const unsigned char *buf, int size)
+// {
+//     int offset = 0;
+//     int actual_length;
+
+//     if (ftdi == NULL || ftdi->usb_dev == NULL)
+//         ftdi_error_return(-666, "USB device unavailable");
+
+//     while (offset < size)
+//     {
+//         int write_size = ftdi->writebuffer_chunksize;
+
+//         if (offset+write_size > size)
+//             write_size = size-offset;
+
+//         if (libusb_bulk_transfer(ftdi->usb_dev, ftdi->in_ep, (unsigned char *)buf+offset, write_size, &actual_length, ftdi->usb_write_timeout) < 0)
+//             ftdi_error_return(-1, "usb bulk write failed");
+
+//         offset += actual_length;
+//     }
+
+//     return offset;
+// }
+
+
+  // ftdi_write_data(ctx, buf, 1)
+
+  
+  // if (libusb_bulk_transfer(
+  //       ftdi->usb_dev, 
+  //       ftdi->in_ep, 
+  //       (unsigned char *)buf+offset, 
+  //       write_size, 
+  //       &actual_length, 
+  //       ftdi->usb_write_timeout) < 0)
+  // ftdi_error_return(-1, "usb bulk write failed");
 
 
 }
