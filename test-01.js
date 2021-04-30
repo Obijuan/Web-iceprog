@@ -4,7 +4,24 @@ const usbProduct = 0x6010;
 const BITMODE_MPSSE  = 0x02;
 const INTERFACE_A   = 1;
 
+//-- Request
 const SIO_RESET_REQUEST = 0;  //-- Reset the port
+// #define SIO_SET_BAUDRATE_REQUEST      SIO_SET_BAUD_RATE
+// #define SIO_SET_DATA_REQUEST          SIO_SET_DATA
+// #define SIO_SET_FLOW_CTRL_REQUEST     SIO_SET_FLOW_CTRL
+// #define SIO_SET_MODEM_CTRL_REQUEST    SIO_MODEM_CTRL
+// #define SIO_POLL_MODEM_STATUS_REQUEST 0x05
+// #define SIO_SET_EVENT_CHAR_REQUEST    0x06
+// #define SIO_SET_ERROR_CHAR_REQUEST    0x07
+// #define SIO_SET_LATENCY_TIMER_REQUEST 0x09
+const SIO_GET_LATENCY_TIMER_REQUEST = 0x0A;
+// #define SIO_SET_BITMODE_REQUEST       0x0B
+// #define SIO_READ_PINS_REQUEST         0x0C
+// #define SIO_READ_EEPROM_REQUEST       0x90
+// #define SIO_WRITE_EEPROM_REQUEST      0x91
+// #define SIO_ERASE_EEPROM_REQUEST      0x92
+
+
 const SIO_RESET_SIO = 0;
 const SIO_RESET_PURGE_RX = 1;
 const SIO_RESET_PURGE_TX = 2;
@@ -92,6 +109,32 @@ btn_usb.onclick = async () => {
   //-- Initialization commands
   ftdi_reset(device);
   ftdi_usb_purge_buffers(device);
+
+  //-- FTDI_DEVICE_IN_REQTYPE
+
+
+  let result = await device.controlTransferIn({
+    requestType: 'vendor',
+    recipient: 'device',
+    request: SIO_GET_LATENCY_TIMER_REQUEST,
+    value: 0,
+    index: INTERFACE_A
+  }, 1);
+
+  console.log("Get Latency: " + result.status +
+              " -> Bytes: " + result.data.byteLength +
+              ", Value: " + result.data.getUint8(0)
+              );
+
+  // if (libusb_control_transfer(ftdi->usb_dev, 
+  //   FTDI_DEVICE_IN_REQTYPE, 
+  //   SIO_GET_LATENCY_TIMER_REQUEST, 
+  //   0, 
+  //   ftdi->index, 
+  //   (unsigned char *)&usb_val, 1, ftdi->usb_read_timeout) != 1);
+  //   ftdi_error_return(-1, "reading latency timer failed");
+
+  //*latency = (unsigned char)usb_val;
 }
 
 btn_list.onclick = async () => {
