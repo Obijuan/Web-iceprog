@@ -621,6 +621,21 @@ async function flash_read_status()
     console.log("FLASH: write_enable. STOP!");
   }
 
+  async function flash_64kB_sector_erase(addr)
+  {
+    console.log("erase 64kB sector at 0x" + addr.toString(16) + "..");
+  
+    const command = new  Uint8Array(4);
+    command[0] = FC_BE64;
+    command[1] = (addr >> 16);
+    command[2] = (addr >> 8);
+    command[3] = addr;
+  
+    await flash_chip_select();
+    await mpsse_send_spi(command);
+    await flash_chip_deselect();
+  }
+
 
 //---------------------
 //-- UTILS
@@ -790,36 +805,98 @@ async function load_bitstream(contents)
   let end_addr = (rw_offset + file_size + 0xffff) & ~0xffff;
 
 
+  let addr = begin_addr;
 
   // for (let addr = begin_addr; addr < end_addr; addr += 0x10000) {
      await flash_write_enable(false);
-  //   flash_64kB_sector_erase(addr);
-  //   if (verbose)
-  //     console.log("Status after block erase:");
-  //   let status = flash_read_status()
-  //   if (verbose)
-  //     flash_print_status(status)
+     await flash_64kB_sector_erase(addr);
+     if (verbose)
+       console.log("************ Status after block erase:");
+     let status = await flash_read_status()
+     if (verbose)
+       flash_print_status(status)
   //   flash_wait(verbose);
   // }
 
-  // function flash_64kB_sector_erase(addr)
+    //-- Implement: flash_wait()
+
+  //   function flash_wait(verbose)
   // {
-  //   console.log("erase 64kB sector at 0x" + addr.toString(16) + "..");
-  
-  //   let command = new Buffer.alloc(4);
-  //   command[0] = FC_BE64;
-  //   command[1] = (addr >> 16);
-  //   command[2] = (addr >> 8);
-  //   command[3] = addr;
-  
-  //   flash_chip_select();
-  //   mpsse_send_spi(command, 4);
-  //   flash_chip_deselect();
+  //   if (verbose)
+  //     console.log("waiting..");
+  //   var count = 0;
+  //   while (1)
+  //   {
+  //     let data = new Buffer.alloc(2);
+  //     data[0] = FC_RSR1;
+
+  //     flash_chip_select();
+  //     mpsse_xfer_spi(data, 2);
+  //     flash_chip_deselect();
+
+  //     if ((data[1] & 0x01) == 0) {
+  //       if (count < 2) {
+  //         count++;
+  //         if (verbose) {
+  //           console.log("r");
+  //         }
+  //       } else {
+  //         if (verbose) {
+  //           console.log("R");
+  //         }
+  //         break;
+  //       }
+  //     } else {
+  //       if (verbose) {
+  //         console.log(".");
+  //       }
+  //       count = 0;
+  //     }
+
+  //     sleep.usleep(1000);
+  //   }
   // }
 
-  //-- Implementar mpsse_send_spi()
 
-  await mpsse_send_spi();
+  if (verbose)
+      console.log("waiting..");
+    let count = 0;
+    
+
+    while (1)
+    {
+
+      let data = new Uint8Array(2);
+      data[0] = FC_RSR1;
+
+      await flash_chip_select();
+      await mpsse_xfer_spi(data);
+      await flash_chip_deselect();
+
+      if ((data[1] & 0x01) == 0) {
+        if (count < 2) {
+          count++;
+          if (verbose) {
+            console.log("r");
+          }
+        } else {
+          if (verbose) {
+            console.log("R");
+          }
+          break;
+        }
+      } else {
+        if (verbose) {
+          console.log(".");
+        }
+        count = 0;
+      }
+
+      console.log("Data[1]: " + data[1]);
+      console.log("***************************************************************PAUSA!!!!!!")
+      await sleep(10);
+    }
+
 
   console.log("------------> OK!!");
 
