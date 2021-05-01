@@ -617,6 +617,8 @@ btn_usb.onclick = async () => {
   //------- Test Mode
   await test_mode();
 
+//-- Programing the FPGA
+
   //-- This is for test....
   //await mpsse_recv_byte(device);
 
