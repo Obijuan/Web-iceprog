@@ -393,6 +393,23 @@ async function mpsse_xfer_spi(buff)
   console.log("MPSSE: xfer_spio. STOP!----------------")
 }
 
+//------ MPSSE: send_spi
+async function mpsse_send_spi(buff)
+{
+  console.log("MPSSE: send_spi. START!---------")
+  if (buff.byteLength < 1)
+    return;
+
+  // Output only, update data on negative clock edge.
+  await mpsse_send_byte(MC_DATA_OUT | MC_DATA_OCN);
+  await mpsse_send_byte(buff.byteLength - 1);
+  await mpsse_send_byte((buff.byteLength - 1) >> 8);
+
+  let rc = await ftdi_write_data(device, buff);
+  //-- Todo! Check the correct number of bytes has been written....
+  console.log("MPSSE: send_spi. STOP!---------")
+}
+
 // ---------------------------------------------------------
 // Hardware specific CS, CReset, CDone functions
 // ---------------------------------------------------------
@@ -772,6 +789,8 @@ async function load_bitstream(contents)
   let begin_addr = rw_offset & ~0xffff;
   let end_addr = (rw_offset + file_size + 0xffff) & ~0xffff;
 
+
+
   // for (let addr = begin_addr; addr < end_addr; addr += 0x10000) {
      await flash_write_enable(false);
   //   flash_64kB_sector_erase(addr);
@@ -782,6 +801,25 @@ async function load_bitstream(contents)
   //     flash_print_status(status)
   //   flash_wait(verbose);
   // }
+
+  // function flash_64kB_sector_erase(addr)
+  // {
+  //   console.log("erase 64kB sector at 0x" + addr.toString(16) + "..");
+  
+  //   let command = new Buffer.alloc(4);
+  //   command[0] = FC_BE64;
+  //   command[1] = (addr >> 16);
+  //   command[2] = (addr >> 8);
+  //   command[3] = addr;
+  
+  //   flash_chip_select();
+  //   mpsse_send_spi(command, 4);
+  //   flash_chip_deselect();
+  // }
+
+  //-- Implementar mpsse_send_spi()
+
+  await mpsse_send_spi();
 
   console.log("------------> OK!!");
 
