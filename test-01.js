@@ -300,6 +300,23 @@ async function mpsse_readb_low(device)
   console.log("MPSSE: readb_low(): 0x" + data.toString(16));
 }
 
+//-------- MPSSE: set_gpio()
+async function mpsse_set_gpio(gpio, direction)
+{
+	await mpsse_send_byte(MC_SETB_LOW);
+	await mpsse_send_byte(gpio); // Value
+	await mpsse_send_byte(direction); // Direction
+
+  console.log("MPSSE: set_gpio: " + gpio.toString(16) + 
+              ", Dir: " + direction.toString(16));
+}
+
+
+// ---------------------------------------------------------
+// Hardware specific CS, CReset, CDone functions
+// ---------------------------------------------------------
+
+
 async function get_cdone()
 {
   let data = await mpsse_readb_low(device);
@@ -308,6 +325,36 @@ async function get_cdone()
   console.log("MPSSE: get_cdone(): " + cdone);
   return cdone;
  }
+
+ async function set_cs_creset(cs_b, creset_b)
+ {
+   let gpio = 0;
+   const direction = 0x93;
+ 
+   if (cs_b) {
+     // ADBUS4 (GPIOL0)
+     gpio |= 0x10;
+   }
+ 
+   if (creset_b) {
+     // ADBUS7 (GPIOL3)
+     gpio |= 0x80;
+   }
+ 
+   await mpsse_set_gpio(gpio, direction);
+
+   console.log("MPSEE: set_cs_creset: cs_b: " + cs_b.toString(16) + 
+               ", creset_b: " + creset_b.toString(16));
+ }
+
+// ---------------------------------------------------------
+// FLASH function implementations
+// ---------------------------------------------------------
+// the FPGA reset is released so also FLASH chip select should be deasserted
+async function flash_release_reset()
+{
+  await set_cs_creset(1, 1);
+}
 
 
 //----------------- Main ---------------------
@@ -347,18 +394,11 @@ btn_usb.onclick = async () => {
   //-- Test: Read FTDI chip id
   await ftdi_read_chipid(device);
   
-  console.log("**************************get_cdone()");
-
   let cdone = await get_cdone();
   console.log("Cdone: " + (cdone ? "high" : "low"));
 
-  
-
-
-
-
+  flash_release_reset();
  
-
 
 }
 
