@@ -359,6 +359,22 @@ async function flash_release_reset()
   console.log("FLASH: release_reset() STOP!");
 }
 
+// FLASH chip select deassert
+async function flash_chip_deselect()
+{
+  console.log("FLASH: chip_deselect() START!");
+	await set_cs_creset(1, 0);
+  console.log("FLASH: chip_deselect() STOP!");
+}
+
+// FLASH chip select assert
+// should only happen while FPGA reset is asserted
+async function flash_chip_select()
+{
+  console.log("FLASH: chip_select() START!");
+	await set_cs_creset(0, 0);
+  console.log("FLASH: chip_select() STOP!");
+}
 
 //---------------------
 //-- UTILS
@@ -412,6 +428,60 @@ btn_usb.onclick = async () => {
   await flash_release_reset();
   await sleep(100);
 
+  //------- Test Mode
+  //test_mode()
+
+   console.log("---> TEST MODE")
+   console.log("reset..")
+   await flash_chip_deselect();
+   await sleep(250);
+
+   cdone = await get_cdone()
+   console.log("cdone: " + (cdone ? "high" : "low"))
+   
+
+   //   flash_reset()
+
+   // flash_chip_select();
+
+   await flash_chip_select();
+   console.log("------>OK !!!!! -------");
+
+  //  function flash_reset()
+  //  {
+  //    flash_chip_select();
+  //    mpsse_xfer_spi_bits(0xFF, 8);
+  //    flash_chip_deselect(); 
+  //    flash_chip_select();
+  //    mpsse_xfer_spi_bits(0xFF, 2);
+  //    flash_chip_deselect();
+  //  }
+
+  //-- Read the Flash ID, for testing purposes
+  // function test_mode()
+  // {
+  //   console.log("---> TEST MODE")
+  //   console.log("reset..")
+  //   flash_chip_deselect();
+  //   sleep.usleep(250000);
+
+  //   cdone = get_cdone()
+  //   console.log("cdone: " + (cdone ? "high" : "low"))
+
+  //   flash_reset()
+
+  //   flash_power_up()
+
+  //   flash_read_id();
+
+  //   flash_power_down();
+
+  //   flash_release_reset();
+  //   sleep.usleep(250000);
+  //   console.log("cdone: " + (cdone ? "high" : "low"))
+  // }
+
+ 
 
 }
 
