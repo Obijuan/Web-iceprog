@@ -636,6 +636,74 @@ async function flash_read_status()
     await flash_chip_deselect();
   }
 
+  async function flash_wait(verbose) {
+
+    if (verbose)
+        console.log("waiting..");
+      let count = 0;
+      
+      while (1)
+      {
+
+        let data = new Uint8Array(2);
+        data[0] = FC_RSR1;
+
+        await flash_chip_select();
+        await mpsse_xfer_spi(data);
+        await flash_chip_deselect();
+
+        if ((data[1] & 0x01) == 0) {
+          if (count < 2) {
+            count++;
+            if (verbose) {
+              console.log("r");
+            }
+          } else {
+            if (verbose) {
+              console.log("R");
+            }
+            break;
+          }
+        } else {
+          if (verbose) {
+            console.log(".");
+          }
+          count = 0;
+        }
+
+        console.log("Data[1]: " + data[1]);
+        console.log("***************************************************************PAUSA!!!!!!")
+        await sleep(10);
+      }
+  }
+
+//-- Implement flash_prog...
+async function flash_prog(addr, data, verbose)
+{
+  let n = data.byteLength;
+
+ 	if (verbose)
+		console.log("prog 0x" + addr.toString(16) + " 0x" + n.toString(16));
+
+  let command = new Uint8Array(4);
+  command[0] = FC_PP;
+  command[1] = (addr >> 16);
+  command[2] = (addr >> 8);
+  command[3] = addr;
+
+	await flash_chip_select();
+	await mpsse_send_spi(command);
+	await mpsse_send_spi(data);
+	await flash_chip_deselect();
+
+	if (verbose) {
+    let str = ""
+		for (let i = 0; i < n; i++)
+			str += data[i].toString(16) + (i == n - 1 || i % 32 == 31 ? '\n' : ' ');
+    console.log(str);
+  }
+}
+
 
 //---------------------
 //-- UTILS
@@ -796,115 +864,115 @@ async function load_bitstream(contents)
   // ---------------------------------------------------------
   console.log("Length: " + file_size)
 
-  let rw_offset = 0;
+  // let rw_offset = 0;
 
-  //-- Flash erase
-  let verbose = true;
+  // //-- Flash erase
+  // let verbose = true;
 
-  let begin_addr = rw_offset & ~0xffff;
-  let end_addr = (rw_offset + file_size + 0xffff) & ~0xffff;
-
-
-  let addr = begin_addr;
+  // let begin_addr = rw_offset & ~0xffff;
+  // let end_addr = (rw_offset + file_size + 0xffff) & ~0xffff;
 
   // for (let addr = begin_addr; addr < end_addr; addr += 0x10000) {
-     await flash_write_enable(false);
-     await flash_64kB_sector_erase(addr);
-     if (verbose)
-       console.log("************ Status after block erase:");
-     let status = await flash_read_status()
-     if (verbose)
-       flash_print_status(status)
-  //   flash_wait(verbose);
+  //    await flash_write_enable(false);
+  //    await flash_64kB_sector_erase(addr);
+  //    if (verbose)
+  //      console.log("************ Status after block erase:");
+  //    let status = await flash_read_status()
+  //    if (verbose)
+  //      flash_print_status(status)
+  //    await flash_wait(verbose);
   // }
 
-    //-- Implement: flash_wait()
+  // console.log("programming..")
 
-  //   function flash_wait(verbose)
-  // {
-  //   if (verbose)
-  //     console.log("waiting..");
-  //   var count = 0;
-  //   while (1)
-  //   {
-  //     let data = new Buffer.alloc(2);
-  //     data[0] = FC_RSR1;
+  // let addr = 0;
+  // let total_blocks = Math.trunc(file_size / 256);
+  // let remaining = Math.trunc(file_size % 256);
 
-  //     flash_chip_select();
-  //     mpsse_xfer_spi(data, 2);
-  //     flash_chip_deselect();
+  // console.log("Total 256 bytes blocks: " + total_blocks)
 
-  //     if ((data[1] & 0x01) == 0) {
-  //       if (count < 2) {
-  //         count++;
-  //         if (verbose) {
-  //           console.log("r");
-  //         }
-  //       } else {
-  //         if (verbose) {
-  //           console.log("R");
-  //         }
-  //         break;
-  //       }
-  //     } else {
-  //       if (verbose) {
-  //         console.log(".");
-  //       }
-  //       count = 0;
-  //     }
+  // //-- Write complete blocks
+  //  for (let b = 0; b < total_blocks; b++) {
+  //    let buf = contents.slice(addr, addr + 256);
+  //    console.log("Bloque: " + b + ". Size: " + buf.byteLength);
+  //    await flash_write_enable();
+  //    await flash_write_enable();
+  //    await flash_prog(rw_offset + addr, buf, false);
+  //    await flash_wait();
 
-  //     sleep.usleep(1000);
-  //   }
+  //    addr += 256;
+  //  }
+
+  // //-- Write the remaining not full block
+  // if (remaining > 0) {
+  //   let buf = contents.slice(addr, addr + remaining);
+  //   await flash_write_enable();
+  //   await flash_prog(rw_offset + addr, buf, false);
+  //   await flash_wait();
   // }
 
+//-----------------------------------------------------------
+//   VERYFICATION
+//-----------------------------------------------------------
 
-  if (verbose)
-      console.log("waiting..");
-    let count = 0;
-    
+  console.log("reading.. for verification");
+  let addr = 0;
+  let buf_flash = new Uint8Array(256);
+  let buf_file = contents.slice(addr, addr + 256); 
 
-    while (1)
-    {
 
-      let data = new Uint8Array(2);
-      data[0] = FC_RSR1;
 
-      await flash_chip_select();
-      await mpsse_xfer_spi(data);
-      await flash_chip_deselect();
+  //-- Verify complete blocks
+  // for (let b = 0; b < total_blocks; b++) {
+  //   let buf_file = bitstream_data.slice(addr, addr + 256);
+  //   flash_read(rw_offset + addr, buf_flash, 256, false);
+  //   if (!buf_flash.equals(buf_file))
+  //     mpsse_error(3, "Found difference between flash and file!")
+  //   addr += 256;
+  // }
+  // //-- Verify the remaining block
+  // if (remaining > 0) {
+  //   let buf_file = bitstream_data.slice(addr, addr + remaining);
+  //   let buf_flash = new Buffer.alloc(remaining);
 
-      if ((data[1] & 0x01) == 0) {
-        if (count < 2) {
-          count++;
-          if (verbose) {
-            console.log("r");
-          }
-        } else {
-          if (verbose) {
-            console.log("R");
-          }
-          break;
-        }
-      } else {
-        if (verbose) {
-          console.log(".");
-        }
-        count = 0;
-      }
+  //   flash_read(rw_offset + addr, buf_flash, remaining, false);
+  //   if (!buf_flash.equals(buf_file))
+  //     mpsse_error(3, "Found difference between flash and file!")
+  // }
 
-      console.log("Data[1]: " + data[1]);
-      console.log("***************************************************************PAUSA!!!!!!")
-      await sleep(10);
-    }
+  //-- Implementar flash_read
+
+//   function flash_read(addr, data, n, verbose)
+// {
+// 	if (verbose)
+//     console.log("read 0x" + addr.toString(16) + " 0x" + n.toString(16));
+
+//   let command = new Buffer.alloc(4);
+//   command[0] = FC_RD;
+//   command[1] = (addr >> 16);
+//   command[2] = (addr >> 8);
+//   command[3] = addr;
+
+// 	flash_chip_select();
+// 	mpsse_send_spi(command, 4);
+// 	//memset(data, 0, n);
+// 	mpsse_xfer_spi(data, n);
+// 	flash_chip_deselect();
+
+//   if (verbose) {
+//     let str = ""
+// 		for (let i = 0; i < n; i++)
+// 			str += data[i].toString(16) + (i == n - 1 || i % 32 == 31 ? '\n' : ' ');
+//     console.log(str);
+//   }
+// }
+
+
 
 
   console.log("------------> OK!!");
 
 }
-
-
- 
-
 
 
 
@@ -938,7 +1006,24 @@ navigator.usb.addEventListener('disconnect', event => {
 
 //   reader.onload = (e) => {
 //     let contents = e.target.result;
-//     console.log(contents);
+
+//     let file_size = contents.byteLength;
+//     console.log("Length: " + file_size);
+
+//     let addr = 0;
+//     let total_blocks = Math.trunc(file_size / 256);
+//     let remaining = Math.trunc(file_size % 256);
+
+//     console.log("Total 256 bytes blocks: " + total_blocks)
+
+//     let buf = contents.slice(addr, addr + 256);
+//     console.log(buf);
+
+//     //-- Write complete blocks
+//     for (let b = 0; b < total_blocks; b++) {
+//       let buf = contents.slice(addr, addr + 256);
+//       console.log("Bloque: " + b + ". Size: " + buf.byteLength);
+//     }
 //   };
 
 //   reader.readAsArrayBuffer(file);
