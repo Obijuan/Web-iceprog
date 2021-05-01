@@ -547,6 +547,29 @@ function print_buffer(buff)
   console.log(cad);
 }
 
+async function test_mode() 
+{
+  console.log("---> TEST MODE")
+  console.log("reset..")
+  await flash_chip_deselect();
+  await sleep(250);
+  cdone = await get_cdone()
+  console.log("cdone: " + (cdone ? "high" : "low"))
+  await flash_reset();
+  await flash_power_up();
+  
+  console.log("**************************** Read flash ID..");
+  await flash_read_id();
+
+  await flash_power_down();
+
+  await flash_release_reset();
+  sleep(250);
+  cdone = await get_cdone()
+  console.log("cdone: " + (cdone ? "high" : "low"))
+  console.log("------>OK !!!!! -------"); 
+}
+
 
 //----------------- Main ---------------------
 
@@ -592,48 +615,8 @@ btn_usb.onclick = async () => {
   await sleep(100);
 
   //------- Test Mode
-  //test_mode()
+  await test_mode();
 
-  //-- Read the Flash ID, for testing purposes
-  // function test_mode()
-  // {
-  //   console.log("---> TEST MODE")
-  //   console.log("reset..")
-  //   flash_chip_deselect();
-  //   sleep.usleep(250000);
-
-  //   cdone = get_cdone()
-  //   console.log("cdone: " + (cdone ? "high" : "low"))
-
-  //   flash_reset()
-
-  //   flash_power_up()
-
-  //   flash_read_id();
-
-  //   flash_power_down();
-
-  //   flash_release_reset();
-  //   sleep.usleep(250000);
-  //   console.log("cdone: " + (cdone ? "high" : "low"))
-  // }
-
-
-  console.log("---> TEST MODE")
-  console.log("reset..")
-  await flash_chip_deselect();
-  await sleep(250);
-  cdone = await get_cdone()
-  console.log("cdone: " + (cdone ? "high" : "low"))
-  await flash_reset();
-  await flash_power_up();
-  
-  console.log("**************************** Read flash ID..");
-  await flash_read_id();
-
-  await flash_power_down();
- 
-  console.log("------>OK !!!!! -------"); 
   //-- This is for test....
   //await mpsse_recv_byte(device);
 
