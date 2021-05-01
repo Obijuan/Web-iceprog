@@ -530,6 +530,80 @@ async function flash_power_down()
   console.log("FLASH: Power Down. STOP!");
 }
 
+async function flash_read_status()
+  {
+    console.log("FLASH: Read_status. START!");
+    let buff = new Uint8Array(2);
+    buff[0] = FC_RSR1;
+    await flash_chip_select();
+    await mpsse_xfer_spi(buff);
+    await flash_chip_deselect();
+
+    await sleep(1);
+
+    let status = buff[1];
+    console.log("Status: " + status.toString(16));
+    console.log("FLASH: Read_status. STOP!");
+
+    return status;
+  }
+
+  function flash_print_status(status)
+  {
+    console.log("SR1: 0x" + status.toString(16))
+    console.log(" - SPRL: " + ((status & (1 << 7)) == 0 ? "unlocked" : "locked"));
+    console.log(" -  SPM: " + (((status & (1 << 6)) == 0) ? "Byte/Page Prog Mode" : "Sequential Prog Mode"));
+    console.log(" -  EPE: " + (((status & (1 << 5)) == 0) ? "Erase/Prog success" : "Erase/Prog error"));
+    console.log("-  SPM: " +  (((status & (1 << 4)) == 0) ?  "~WP asserted" : "~WP deasserted"));
+  
+    var spm = "";
+    switch((status >> 2) & 0x3) {
+      case 0:
+        spm = "All sectors unprotected";
+        break;
+      case 1:
+        spm = "Some sectors protected";
+        break;
+      case 2:
+        spm = "Reserved (xxxx 10xx)";
+        break;
+      case 3:
+        spm = "All sectors protected";
+        break;
+    }
+  
+    console.log(" -  SWP: " + spm);
+    console.log(" -  WEL: " + (((status & (1 << 1)) == 0) ? "Not write enabled" : "Write enabled"));
+    console.log(" - ~RDY: " + (((status & 0x1) == 0) ? "Ready" : "Busy"));
+  }
+
+  async function flash_write_enable(verbose) 
+  {
+    console.log("FLASH: write_enable. START!");
+    if (verbose) {
+      console.log("status before enable:");
+      let status = await flash_read_status();
+      flash_print_status(status)
+    }
+
+    if (verbose)
+      console.log("write enable..");
+
+    let buff = new Uint8Array(1);
+    buff[0] = FC_WE;
+
+    await flash_chip_select();
+    await mpsse_xfer_spi(buff);
+    await flash_chip_deselect();
+
+    if (verbose) {
+      console.log("status after enable:");
+      status = await flash_read_status();
+      flash_print_status(status)
+    }
+    console.log("FLASH: write_enable. STOP!");
+  }
+
 
 //---------------------
 //-- UTILS
@@ -668,24 +742,49 @@ btn_usb.onclick = async () => {
 
 async function load_bitstream(contents)
 {
-   console.log("-----> FUNCTION LOAD-BITSTREAM --- ");
+  console.log("-----> FUNCTION LOAD-BITSTREAM --- ");
 
-   let file_size = contents.byteLength;
-   console.log("Length: " + file_size);
+  let file_size = contents.byteLength;
+  console.log("Length: " + file_size);
 
-   console.log("reset..");
-   await flash_chip_deselect();
-   await sleep(250);
+  console.log("reset..");
+  await flash_chip_deselect();
+  await sleep(250);
 
-   let cdone = await get_cdone();
-   console.log("cdone: " + (cdone ? "high" : "low"))
+  let cdone = await get_cdone();
+  console.log("cdone: " + (cdone ? "high" : "low"))
 
-   await flash_reset();
-   await flash_power_up();
-   await flash_read_id(); 
+  await flash_reset();
+  await flash_power_up();
+  await flash_read_id(); 
 
 
-//   console.log("------------> OK!!");
+  // ---------------------------------------------------------
+  // Program
+  // ---------------------------------------------------------
+  console.log("Length: " + file_size)
+
+  let rw_offset = 0;
+
+  //-- Flash erase
+  let verbose = true;
+
+  let begin_addr = rw_offset & ~0xffff;
+  let end_addr = (rw_offset + file_size + 0xffff) & ~0xffff;
+
+  // for (let addr = begin_addr; addr < end_addr; addr += 0x10000) {
+     await flash_write_enable(false);
+  //   flash_64kB_sector_erase(addr);
+  //   if (verbose)
+  //     console.log("Status after block erase:");
+  //   let status = flash_read_status()
+  //   if (verbose)
+  //     flash_print_status(status)
+  //   flash_wait(verbose);
+  // }
+
+  console.log("------------> OK!!");
+
 }
 
 
