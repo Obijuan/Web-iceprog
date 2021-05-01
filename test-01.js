@@ -391,6 +391,18 @@ async function flash_chip_select()
   console.log("FLASH: chip_select() STOP!");
 }
 
+async function flash_reset()
+   {
+     console.log("FLASH: Reset. START!");
+     await flash_chip_select();
+     await mpsse_xfer_spi_bits(device, 0xFF, 8);
+     await flash_chip_deselect();
+     await flash_chip_select();
+     await mpsse_xfer_spi_bits(device, 0xFF, 2);
+     await flash_chip_deselect();
+     console.log("FLASH: Reset. STOP!");
+   }
+
 //---------------------
 //-- UTILS
 //---------------------
@@ -454,23 +466,14 @@ btn_usb.onclick = async () => {
    cdone = await get_cdone()
    console.log("cdone: " + (cdone ? "high" : "low"))
 
-   //   flash_reset()
+   await flash_reset();
+   console.log("------>OK !!!!! -------");
 
-  //  function flash_reset()
-  //  {
-  //    flash_chip_select();
-  //    mpsse_xfer_spi_bits(0xFF, 8);
-  //    flash_chip_deselect(); 
-  //    flash_chip_select();
-  //    mpsse_xfer_spi_bits(0xFF, 2);
-  //    flash_chip_deselect();
-  //  }
+   
 
-  // flash_chip_select();
 
-  await flash_chip_select();
-  await mpsse_xfer_spi_bits(device, 0xFF, 8);
-  console.log("------>OK !!!!! -------");
+  
+ 
 
   //-- Read the Flash ID, for testing purposes
   // function test_mode()
