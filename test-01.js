@@ -310,8 +310,9 @@ async function mpsse_recv_byte(device) {
 
   let cad = "";
 
+  //-- The first two bytes received are the modem status bytes
   //-- Insert the data in the queue
-  for (let i = 0; i < result.data.byteLength; i = i + 1) {
+  for (let i = 2; i < result.data.byteLength; i = i + 1) {
     queue.push(result.data.getUint8(i));
     cad = cad + "0x" + result.data.getUint8(i).toString(16) + " ";
   }
@@ -319,12 +320,16 @@ async function mpsse_recv_byte(device) {
   console.log("QUEUE: [ " + cad + "]");
 
   //-- Read the first element in the queue
-  data = queue.shift();
+  if (queue.length > 0) {
+    data = queue.shift();
+    console.log("MPSEE: recv_byte. Read: " + data.toString(16) + 
+                "Buffer size: " + queue.length);
+    return data;
+  }
 
-  console.log("MPSSE: recv_byte. Read: " + data.toString(16) + 
-              ", Buffer size: " + queue.length);
+  console.log("MPSSE: recv_byte. NO DATA READ! (EMPTY)");
 
-  return data;
+  return -1;
 }
 
 
@@ -366,6 +371,7 @@ async function mpsse_xfer_spi_bits(device, data, n)
 //------ MPSSE: xfer_spi()
 async function mpsse_xfer_spi(buff)
 {
+  console.log("MPSSE: xfer_spi. START!---------")
    if (buff.byteLength < 1)
      return;
 
@@ -380,9 +386,10 @@ async function mpsse_xfer_spi(buff)
   console.log("Rc: " + rc + ", Buff lenth: " + buff.byteLength);
 
   for (i = 0; i < buff.byteLength; i++)
-    buff[i] = await mpsse_recv_byte();
+    buff[i] = await mpsse_recv_byte(device);
 
   console.log("MPSSE: xfer_spi. Written: " + rc + " byte(s)!");
+  console.log("MPSSE: xfer_spio. STOP!----------------")
 }
 
 // ---------------------------------------------------------
@@ -473,6 +480,45 @@ async function flash_power_up()
   console.log("FLASH: Power UP. START!");
 }
 
+
+async function flash_read_id()
+{
+  /* JEDEC ID structure:
+  * Byte No. | Data Type
+  * ---------+----------
+  *        0 | FC_JEDECID Request Command
+  *        1 | MFG ID
+  *        2 | Dev ID 1
+  *        3 | Dev ID 2
+  *        4 | Ext Dev Str Len
+  */
+
+  console.log("FLASH: READ-ID. START!");
+
+  let buff = new Uint8Array(5); //-- command + 4 response bytes
+  buff[0] = FC_JEDECID;
+
+  await flash_chip_select();
+
+  // Write command and read first 4 bytes
+  await mpsse_xfer_spi(buff);
+
+  if (buff[4] == 0xFF)
+      console.log("Extended Device String Length is 0xFF, " +
+                  "this is likely a read error. Ignorig...");
+
+  await flash_chip_deselect();
+
+  // TODO: Add full decode of the JEDEC ID.
+  let flash_id_str = "flash ID: ";
+  for (let i = 1; i < buff.byteLength; i++)
+    flash_id_str += " 0x" + buff[i].toString(16);
+
+  console.log(flash_id_str);
+  console.log("FLASH: READ-ID. START!");
+}
+
+
 //---------------------
 //-- UTILS
 //---------------------
@@ -480,6 +526,15 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function print_buffer(buff)
+{
+  let cad = "[ ";
+  for (let i=0; i<buff.byteLength; i = i + 1) {
+    cad += "0x" + buff.getUint8(i).toString(16) + " ";
+  }
+  cad += "]";
+  console.log(cad);
+}
 
 
 //----------------- Main ---------------------
@@ -563,8 +618,18 @@ btn_usb.onclick = async () => {
 
    await flash_reset();
    await flash_power_up();
-   
+  
+  console.log("**************************** Read flash ID..");
+  await flash_read_id();
+ 
+
+  //-- This is for test....
+  //await mpsse_recv_byte(device);
+
   console.log("------>OK !!!!! -------");
+
+
+
 
 }
 
