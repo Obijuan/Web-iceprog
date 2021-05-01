@@ -311,6 +311,21 @@ async function mpsse_set_gpio(gpio, direction)
               ", Dir: " + direction.toString(16));
 }
 
+//--------- MPSSE: xfer_spi_bits()
+async function mpsse_xfer_spi_bits(device, data, n)
+{
+  if (n < 1)
+    return 0;
+
+  // Input and output, update data on negative edge read on positive, bits.
+  await mpsse_send_byte(MC_DATA_IN | MC_DATA_OUT | MC_DATA_OCN | MC_DATA_BITS);
+  await mpsse_send_byte(n - 1);
+  await mpsse_send_byte(data);
+
+  let rcv = await mpsse_recv_byte(device);
+  console.log("MPSSE: xfer_spi_bits. Received: 0x" + rcv.toString(16));
+  return rcv;
+}
 
 // ---------------------------------------------------------
 // Hardware specific CS, CReset, CDone functions
@@ -438,14 +453,8 @@ btn_usb.onclick = async () => {
 
    cdone = await get_cdone()
    console.log("cdone: " + (cdone ? "high" : "low"))
-   
 
    //   flash_reset()
-
-   // flash_chip_select();
-
-   await flash_chip_select();
-   console.log("------>OK !!!!! -------");
 
   //  function flash_reset()
   //  {
@@ -456,6 +465,12 @@ btn_usb.onclick = async () => {
   //    mpsse_xfer_spi_bits(0xFF, 2);
   //    flash_chip_deselect();
   //  }
+
+  // flash_chip_select();
+
+  await flash_chip_select();
+  await mpsse_xfer_spi_bits(device, 0xFF, 8);
+  console.log("------>OK !!!!! -------");
 
   //-- Read the Flash ID, for testing purposes
   // function test_mode()
