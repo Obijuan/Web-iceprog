@@ -63,6 +63,7 @@ const btn_usb = document.getElementById('btn_usb');
 const display = document.getElementById('display');
 const btn_list = document.getElementById('btn_list');
 const btn_close = document.getElementById('btn_close');
+const bitstream = document.getElementById('bitstream');
 
 //-- FTDI: Reset cmd
 async function ftdi_reset(device) {
@@ -537,6 +538,33 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function ReadFile(file) {
+  return new Promise(resolve => {
+    let reader = new FileReader();
+
+    reader.onload = (e) => {
+       let contents = e.target.result;
+       console.log("Terminamos de leer");
+       resolve(contents);
+    };
+    console.log("Vamos a comenzar a leer");
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+async function ReadFile(file) {
+    let reader = new FileReader();
+
+    reader.onload = (e) => {
+       let contents = e.target.result;
+       console.log("Terminamos de leer");
+       return contents;
+    };
+    console.log("Vamos a comenzar a leer");
+    reader.readAsArrayBuffer(file);
+}
+
+
 function print_buffer(buff)
 {
   let cad = "[ ";
@@ -564,11 +592,12 @@ async function test_mode()
   await flash_power_down();
 
   await flash_release_reset();
-  sleep(250);
+  await sleep(250);
   cdone = await get_cdone()
   console.log("cdone: " + (cdone ? "high" : "low"))
   console.log("------>OK !!!!! -------"); 
 }
+
 
 
 //----------------- Main ---------------------
@@ -582,6 +611,9 @@ let device;
 
 //-- Buffer for storing incomming data from usb
 let queue = [];
+
+
+
 
 btn_usb.onclick = async () => {
   console.log("Connect to USB");
@@ -615,14 +647,51 @@ btn_usb.onclick = async () => {
   await sleep(100);
 
   //------- Test Mode
-  await test_mode();
+  //await test_mode();
 
-//-- Programing the FPGA
+  //--------- Programing the FPGA
 
-  //-- This is for test....
-  //await mpsse_recv_byte(device);
+  //-- Open the bitstream file
+  const filename = bitstream.files[0];
+  console.log("File: " + bitstream.value);
+
+  let reader = new FileReader();
+
+  reader.onload = (e) => {
+    let contents = e.target.result;
+    load_bitstream(contents);
+  }
+
+  reader.readAsArrayBuffer(filename);
 
 }
+
+async function load_bitstream(contents)
+{
+   console.log("-----> FUNCTION LOAD-BITSTREAM --- ");
+
+   let file_size = contents.byteLength;
+   console.log("Length: " + file_size);
+
+   console.log("reset..");
+   await flash_chip_deselect();
+   await sleep(250);
+
+   let cdone = await get_cdone();
+   console.log("cdone: " + (cdone ? "high" : "low"))
+
+   await flash_reset();
+   await flash_power_up();
+   await flash_read_id(); 
+
+
+//   console.log("------------> OK!!");
+}
+
+
+ 
+
+
 
 
 btn_list.onclick = async () => {
@@ -646,3 +715,17 @@ navigator.usb.addEventListener('disconnect', event => {
     display.innerHTML = "";
 })
 
+// bitstream.onchange = (e) => {
+//   console.log("File selected!");
+
+//   let file = e.target.files[0];
+ 
+//   const reader = new FileReader();
+
+//   reader.onload = (e) => {
+//     let contents = e.target.result;
+//     console.log(contents);
+//   };
+
+//   reader.readAsArrayBuffer(file);
+// }
