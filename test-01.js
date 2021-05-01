@@ -514,8 +514,19 @@ async function flash_read_id()
   for (let i = 1; i < buff.byteLength; i++)
     flash_id_str += " 0x" + buff[i].toString(16);
 
-  console.log(flash_id_str);
-  console.log("FLASH: READ-ID. START!");
+  console.log("--------------- FLASH-ID: " + flash_id_str);
+  console.log("FLASH: READ-ID. STOP!");
+}
+
+async function flash_power_down()
+{
+  console.log("FLASH: Power Down. START!");
+  let buff = new Uint8Array(1);
+  buff[0] = FC_PD;
+  await flash_chip_select();
+  await mpsse_xfer_spi(buff);
+  await flash_chip_deselect();
+  console.log("FLASH: Power Down. STOP!");
 }
 
 
@@ -608,28 +619,23 @@ btn_usb.onclick = async () => {
   // }
 
 
-   console.log("---> TEST MODE")
-   console.log("reset..")
-   await flash_chip_deselect();
-   await sleep(250);
-
-   cdone = await get_cdone()
-   console.log("cdone: " + (cdone ? "high" : "low"))
-
-   await flash_reset();
-   await flash_power_up();
+  console.log("---> TEST MODE")
+  console.log("reset..")
+  await flash_chip_deselect();
+  await sleep(250);
+  cdone = await get_cdone()
+  console.log("cdone: " + (cdone ? "high" : "low"))
+  await flash_reset();
+  await flash_power_up();
   
   console.log("**************************** Read flash ID..");
   await flash_read_id();
- 
 
+  await flash_power_down();
+ 
+  console.log("------>OK !!!!! -------"); 
   //-- This is for test....
   //await mpsse_recv_byte(device);
-
-  console.log("------>OK !!!!! -------");
-
-
-
 
 }
 
