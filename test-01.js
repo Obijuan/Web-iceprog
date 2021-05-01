@@ -15,6 +15,22 @@ const MC_DATA_OUT =  0x10 // When set write data (Data OUT)
 const MC_DATA_OCN = 0x01  // When set update data on negative clock edge
 const MC_DATA_BITS = 0x02 // When set count bits not bytes
 
+// ---------------------------------------------------------
+// FLASH definitions
+// ---------------------------------------------------------
+
+// Flash command definitions
+// This command list is based on the Winbond W25Q128JV Datasheet
+
+const FC_WE = 0x06;  // Write Enable
+const FC_RPD = 0xAB; // Release Power-Down, returns Device ID
+const FC_JEDECID = 0x9F; // Read JEDEC ID
+const FC_PP = 0x02; // Page Program
+const FC_RD = 0x03; // Read Data
+const FC_PD = 0xB9; // Power-down
+const FC_RSR1 = 0x05; // Read Status Register 1
+const FC_BE64 = 0xD8; // Block Erase 64kb
+
 //-- Request
 const SIO_RESET_REQUEST = 0;  //-- Reset the port
 // #define SIO_SET_BAUDRATE_REQUEST      SIO_SET_BAUD_RATE
@@ -208,6 +224,26 @@ async function ftdi_read_chipid(device) {
   console.log("Chipid: " + chipid.toString(16));
 }
 
+//----- FTDI: Write_data
+//-- Escribir un buffer en el FTDI
+//-- Tamaño máximo buffer: 4096
+async function ftdi_write_data(device, buff)
+{
+  let result = await device.transferOut(IN_EP, buff); 
+
+  console.log("FTDI_WRITE: Buffer written: " + result.status);
+  console.log("  -> Written: " + result.bytesWritten + " byte(s)");
+
+  return result.bytesWritten;
+}
+
+function mpsse_error(ret, msg) {
+  console.log(msg);
+  console.log("Error: xxx");
+  console.log("Operation code: " + ret);
+  console.log("Abort!!!!!!!!.");
+}
+
 //-- MPSSE: Send one byte
 async function mpsse_send_byte(b) {
 
@@ -216,7 +252,7 @@ async function mpsse_send_byte(b) {
   let result = await device.transferOut(IN_EP, data); 
 
   console.log("MPSSE: Send_byte: " + result.status);
-  console.log("  -> Written: " + result.bytesWritten + ", Value: " + b.toString(16));
+  console.log("  -> Written: " + result.bytesWritten + ", Value: 0x" + b.toString(16));
 }
 
 //-- MPSSE: Init
@@ -327,6 +363,28 @@ async function mpsse_xfer_spi_bits(device, data, n)
   return rcv;
 }
 
+//------ MPSSE: xfer_spi()
+async function mpsse_xfer_spi(buff)
+{
+   if (buff.byteLength < 1)
+     return;
+
+  /* Input and output, update data on negative edge read on positive. */
+  await mpsse_send_byte(MC_DATA_IN | MC_DATA_OUT | MC_DATA_OCN);
+  await mpsse_send_byte(buff.byteLength - 1);
+  await mpsse_send_byte((buff.byteLength - 1) >> 8);
+
+  let rc = await ftdi_write_data(device, buff);
+  //-- Todo! Check the correct number of bytes has been written....
+
+  console.log("Rc: " + rc + ", Buff lenth: " + buff.byteLength);
+
+  for (i = 0; i < buff.byteLength; i++)
+    buff[i] = await mpsse_recv_byte();
+
+  console.log("MPSSE: xfer_spi. Written: " + rc + " byte(s)!");
+}
+
 // ---------------------------------------------------------
 // Hardware specific CS, CReset, CDone functions
 // ---------------------------------------------------------
@@ -403,6 +461,18 @@ async function flash_reset()
      console.log("FLASH: Reset. STOP!");
    }
 
+
+async function flash_power_up()
+{
+  console.log("FLASH: Power UP. START!");
+  let buff = new Uint8Array(1);
+  buff[0] = FC_RPD;
+  await flash_chip_select();
+  await mpsse_xfer_spi(buff);
+  await flash_chip_deselect();
+  console.log("FLASH: Power UP. START!");
+}
+
 //---------------------
 //-- UTILS
 //---------------------
@@ -458,23 +528,6 @@ btn_usb.onclick = async () => {
   //------- Test Mode
   //test_mode()
 
-   console.log("---> TEST MODE")
-   console.log("reset..")
-   await flash_chip_deselect();
-   await sleep(250);
-
-   cdone = await get_cdone()
-   console.log("cdone: " + (cdone ? "high" : "low"))
-
-   await flash_reset();
-   console.log("------>OK !!!!! -------");
-
-   
-
-
-  
- 
-
   //-- Read the Flash ID, for testing purposes
   // function test_mode()
   // {
@@ -499,7 +552,19 @@ btn_usb.onclick = async () => {
   //   console.log("cdone: " + (cdone ? "high" : "low"))
   // }
 
- 
+
+   console.log("---> TEST MODE")
+   console.log("reset..")
+   await flash_chip_deselect();
+   await sleep(250);
+
+   cdone = await get_cdone()
+   console.log("cdone: " + (cdone ? "high" : "low"))
+
+   await flash_reset();
+   await flash_power_up();
+   
+  console.log("------>OK !!!!! -------");
 
 }
 
