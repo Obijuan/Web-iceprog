@@ -353,8 +353,20 @@ async function get_cdone()
 // the FPGA reset is released so also FLASH chip select should be deasserted
 async function flash_release_reset()
 {
+  console.log("FLASH: release_reset() START!");
   await set_cs_creset(1, 1);
+
+  console.log("FLASH: release_reset() STOP!");
 }
+
+
+//---------------------
+//-- UTILS
+//---------------------
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 
 
 //----------------- Main ---------------------
@@ -397,8 +409,9 @@ btn_usb.onclick = async () => {
   let cdone = await get_cdone();
   console.log("Cdone: " + (cdone ? "high" : "low"));
 
-  flash_release_reset();
- 
+  await flash_release_reset();
+  await sleep(100);
+
 
 }
 
