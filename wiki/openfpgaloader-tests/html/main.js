@@ -33,9 +33,7 @@ async function ofl_exec(args, div_log, fileIn={}) {
 			USBStatus.innerHTML = `USB Status: <font color='red'>Error ${e}</font>`;
 		});
 	
-
-	if (div_log)
-		div_log.innerHTML = "openFPGALoader " + args.join(' ') + "</br>\n";
+	div_log.innerHTML = "openFPGALoader " + args.join(' ') + "</br>\n";
 
 	/* Get current time to compute duration */
 	const startTime = performance.now();
@@ -45,14 +43,12 @@ async function ofl_exec(args, div_log, fileIn={}) {
 			stdout: lineBuffered(line => {
 				lines.push(line);
 				console.log(line);
-				if (div_log)
-					update_ofl_log(div_log, line);
+				update_ofl_log(div_log, line);
 			}),
 			stderr: lineBuffered(line => {
 				lines.push(line)
 				console.log(line);
-				if (div_log)
-					update_ofl_log(div_log, line);
+				update_ofl_log(div_log, line);
 			}),
 			decodeASCII: true
 		});
@@ -62,17 +58,14 @@ async function ofl_exec(args, div_log, fileIn={}) {
 		const duration = Math.round(endTime - startTime);
 
 		console.log(`Execution time: ${duration} milliseconds`);
-		if (div_log)
-			div_log.innerHTML += `<div class="timing"><span class="span-success">Execution completed in ${duration}ms</span></div><br>\n`;
+		div_log.innerHTML += `<div class="timing"><span class="span-success">Execution completed in ${duration}ms</span></div><br>\n`;
 
 	} catch(error) {
 		console.error("openFPGALoader execution error:", error);
 		success = false;
-		if (div_log)
-			div_log.innerHTML += `<span class="span-error">Error: ${error.message} </span><br>\n`;
+		div_log.innerHTML += `<span class="span-error">Error: ${error.message} </span><br>\n`;
 	} finally {
-		if (div_log)
-			div_log.scrollTop = div_log.scrollHeight;
+		div_log.scrollTop = div_log.scrollHeight;
 	}
 	return {success, lines};
 }
