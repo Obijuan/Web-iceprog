@@ -97,15 +97,10 @@ async function perform_operation(file, cmd_line) {
 	// name, otherwise ""
 	const ret      = await detectSpiOverJtagName(cmd_line);
 	const soj_name = ret[1]; // spiOverJtag bitstream name
-	const ret_code = ret[0]; // spiOverJtag detect ret code
-	// FIXME: todo something with return code.
 
-	var detect_status = "SpiOverJtag not required";
-	var mess          = "SpiOverJtag Bridge: ";
-	mess += '<span class="span-info">Not required.</span>'
-	
-	console.log(detect_status);
+	var mess          = "";
 	oflOpStatus.innerHTML += mess + "</br>";
+
 	var span_soj_dl = document.createElement("span_soj_dl");
 	oflOpStatus.appendChild(span_soj_dl);
 	if (soj_name) {
