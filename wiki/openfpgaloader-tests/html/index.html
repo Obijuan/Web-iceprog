@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Expires" content="0">
+	<title>openFPGALoader Web Interface</title>
+
+	<meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
+	<meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp">
+	
+	<link rel="stylesheet" href="style_ofl.css">
+
+</head>
+<body>
+	<script type="module" src="main.js"></script>
+
+	<h1>openFPGALoader WEB interface</h1>
+	
+	<div class="main-container">
+		<div class="controls-column">
+			<fieldset>
+				<legend>Manual Operations</legend>
+				<div class="form-group">
+					<label for="ofl_cmd">Command line args:</label>
+					<input type="text" id="ofl_cmd" placeholder="e.g., -c ft2232 -b ulx3s" />
+				</div>
+				<div class="form-group">
+					<label for="fileInput">Bitstream file:</label>
+					<input type="file" id="fileInput">
+					<div id="fileContents"></div>
+				</div>
+				<button id="programButtonManual">Program FPGA</button>
+			</fieldset>
+
+			<fieldset>
+				<legend>Automatic Operations</legend>
+				<div class="form-group-flex">
+					<div>
+						<label for="cable_select">Choose a cable:</label>
+						<select name="cable" id="cable_select">
+							<option value="0">Default</option>
+						</select>
+					</div>
+					<div>
+						<label for="board_select">Choose a board:</label>
+						<select name="board" id="board_select">
+							<option value="0">None</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<p>Target Destination:</p>
+					<div class="radio-group">
+						<div>
+							<input type="radio" id="ofl_sram" name="ofl_mode" value="sram" checked />
+							<label for="ofl_sram">SRAM</label>
+						</div>
+						<div>
+							<input type="radio" id="ofl_flash" name="ofl_mode" value="flash" />
+							<label for="ofl_flash">Flash</label>
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<input type="checkbox" id="ofl_verify" name="ofl_verify" />
+					<label for="ofl_verify">Verify after write</label>
+				</div>
+				
+				<div class="form-group">
+					<label for="fileAutoInput">Bitstream file:</label>
+					<input type="file" id="fileAutoInput">
+				</div>
+
+				<button id="programButton">Program FPGA</button>
+			</fieldset>
+		</div>
+
+		<div class="logs-column">
+			<div><b>openFPGALoader Command Line: </b><span id="oflCmdManual"></span></div>
+			<fieldset>
+				<legend>Operation Status</legend>
+
+				<div id="oflOpStatus" class="log-area" tabindex="0"></div>
+			</fieldset>
+
+			<fieldset>
+				<legend>openFPGALoader Logs</legend>
+				<div id="OFLStatus" class="log-area" tabindex="0"></div>
+			</fieldset>
+		</div>
+	</div>
+
+	<div id="USBStatus">USB Status: Not connected</div>
+
+	<div id="copyright" style="font-size: 15px; text-align: left; margin-bottom: 2rem;">
+		Copyright (C) <b>2025 Gwenhael Goavec-Merou <gwenhael.goavec-merou@trabucayre.com></b></br>
+		SPDX-License-Identifier: Apache-2.0</br>
+	</div>
+</body>
+</html>
