@@ -98,11 +98,6 @@ async function perform_operation(file, cmd_line) {
 	const ret      = await detectSpiOverJtagName(cmd_line);
 	const soj_name = ret[1]; // spiOverJtag bitstream name
 
-	var span_soj_dl = document.createElement("span_soj_dl");
-	oflOpStatus.appendChild(span_soj_dl);
-	span_soj_dl.innerHTML = '';
-	oflOpStatus.innerHTML += "";
-
 	/* Get Bitstream from host computer */
 	var span_bit_dl = document.createElement("span_bit_dl");
 	oflOpStatus.appendChild(span_bit_dl);
