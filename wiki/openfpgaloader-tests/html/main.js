@@ -98,28 +98,9 @@ async function perform_operation(file, cmd_line) {
 	const ret      = await detectSpiOverJtagName(cmd_line);
 	const soj_name = ret[1]; // spiOverJtag bitstream name
 
-	var mess          = "";
-	oflOpStatus.innerHTML += mess + "</br>";
-
 	var span_soj_dl = document.createElement("span_soj_dl");
 	oflOpStatus.appendChild(span_soj_dl);
-	if (soj_name) {
-		// read bitstream from the server to be used by utils when
-		// openFPGALoader will be executed
-		const soj_file_url = "spiOverJtag/" + soj_name;
-		span_soj_dl.innerHTML = 'Fetch SpiOverJtag Bridge:';
-		await readBinaryFileFromUrl(soj_file_url).then(uint8Array => {
-		    if (uint8Array) {
-				span_soj_dl.innerHTML = 'Fetch SpiOverJtag Bridge: <span class="span-success">Done</span>';
-				soj_fileContent = uint8Array;
-		    } else {
-				span_soj_dl.innerHTML = 'Fetch SpiOverJtag Bridge: <span class="span-error">Fail</span>';
-				return;
-			}
-		});
-	} else {
-		span_soj_dl.innerHTML = 'Fetch SpiOverJtag Bridge: <span class="span-info">Not required</span>';
-	}
+	span_soj_dl.innerHTML = 'Fetch SpiOverJtag Bridge: <span class="span-info">Not required</span>';
 	oflOpStatus.innerHTML += "</br>";
 
 	/* Get Bitstream from host computer */
