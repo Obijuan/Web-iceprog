@@ -100,8 +100,8 @@ async function perform_operation(file, cmd_line) {
 
 	var span_soj_dl = document.createElement("span_soj_dl");
 	oflOpStatus.appendChild(span_soj_dl);
-	span_soj_dl.innerHTML = 'Fetch SpiOverJtag Bridge: <span class="span-info">Not required</span>';
-	oflOpStatus.innerHTML += "</br>";
+	span_soj_dl.innerHTML = '';
+	oflOpStatus.innerHTML += "";
 
 	/* Get Bitstream from host computer */
 	var span_bit_dl = document.createElement("span_bit_dl");
