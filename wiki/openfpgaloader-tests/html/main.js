@@ -146,28 +146,7 @@ document.getElementById('programButtonManual').addEventListener('click', async f
 	perform_operation(file, ofl_cmd);
 });
 
-function findManufacturer(l) {
-	return l.includes("manufacturer");
-}
-function findModel(l) {
-	return l.includes("model");
-}
 // ------------------ Helpers ------------------ //
-
-// Fetch spiOverJtag bitstream from the server
-async function readBinaryFileFromUrl(url) {
-	try {
-		const response = await fetch(url);
-		if (!response.ok)
-			throw new Error(`HTTP error! status: ${response.status}`);
-		const arrayBuffer = await response.arrayBuffer();
-		const uint8Array = new Uint8Array(arrayBuffer);
-		return uint8Array;
-	} catch (error) {
-		console.error('Error reading file:', error);
-		return null;
-	}
-}
 
 // Fetch the bitstream from the host
 function readBinaryFileFromHost(file) {
