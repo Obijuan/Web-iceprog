@@ -114,21 +114,14 @@ async function perform_operation(file, cmd_line) {
 
 	/* Prepare openFPGALoader call/cmd line */
 	const fileData = {};
+	fileData[filename] = fileContent;
+	cmd_line.push(filename);
 
-	if (soj_name && soj_fileContent) {
-		fileData[soj_name] = soj_fileContent;
-		cmd_line.push("--bridge", soj_name);
-	}
-	if (filename && fileContent) {
-		fileData[filename] = fileContent;
-		cmd_line.push(filename);
-	}
 
 	/* openFPGALoader run */
 	const span_ofl_exec = document.createElement("div");
 	oflOpStatus.appendChild(span_ofl_exec);
 	span_ofl_exec.innerHTML = 'Execute openFPGALoader:';
-	document.getElementById("oflCmdManual").textContent = "openFPGALoader " + cmd_line.join(" ");
 
 	const ret_ofl = await ofl_exec(cmd_line, oflStatus, fileData, true, true);
 	span_ofl_exec.innerHTML = ret_ofl.success
