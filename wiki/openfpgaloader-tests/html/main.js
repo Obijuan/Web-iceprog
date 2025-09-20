@@ -17,23 +17,22 @@ function update_ofl_log(div_log, message) {
 	div_log.scrollTop = div_log.scrollHeight;
 }
 
-async function ofl_exec(args, div_log, fileIn={}, with_usb=true, verbose=true) {
+async function ofl_exec(args, div_log, fileIn={}) {
 	let lines   = [];
 	let success = true;
 
-	if (!device && with_usb) {
-		if (verbose)
-			console.log("device null");
-		await navigator.usb.requestDevice({ filters: [] })
-			.then((usbDevice) => {
-				device = usbDevice;
-				USBStatus.innerHTML = "USB Status: <font color='green'>Connected</font>";
-			})
-			.catch((e) => {
-				device = null;
-				USBStatus.innerHTML = `USB Status: <font color='red'>Error ${e}</font>`;
-			});
-	}
+	
+	console.log("device null");
+	await navigator.usb.requestDevice({ filters: [] })
+		.then((usbDevice) => {
+			device = usbDevice;
+			USBStatus.innerHTML = "USB Status: <font color='green'>Connected</font>";
+		})
+		.catch((e) => {
+			device = null;
+			USBStatus.innerHTML = `USB Status: <font color='red'>Error ${e}</font>`;
+		});
+	
 
 	if (div_log)
 		div_log.innerHTML = "openFPGALoader " + args.join(' ') + "</br>\n";
@@ -45,15 +44,13 @@ async function ofl_exec(args, div_log, fileIn={}, with_usb=true, verbose=true) {
 		const response = await runOpenFPGALoader(args, fileIn, {
 			stdout: lineBuffered(line => {
 				lines.push(line);
-				if (verbose)
-					console.log(line);
+				console.log(line);
 				if (div_log)
 					update_ofl_log(div_log, line);
 			}),
 			stderr: lineBuffered(line => {
 				lines.push(line)
-				if (verbose)
-					console.log(line);
+				console.log(line);
 				if (div_log)
 					update_ofl_log(div_log, line);
 			}),
@@ -64,8 +61,7 @@ async function ofl_exec(args, div_log, fileIn={}, with_usb=true, verbose=true) {
 		const endTime  = performance.now();
 		const duration = Math.round(endTime - startTime);
 
-		if (verbose)
-			console.log(`Execution time: ${duration} milliseconds`);
+		console.log(`Execution time: ${duration} milliseconds`);
 		if (div_log)
 			div_log.innerHTML += `<div class="timing"><span class="span-success">Execution completed in ${duration}ms</span></div><br>\n`;
 
@@ -123,7 +119,7 @@ async function perform_operation(file, cmd_line) {
 	oflOpStatus.appendChild(span_ofl_exec);
 	span_ofl_exec.innerHTML = 'Execute openFPGALoader:';
 
-	const ret_ofl = await ofl_exec(cmd_line, oflStatus, fileData, true, true);
+	const ret_ofl = await ofl_exec(cmd_line, oflStatus, fileData);
 	span_ofl_exec.innerHTML = ret_ofl.success
 		? 'Execute openFPGALoader: <span class="span-success">Done</span>'
 		: 'Execute openFPGALoader: <span class="span-error">Fail</span>';
