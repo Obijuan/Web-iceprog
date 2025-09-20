@@ -1,6 +1,5 @@
-//import { runOpenFPGALoader     } from 'https://cdn.jsdelivr.net/npm/@yowasp/openfpgaloader/gen/bundle.js';
 import { runOpenFPGALoader     } from './bundle.js';
-import { lineBuffered, chunked } from 'https://cdn.jsdelivr.net/npm/@yowasp/runtime/lib/util.js';
+import { lineBuffered, chunked } from './util.js';
 
 // Supported boards storage
 const list_boards = {};
@@ -90,16 +89,6 @@ async function perform_operation(file, cmd_line) {
 	var soj_fileContent = null;   // SpiOverJtag bitstream content
 	var fileContent     = null;   // user bitstream content
 
-	//cmd_line.push("--quiet");
-	if (false) {
-		cmd_line = ["-c", "digilent"];
-		cmd_line.push("-f")
-
-		//cmd_line.push("--detect");
-		//cmd_line.push("--fpga-part", "xc7a35tcsg324");
-		cmd_line.push("--board", "cmoda7_35t");
-	}
-
 	// Clear status area.
 	oflOpStatus.innerHTML = "";
 
@@ -111,26 +100,10 @@ async function perform_operation(file, cmd_line) {
 	const ret_code = ret[0]; // spiOverJtag detect ret code
 	// FIXME: todo something with return code.
 
-	var detect_status = "";
+	var detect_status = "SpiOverJtag not required";
 	var mess          = "SpiOverJtag Bridge: ";
-	if (ret_code < 0) {
-		detect_status = "Error to detect FPGA part: can't flash bitstream";
-		mess += '<span class="span-error">Error. Please adds --fpga-part option or --board</span>';
-		return;
-	} else if (ret_code == 0) {
-		detect_status = "SpiOverJtag not required";
-		mess += '<span class="span-info">Not required.</span>'
-	} else {
-		detect_status = `FPGA Part detected ${soj_name} method: `
-		mess += `<span class="span-success">Ok (${soj_name}).</span>`
-		if (ret_code == 1) {
-			detect_status += "--fpga_part option";
-		} else if (ret_code == 2) {
-			detect_status += "board list entry";
-		} else if (ret_code == 3) {
-			detect_status += "FPGA detection with --detect option";
-		}
-	}
+	mess += '<span class="span-info">Not required.</span>'
+	
 	console.log(detect_status);
 	oflOpStatus.innerHTML += mess + "</br>";
 	var span_soj_dl = document.createElement("span_soj_dl");
@@ -204,33 +177,12 @@ async function perform_operation(file, cmd_line) {
 
 document.getElementById('programButtonManual').addEventListener('click', async function () {
 	// User bitstream file and name
-	const file    = document.getElementById("fileInput").files[0];
+	var file    = document.getElementById("fileInput").files[0];
 	// openFPGALoader command line
-	const ofl_cmd = document.getElementById("ofl_cmd").value.split(' ');
+	const ofl_cmd = ['-b', 'ice40_generic'];//document.getElementById("ofl_cmd").value.split(' ');
 	perform_operation(file, ofl_cmd);
 });
 
-// Handle program button click
-document.getElementById('programButton').addEventListener('click', async function () {
-	const select_cable = document.getElementById('cable_select');
-	const select_board = document.getElementById('board_select');
-	const tgt_flash    = document.getElementById("ofl_flash").checked;
-	const tgt_sram     = document.getElementById("ofl_sram").checked;
-	const verify       = document.getElementById("ofl_verify").checked;
-	const file         = document.getElementById("fileAutoInput").files[0];
-
-	let ofl_cmd = [];
-	if (select_cable.selectedIndex > 0)
-		ofl_cmd.push("-c", select_cable.options[select_cable.selectedIndex].text);
-	if (select_board.selectedIndex > 0)
-		ofl_cmd.push("-b", select_board.options[select_board.selectedIndex].text);
-	if (tgt_flash) {
-		ofl_cmd.push("-f");
-		if (verify)
-			cmd.push("--verify");
-	}
-	perform_operation(file, ofl_cmd);
-});
 
 // Try to detect FPGA Vendor/Model
 // cmd_line must be a list
