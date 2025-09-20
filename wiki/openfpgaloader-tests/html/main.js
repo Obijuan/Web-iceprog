@@ -1,5 +1,5 @@
 import { runOpenFPGALoader     } from './bundle.js';
-import { lineBuffered, chunked } from './util.js';
+import { lineBuffered } from './util.js';
 
 // Supported boards storage
 const list_boards = {};
@@ -21,9 +21,8 @@ async function ofl_exec(args, div_log, fileIn={}) {
 	let lines   = [];
 	let success = true;
 
-	
-	console.log("device null");
-	await navigator.usb.requestDevice({ filters: [] })
+	const filters = [{ vendorId: 0x0403}];
+	await navigator.usb.requestDevice({ filters: filters })
 		.then((usbDevice) => {
 			device = usbDevice;
 			USBStatus.innerHTML = "USB Status: <font color='green'>Connected</font>";
@@ -74,13 +73,10 @@ async function ofl_exec(args, div_log, fileIn={}) {
 
 async function perform_operation(file, cmd_line) {
 	var filename  = null;
-	// spiOverJtag and User bitstream content.
-	var soj_fileContent = null;   // SpiOverJtag bitstream content
-	var fileContent     = null;   // user bitstream content
+	var fileContent = null;   // user bitstream content
 
 	// Clear status area.
 	oflOpStatus.innerHTML = "";
-	const soj_name = "";
 
 	/* Get Bitstream from host computer */
 	var span_bit_dl = document.createElement("span_bit_dl");
