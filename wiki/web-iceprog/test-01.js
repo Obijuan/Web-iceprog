@@ -928,6 +928,7 @@ async function load_bitstream(contents)
       await flash_wait();
 
       caddr += 256;
+      console.log(b + " ");
   }
 
   //-- Write the remaining not full block
@@ -956,33 +957,35 @@ async function load_bitstream(contents)
   //   VERYFICATION
   //-----------------------------------------------------------
 
-  // console.log("reading.. for verification");
-  // let addr = 0;
-  // let buf_flash = new ArrayBuffer(256);
-  // let buf_file = contents.slice(addr, addr + 256); 
+  console.log("reading.. for verification");
+  let addr = 0;
+  
+  //let buf_file = contents.slice(addr, addr + 256); 
 
-  // //-- Verify complete blocks
-  // for (let b = 0; b < total_blocks; b++) {
-  //     //let buf_file = contents.slice(addr, addr + 256);
-  //     flash_read(rw_offset + addr, buf_flash, 256, false);
+  //-- Verify complete blocks
+  for (let b = 0; b < total_blocks; b++) {
+    let buf_file = contents.slice(addr, addr + 256);
+    let buf_flash = new ArrayBuffer(256);
+    flash_read(rw_offset + addr, buf_flash, 256, false);
+    await sleep(1);
 
-  //     if (!array_equals(buf_flash, buf_file))
-  //       mpsse_error(3, "Found difference between flash and file!")
+    if (!array_equals(buf_flash, buf_file))
+      mpsse_error(3, "Found difference between flash and file!")
 
-  //     addr += 256;
-  // }
+    addr += 256;
+    console.log(b + " ");
+  }
 
 
-  // //-- Verify the remaining block
-  // if (remaining > 0) {
-  //   let buf_file = contents.slice(addr, addr + remaining);
-  //   let buf_flash = new ArrayBuffer(remaining);
-
-  //   flash_read(rw_offset + addr, buf_flash, remaining, false);
-  //   if (!array_equals(buf_flash, buf_file))
-  //       mpsse_error(3, "Found difference between flash and file!")
-  // }
-  // console.log("✅Verify: OK!");
+  //-- Verify the remaining block
+  if (remaining > 0) {
+    let buf_file = contents.slice(addr, addr + remaining);
+    let buf_flash = new ArrayBuffer(remaining)    
+    flash_read(rw_offset + addr, buf_flash, remaining, false);
+    if (!array_equals(buf_flash, buf_file))
+        mpsse_error(3, "Found difference between flash and file!")
+  }
+  console.log("✅Verify: OK!");
 
 
 
@@ -1016,8 +1019,8 @@ async function load_bitstream(contents)
   //--set_cs_creset(1, 1);
   //--sleep.usleep(250000);
 
-  //console.log("cdone: " + (cdone ? "high" : "low"))
-  //console.log("Bye.")
+  console.log("cdone: " + (cdone ? "high" : "low"))
+  console.log("Bye.")
   //--mpsse_close(ctx)
 }
 
