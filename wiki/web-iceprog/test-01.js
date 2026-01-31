@@ -990,9 +990,9 @@ async function load_bitstream(contents)
   console.log("cdone: " + (cdone ? "high" : "low"))
   console.log("**************************** TEST4 *******");
 
-  //await flash_reset();
-  //await flash_power_up();
-  //await flash_read_id(); 
+  await flash_reset();
+  await flash_power_up();
+  await flash_read_id(); 
 
 
 
@@ -1004,11 +1004,12 @@ async function load_bitstream(contents)
   // ---------------------------------------------------------
   // Reset
   // ---------------------------------------------------------
-  //console.log("Llamando a Power down...");
-  //await flash_power_down();
-  //await flash_release_reset();
-  //await sleep(250);
-  //cdone = await get_cdone()
+  console.log("Llamando a Power down...");
+  await flash_power_down();
+  console.log("Llega bien aquí tras power_down....")
+  await flash_release_reset();
+  await sleep(250);
+  cdone = await get_cdone()
 
 
 
