@@ -943,13 +943,13 @@ async function load_bitstream(contents)
 
 
 
-  cdone = await get_cdone();
-  console.log("cdone: " + (cdone ? "high" : "low"))
-  console.log("**************************** TEST3 *******");
+  // cdone = await get_cdone();
+  // console.log("cdone: " + (cdone ? "high" : "low"))
+  // console.log("**************************** TEST3 *******");
 
-  await flash_reset();
-  await flash_power_up();
-  await flash_read_id(); 
+  // await flash_reset();
+  // await flash_power_up();
+  // await flash_read_id(); 
 
 
 
