@@ -1,0 +1,58 @@
+/* web-fpga-02.css */
+body { 
+    font-family: 'Segoe UI', sans-serif; 
+    text-align: center;
+    padding: 40px;
+    background-color: #f4f4f9; 
+    color: #333; 
+}
+
+.status { 
+    padding: 15px; 
+    border-radius: 8px; 
+    display: inline-block; 
+    margin-bottom: 20px; 
+    font-weight: bold; 
+}
+
+
+.supported { 
+    background-color: #d4edda; 
+    color: #155724; 
+    border: 1px solid #c3e6cb; 
+}
+
+.not-supported { 
+    background-color: #f8d7da; 
+    color: #721c24; 
+    border: 1px solid #f5c6cb; 
+}
+
+/* Clase para ocultar el botón */
+.hidden { display: none; }
+
+.control-panel { margin: 20px; }
+
+button {
+    padding: 12px 24px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #28a745; /* Verde para invitar a la acción */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: background 0.3s;
+}
+
+button:hover { background-color: #218838; }
+
+.info-card {
+    margin: 20px auto;
+    padding: 20px;
+    max-width: 400px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    text-align: left;
+}

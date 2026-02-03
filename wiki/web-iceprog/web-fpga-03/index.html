@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web-FPGA v0.2: Conexión</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h1>WEB-FPGA</h1>
+    <p>Paso 03: Gestión de desconexión dinámica</p>
+    
+    <div id="status-message" class="status">Verificando compatibilidad...</div>
+    
+    <div class="control-panel">
+        <button id="connect-btn" class="hidden">Conectar Alhambra-II</button>
+    </div>
+
+    <div id="device-info" class="info-card" style="display: none;">
+        <h3>Dispositivo Detectado:</h3>
+        <p><strong>Fabricante:</strong> <span id="vendor-name">-</span></p>
+        <p><strong>Vendor ID:</strong> <span id="vendor-id">-</span></p>
+        <p><strong>Product ID:</strong> <span id="product-id">-</span></p>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
