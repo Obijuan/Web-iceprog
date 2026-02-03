@@ -39,6 +39,20 @@
             "name": "Web-FPGA-04",
             "url": "https://localhost:4443/web-fpga-04/",
             "webRoot": "${workspaceFolder}"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Web-FPGA-05",
+            "url": "https://localhost:4443/web-fpga-05/",
+            "webRoot": "${workspaceFolder}"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Web-FPGA-06",
+            "url": "https://localhost:4443/web-fpga-06/",
+            "webRoot": "${workspaceFolder}"
         }
     ]
 }
