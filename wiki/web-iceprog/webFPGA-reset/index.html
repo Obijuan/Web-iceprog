@@ -8,25 +8,45 @@
 
 
 <body>
-    <div class="glass-container">
+
+    <!-- Panel de Error: Navegador NO SOPORTADO -->
+    <div id="no-support" class="error-panel hidden">
+        <div class="error-icon">⚠️</div>
+        <h2>Navegador no compatible</h2>
+        <p>Esta aplicación requiere <strong>WebUSB</strong> para comunicarse 
+           con la Alhambra-II. Utiliza Chrome u otro navegador 
+           basado en Chromium.</p>
+    </div>
+
+    <!-- PANEL PRINCIPAL (transparente) -->
+    <div id="main-app" class="glass-container">
+
+        <!-- Título del panel -->
         <header>
             <h1>Alhambra-II <span>Manager</span></h1>
         </header>
 
+        <!-- Cuerpo del panel -->
         <main>
             <div id="status-card" class="status-card">
                 <div class="indicator"></div>
                 <div class="info">
                     <p id="status-text">Buscando dispositivo...</p>
-                    <h2 id="device-name">NO conectada</h2>
+                    <h2 id="device-name">Placa no encontrada</h2>
                 </div>
             </div>
 
-            <button id="connect-btn" class="primary-btn">Conectar Placa</button>
-            <div id="actions-area" class="actions">
-                </div>
+            <!-- Botón de conectar PLACA -->
+            <button id="connect-btn" class="primary-btn">Conectar</button>
+
+
+            <div id="actions-area" class="actions"></div>
         </main>
+
     </div>
+
+    <!-- Script MAIN -->
     <script type="module" src="app.js"></script>
 </body>
 </html>
+

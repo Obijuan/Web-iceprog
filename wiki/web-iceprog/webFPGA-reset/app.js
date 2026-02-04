@@ -1,7 +1,8 @@
-//-- Importar modulo FTDI
 import * as ftdi from './ftdi.js';
 
-//------------- Elementos de intefaz
+//-- Elementos de Interfaz
+const mainApp = document.getElementById('main-app');
+const noSupport = document.getElementById('no-support');
 const connectBtn = document.getElementById('connect-btn');
 const statusCard = document.getElementById('status-card');
 const statusText = document.getElementById('status-text');
@@ -9,40 +10,153 @@ const deviceName = document.getElementById('device-name');
 
 let device = null;
 
+// -----------------------------------------------------
+//-- Comprobar si el navegador soporta WebUSB
+//--
+//-- DEVUELVE:
+//--   true: Soporte OK
+//--   false: No hay soporte
+//-----------------------------------------------------
+function checkCompatibility() {
+
+    if (!navigator.usb) {
+        //-- NO hay soporte!
+        //-- Ocultar la app principal y mostrar el mensaje
+        mainApp.classList.add('hidden');
+
+        //-- Mostrar el mensaje de no soporte
+        noSupport.classList.remove('hidden');
+        return false;
+    }
+    return true;
+}
+
+//-----------------------------------------------------
+//-- Actualizar la interfaz de usuario
+//--
+//-- ENTRADA:
+//--   connected: true si el dispositivo está conectado
+//-----------------------------------------------------
 async function updateUI(connected) {
+
+    //-- Limpiar el estado de error
+    statusCard.classList.remove('error-active'); 
+
     if (connected) {
+
+        //-- Tarjeta de estado: Ahora pertenece a la clase connected
         statusCard.classList.add('connected');
-        statusText.textContent = "Conectado";
+
+        //-- Actualizar textos
+        statusText.textContent = "Estado: Activo";
         deviceName.textContent = device.productName || "Alhambra-II";
+
+        //-- Ocultar el botón de conexión
         connectBtn.classList.add('hidden');
-        // El botón de Reset aparecerá en el Paso 02
+
     } else {
+        //-- Tarjeta de estado: Ya no pertenece a la clase connected
         statusCard.classList.remove('connected');
-        statusText.textContent = "Desconectado";
-        deviceName.textContent = "Ninguna placa detectada";
+
+        //-- Actualizar textos
+        statusText.textContent = "Estado: Desconectado";
+        deviceName.textContent = "Placa no encontrada";
+
+        //-- Mostrar el botón de conexión 
         connectBtn.classList.remove('hidden');
     }
 }
 
-connectBtn.addEventListener('click', async () => {
-    try {
-        device = await ftdi.connect();
-        await ftdi.initialize(device);
-        updateUI(true);
-    } catch (err) {
-        console.error("Error de conexión:", err);
-    }
-});
+async function handleConnectionError(err) {
+    statusCard.classList.add('error-active');
+    const isLinux = (navigator.userAgentData?.platform === 'Linux') || 
+                    (navigator.platform.indexOf('Linux') !== -1);
 
-navigator.usb.addEventListener('disconnect', (event) => {
-    if (device && event.device === device) {
-        device = null;
-        updateUI(false);
-    }
-});
+    let title = "Error de conexión";
+    let message = err.message;
+    let solution = "";
 
-// Comprobar soporte inicial
-if (!navigator.usb) {
-    statusText.textContent = "Navegador no compatible";
-    connectBtn.style.display = 'none';
+    // ESCENARIO A: Permisos de sistema (udev)
+    // Suele ocurrir en device.open() y devuelve SecurityError
+    if (err.name === 'SecurityError' || 
+        err.message.toLowerCase().includes('access denied')) {
+        if (isLinux) {
+            title = "Faltan permisos (udev)";
+            message = "Tu usuario no tiene permiso para escribir " +
+                      "en el dispositivo USB.";
+            solution = `
+                <p>Crea un archivo de reglas ejecutando:</p>
+                <code>echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="0403", 
+                  MODE="0666"' | 
+                  sudo tee /etc/udev/rules.d/99-alhambra.rules && 
+                  sudo udevadm control --reload-rules
+                </code>
+            `;
+        } else {
+            message = "El sistema operativo ha bloqueado el acceso al USB.";
+        }
+    } 
+    
+    // ESCENARIO B: Interfaz ocupada (ftdi_sio)
+    // Suele ocurrir en claimInterface() y devuelve NetworkError
+    else if (err.name === 'NetworkError' || err.message.includes('claimInterface')) {
+        if (isLinux) {
+            title = "Driver en conflicto";
+            message = "El módulo 'ftdi_sio' está bloqueando la placa.";
+            solution = `
+                <p>Ejecuta este comando para liberarla:</p>
+                <code>sudo modprobe -r ftdi_sio</code>d
+            `;
+        } else {
+            message = "La placa está siendo usada por otro programa.";
+        }
+    }
+
+    // Renderizado en la UI
+    statusText.innerHTML = `
+        <div class="linux-error">
+            <strong>${title}</strong><br>
+            <span style="font-size: 0.8rem; opacity: 0.8;">${message}</span>
+            ${solution}
+        </div>
+    `;
 }
+
+//-----------------------------------------------------
+//-- MAIN: Punto de entrada
+//-----------------------------------------------------
+
+//-- 1. Comprobar si el navegador soporta WEBUSB
+//--    Si no es así, se muestra un mensaje y no se hace nada más
+if (checkCompatibility()) {
+
+    //-- 2. Configurar el botón de conexión
+    connectBtn.addEventListener('click', async () => {
+        try {
+
+            //-- Boton PULSADO: Conectar al dispositivo FTDI
+            device = await ftdi.connect();
+
+            //-- Inicializar el FTDI
+            await ftdi.initialize(device);
+
+            //-- Actualizar la interfaz
+            updateUI(true);
+
+        } catch (err) {
+            // Capturamos el error y lo mostramos en la UI
+            handleConnectionError(err);
+        }
+    });
+
+    //-- Accion cuando se desconecta el USB
+    navigator.usb.addEventListener('disconnect', (event) => {
+        if (device && event.device === device) {
+            device = null;
+            updateUI(false);
+        }
+    });
+}
+
+
+

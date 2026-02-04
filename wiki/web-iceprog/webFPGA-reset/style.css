@@ -1,9 +1,29 @@
+/* ------------------------------------------------  */
+/*  Variables globales situadas en el top del DOM    */
+/* ------------------------------------------------- */
 :root {
     --bg: #0f172a;
     --glass: rgba(255, 255, 255, 0.05);
-    --primary: #38bdf8;
+    --primary: #38bdf8;  /* Color primero de la interfaz */
     --success: #22c55e;
 }
+
+/* --------------------------------------------- */
+/*  Estilos generales para las etiquetas HTML    */
+/* --------------------------------------------- */
+
+h1 { 
+    font-size: 1.5rem; 
+    margin-bottom: 2rem; 
+    font-weight: 300; 
+}
+
+/* Resaltar palabras dentro de h1 */
+h1 span { 
+    color: var(--primary); 
+    font-weight: 700; 
+}
+
 
 body {
     background-color: var(--bg);
@@ -16,6 +36,46 @@ body {
     margin: 0;
 }
 
+/* ------------------------------------------------------------------- */
+/*            Estilos para las diferentes clasess CSS                  */
+/* ------------------------------------------------------------------- */
+
+/* --------------------------------------- */
+/* Error del panel: Navegador NO soportado */
+/* --------------------------------------- */
+.error-panel {
+    background: rgba(220, 38, 38, 0.1);
+    border: 2px solid #ef4444;
+    padding: 2.5rem;
+    border-radius: 24px;
+    width: 350px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+}
+
+/* Elementos h2 dentro del panel de error */
+.error-panel h2 {
+    color: #ef4444;
+    margin-top: 0;
+}
+
+/* Párrafos dentro del panel de error */
+.error-panel p {
+    color: #fca5a5;
+    line-height: 1.5;
+    font-size: 0.9rem;
+}
+
+/*  Clases para los iconos de error */
+.error-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+
+/* ---------------------------------- */
+/* -- Estilo del panel principal   -- */
+/* ---------------------------------- */
 .glass-container {
     background: var(--glass);
     backdrop-filter: blur(10px);
@@ -26,9 +86,10 @@ body {
     box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
 }
 
-h1 { font-size: 1.5rem; margin-bottom: 2rem; font-weight: 300; }
-h1 span { color: var(--primary); font-weight: 700; }
 
+/* ---------------------------------- */
+/* --  Tarjeta de estado USB       -- */
+/* ---------------------------------- */
 .status-card {
     background: rgba(0,0,0,0.2);
     padding: 1.5rem;
@@ -39,20 +100,31 @@ h1 span { color: var(--primary); font-weight: 700; }
     margin-bottom: 2rem;
 }
 
+.info p { 
+    margin: 0; 
+    font-size: 0.8rem; 
+    color: #94a3b8; 
+}
+
+.info h2 { 
+    margin: 0; 
+    font-size: 1.1rem; 
+}
+
 .indicator {
     width: 12px; height: 12px;
     border-radius: 50%;
     background: #475569;
 }
 
+/* Estilo cuando está conectado */
 .status-card.connected .indicator {
     background: var(--success);
     box-shadow: 0 0 15px var(--success);
 }
 
-.info p { margin: 0; font-size: 0.8rem; color: #94a3b8; }
-.info h2 { margin: 0; font-size: 1.1rem; }
 
+/* Estilo de los botones principales */
 .primary-btn {
     width: 100%;
     padding: 1rem;
@@ -65,5 +137,53 @@ h1 span { color: var(--primary); font-weight: 700; }
     transition: transform 0.2s;
 }
 
-.primary-btn:hover { transform: translateY(-2px); }
-.hidden { display: none; }
+/* Darle movimiento a los botones principales al pasar por encima */
+.primary-btn:hover { 
+    transform: translateY(-2px); 
+}
+
+/* Estilo para oculatar los elementos */
+.hidden { 
+    display: none !important;
+}
+
+
+.status-card.error-active {
+    border: 1px solid rgba(239, 68, 68, 0.5); /* Borde rojo suave */
+    background: rgba(127, 29, 29, 0.2); /* Fondo rojizo translúcido */
+}
+
+.status-card.error-active .indicator {
+    background: #ef4444; /* Indicador rojo */
+    box-shadow: 0 0 10px #ef4444;
+}
+
+.status-card.error-active #status-text {
+    color: #fca5a5; /* Texto del error en rojo claro */
+    font-weight: bold;
+}
+
+/* Estilos para el mensaje de diagnóstico en Linux */
+.linux-error {
+    text-align: left;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.linux-error p {
+    margin: 8px 0 4px 0;
+    color: #fca5a5;
+}
+
+.linux-error code {
+    display: block;
+    background: #000;
+    color: #38bdf8; /* Color primario para el texto del comando */
+    padding: 8px;
+    border-radius: 6px;
+    font-family: 'Courier New', Courier, monospace;
+    margin-top: 5px;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    user-select: all; /* Facilita que el usuario lo seleccione con un clic */
+}
+
