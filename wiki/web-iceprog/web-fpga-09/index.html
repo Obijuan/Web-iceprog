@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web-FPGA v0.2: Conexión</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h1>WEB-FPGA</h1>
+    <p>Web-FPGA v0.8: Preparar FPGA</p>
+    
+    <div id="status-message" class="status">Verificando...</div>
+    
+    <div class="control-panel">
+        <button id="connect-btn" class="hidden">Conectar Alhambra-II</button>
+        <button id="init-btn" class="hidden btn-init">Inicializar Hardware</button>
+
+        <button id="file-btn" class="hidden btn-file">Seleccionar Bitstream</button>
+        <input type="file" id="file-input" accept=".bin" style="display: none;">
+
+        <button id="prep-btn" class="hidden btn-prep">Preparar FPGA</button>
+
+        <button id="program-btn" class="hidden btn-program">🚀 Cargar Bitstream</button>
+
+    </div>
+
+    <div id="device-info" class="info-card" style="display: none;">
+        <h3>Dispositivo: <span id="vendor-name"></span></h3>
+        <p id="file-status">Archivo: Ninguno</p>
+        <progress id="progress-bar" value="0" max="100" style="display: none; width: 100%; margin-top: 10px;"></progress>
+        <div id="log-console" class="console">Esperando órdenes...</div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
+

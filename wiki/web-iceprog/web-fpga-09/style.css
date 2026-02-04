@@ -1,0 +1,35 @@
+/* web-fpga-04.css */
+body { font-family: 'Segoe UI', sans-serif; text-align: center; padding: 30px; background-color: #f4f4f9; }
+.status { padding: 12px; border-radius: 8px; display: inline-block; margin-bottom: 20px; font-weight: bold; }
+.supported { background-color: #d4edda; color: #155724; }
+.not-supported { background-color: #f8d7da; color: #721c24; }
+.hidden { display: none; }
+
+.btn-init { background-color: #f39c12 !important; margin-left: 10px; }
+button {
+    padding: 12px 24px; cursor: pointer; color: white; border: none;
+    border-radius: 5px; font-weight: bold; background-color: #28a745;
+}
+
+.console {
+    background-color: #1e1e1e; color: #00ff00;
+    padding: 15px; border-radius: 5px; font-family: monospace;
+    text-align: left; font-size: 13px; height: 150px; overflow-y: auto; margin-top: 10px;
+}
+.info-card { margin: 20px auto; padding: 20px; max-width: 500px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
+.btn-file { background-color: #9b59b6 !important; margin-left: 10px; }
+.btn-file:hover { background-color: #8e44ad !important; }
+#file-status { font-size: 0.9em; color: #666; font-style: italic; }
+
+.btn-prep { background-color: #e67e22 !important; margin-left: 10px; }
+
+
+.btn-program { background-color: #e74c3c !important; color: white; animation: pulse 2s infinite; }
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+progress { height: 20px; border-radius: 10px; }
+
