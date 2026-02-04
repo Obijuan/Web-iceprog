@@ -22,6 +22,19 @@ export async function connect() {
     return device;
 }
 
+export async function disconnect(device) {
+    if (device && device.opened) {
+        try {
+            // Liberamos la interfaz antes de cerrar
+            await device.releaseInterface(0);
+            await device.close();
+            console.log("FTDI: Conexión cerrada limpiamente.");
+        } catch (err) {
+            console.error("FTDI: Error al cerrar:", err);
+        }
+    }
+}
+
 //--------------------------------------------------
 //-- Inicializar el dispositivo FTDI
 //--------------------------------------------------    

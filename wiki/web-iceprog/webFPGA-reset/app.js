@@ -7,6 +7,9 @@ const connectBtn = document.getElementById('connect-btn');
 const statusCard = document.getElementById('status-card');
 const statusText = document.getElementById('status-text');
 const deviceName = document.getElementById('device-name');
+const actionsArea = document.getElementById('actions-area');
+
+
 
 let device = null;
 
@@ -29,6 +32,16 @@ function checkCompatibility() {
         return false;
     }
     return true;
+}
+
+
+// Función centralizada para desconectar
+async function performDisconnect() {
+    if (device) {
+        await ftdi.disconnect(device);
+        device = null;
+        updateUI(false);
+    }
 }
 
 //-----------------------------------------------------
@@ -54,6 +67,15 @@ async function updateUI(connected) {
         //-- Ocultar el botón de conexión
         connectBtn.classList.add('hidden');
 
+        // Creamos el botón de desconectar en el área de acciones
+        actionsArea.innerHTML = `
+        <button id="disconnect-btn" class="secondary-btn danger">
+            ✕ Desconectar Placa
+        </button>
+        `;
+        document.getElementById('disconnect-btn').onclick = performDisconnect;
+
+
     } else {
         //-- Tarjeta de estado: Ya no pertenece a la clase connected
         statusCard.classList.remove('connected');
@@ -64,6 +86,9 @@ async function updateUI(connected) {
 
         //-- Mostrar el botón de conexión 
         connectBtn.classList.remove('hidden');
+
+        // Limpiamos botones cuando no hay conexión
+        actionsArea.innerHTML = ""; 
     }
 }
 

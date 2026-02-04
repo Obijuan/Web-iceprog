@@ -187,3 +187,24 @@ body {
     user-select: all; /* Facilita que el usuario lo seleccione con un clic */
 }
 
+
+/* Botón de desconexión mejorado */
+.secondary-btn.danger {
+    background: rgba(245, 158, 11, 0.1); /* Fondo ámbar muy sutil */
+    border: 1px solid #f59e0b;           /* Borde ámbar sólido */
+    color: #fbbf24;                      /* Texto ámbar brillante */
+    font-weight: 600;
+    margin-top: 1rem;
+    width: 100%;
+    padding: 1rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.secondary-btn.danger:hover {
+    background: #f59e0b;                /* Se vuelve sólido al pasar el ratón */
+    color: #0f172a;                     /* Texto oscuro para máximo contraste */
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+    transform: translateY(-2px);
+}
