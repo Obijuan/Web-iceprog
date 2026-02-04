@@ -1,0 +1,735 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="194.83163mm"
+   height="102.41731mm"
+   viewBox="0 0 194.83163 102.41731"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.3 (fcd0343856, 2026-01-01)"
+   sodipodi:docname="2026-02-04_03-FTDI-FLASH-FPGA-diagram.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="0.98646753"
+     inkscape:cx="286.37537"
+     inkscape:cy="271.16959"
+     inkscape:window-width="1866"
+     inkscape:window-height="1011"
+     inkscape:window-x="54"
+     inkscape:window-y="32"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer2"
+     showguides="true" />
+  <defs
+     id="defs1">
+    <marker
+       style="overflow:visible"
+       id="Dot"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Dot"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.5)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         d="M 5,0 C 5,2.76 2.76,5 0,5 -2.76,5 -5,2.76 -5,0 c 0,-2.76 2.3,-5 5,-5 2.76,0 5,2.24 5,5 z"
+         sodipodi:nodetypes="sssss"
+         id="path17" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="Triangle"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Triangle arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.5)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         id="path135" />
+    </marker>
+  </defs>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="back"
+     transform="translate(-7.4369658,4.9327995)">
+    <rect
+       style="fill:#f9f9f9;stroke:#000000;stroke-width:0.264583;stroke-linecap:round;stroke-dasharray:0.264583, 1.05833;stroke-dashoffset:0"
+       id="rect59"
+       width="194.56705"
+       height="102.15273"
+       x="7.5692573"
+       y="-4.800508" />
+  </g>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-7.4369658,4.9327995)">
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:6.61458px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#000000;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="31.145306"
+       y="29.921452"
+       id="text1"><tspan
+         sodipodi:role="line"
+         id="tspan1"
+         style="fill:#000000;stroke:none;stroke-width:0.79375"
+         x="31.145306"
+         y="29.921452">FTDI</tspan><tspan
+         sodipodi:role="line"
+         style="fill:#000000;stroke:none;stroke-width:0.79375"
+         x="31.145306"
+         y="36.536034"
+         id="tspan2">2232H</tspan></text>
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.264582;stroke-linecap:square;stroke-dasharray:none"
+       id="rect2"
+       width="37.460087"
+       height="46.205452"
+       x="13.710411"
+       y="13.702368" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#000080;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="-35.429199"
+       y="48.830864"
+       id="text5"
+       transform="rotate(-90)"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#000080;stroke:none;stroke-width:0.79375"
+         x="-35.429199"
+         y="48.830864"
+         id="tspan5">ADBUS</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:6.61458px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#800080;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="163.9444"
+       y="48.903618"
+       id="text7"><tspan
+         sodipodi:role="line"
+         style="fill:#800080;stroke:none;stroke-width:0.79375"
+         x="163.9444"
+         y="48.903618"
+         id="tspan10">FLASH</tspan></text>
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.264582;stroke-linecap:square;stroke-dasharray:none"
+       id="rect7"
+       width="45.517242"
+       height="46.465519"
+       x="141.18578"
+       y="13.490918" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none"
+       id="rect9"
+       width="4.1573005"
+       height="3.5538211"
+       x="137.02849"
+       y="16.903891" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.61458px;line-height:1;font-family:ubuntu;-inkscape-font-specification:ubuntu;text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#800080;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="165.75455"
+       y="57.11092"
+       id="text11"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#800080;stroke:none;stroke-width:0.79375"
+         x="165.75455"
+         y="57.11092"
+         id="tspan11">(N25Q031A)</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#d40000;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="28.716389"
+       y="19.151802"
+       id="text12"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#d40000;stroke:none;stroke-width:0.79375"
+         x="28.716389"
+         y="19.151802"
+         id="tspan12">MAESTRO</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#4d4d4d;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="163.92693"
+       y="19.112289"
+       id="text13"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#4d4d4d;stroke:none;stroke-width:0.79375"
+         x="163.92693"
+         y="19.112289"
+         id="tspan13">ESCLAVO</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#800080;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="145.35747"
+       y="21.822445"
+       id="text14"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#800080;stroke:none;stroke-width:0.79375"
+         x="145.35747"
+         y="21.822445"
+         id="tspan14">SCK</tspan></text>
+    <path
+       style="fill:#008000;stroke:#000000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none;marker-end:url(#Triangle)"
+       d="M 54.351859,18.813103 H 135.95564"
+       id="path14"
+       sodipodi:nodetypes="cc" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.264582;stroke-linecap:square;stroke-dasharray:none"
+       id="rect22"
+       width="31.298668"
+       height="34.052502"
+       x="69.336082"
+       y="53.225269" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:6.61458px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#008000;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="79.723763"
+       y="78.215912"
+       id="text23"><tspan
+         sodipodi:role="line"
+         id="tspan22"
+         style="fill:#008000;stroke:none;stroke-width:0.79375"
+         x="79.723763"
+         y="78.215912">FPGA</tspan><tspan
+         sodipodi:role="line"
+         style="fill:#008000;stroke:none;stroke-width:0.79375"
+         x="79.723763"
+         y="84.83049"
+         id="tspan23">ICE40</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#008000;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="76.653557"
+       y="62.917168"
+       id="text24"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#008000;stroke:none;stroke-width:0.79375"
+         x="76.653557"
+         y="62.917168"
+         id="tspan24">CDONE</tspan></text>
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none"
+       id="rect24"
+       width="4.1573005"
+       height="3.5538211"
+       x="65.17878"
+       y="60.040119" />
+    <path
+       style="fill:none;stroke:#008000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none;marker-end:url(#Triangle)"
+       d="M 65.17878,61.81703 H 61.100077 V 49.832311 h -4.603521"
+       id="path24"
+       sodipodi:nodetypes="cccc" />
+    <path
+       style="fill:none;stroke:#008000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none;marker-end:url(#Triangle)"
+       d="m 55.638946,55.134477 h 2.650475 v 12.664324 h 5.830647"
+       id="path25"
+       sodipodi:nodetypes="cccc" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none"
+       id="rect25"
+       width="4.1573005"
+       height="3.5538211"
+       x="65.17878"
+       y="66.021896" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#008000;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="78.75602"
+       y="68.898941"
+       id="text26"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#008000;stroke:none;stroke-width:0.79375"
+         x="78.75602"
+         y="68.898941"
+         id="tspan26">CRESET_B</tspan></text>
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none"
+       id="rect26"
+       width="4.1573005"
+       height="3.5538211"
+       x="137.02849"
+       y="22.073771" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#800080;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="145.35747"
+       y="25.376266"
+       id="text27"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#800080;stroke:none;stroke-width:0.79375"
+         x="145.35747"
+         y="25.376266"
+         id="tspan27">SDI</tspan></text>
+    <path
+       style="fill:#008000;stroke:#000000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none;marker-end:url(#Triangle)"
+       d="M 55.325566,23.718393 H 135.9881"
+       id="path27"
+       sodipodi:nodetypes="cc" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#000000;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="69.122826"
+       y="18.00404"
+       id="text28"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#000000;stroke:none;stroke-width:0.79375"
+         x="69.122826"
+         y="18.00404"
+         id="tspan28">CLK</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#000000;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="69.122826"
+       y="23.173912"
+       id="text29"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#000000;stroke:none;stroke-width:0.79375"
+         x="69.122826"
+         y="23.173912"
+         id="tspan29">MOSI</tspan></text>
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none"
+       id="rect29"
+       width="4.1573005"
+       height="3.5538211"
+       x="137.02849"
+       y="27.24365" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#800080;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="145.35747"
+       y="28.882462"
+       id="text30"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#800080;stroke:none;stroke-width:0.79375"
+         x="145.35747"
+         y="28.882462"
+         id="tspan30">SDO</tspan></text>
+    <path
+       style="fill:#008000;stroke:#000000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none;marker-end:url(#Triangle)"
+       d="M 137.02849,28.888261 H 56.132828"
+       id="path30"
+       sodipodi:nodetypes="cc" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#000000;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="69.122826"
+       y="28.343781"
+       id="text31"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#000000;stroke:none;stroke-width:0.79375"
+         x="69.122826"
+         y="28.343781"
+         id="tspan31">MISO</tspan></text>
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none"
+       id="rect32"
+       width="4.1573005"
+       height="3.5538211"
+       x="137.02849"
+       y="37.684559" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#800080;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="145.77043"
+       y="41.261154"
+       id="text33"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#800080;stroke:none;stroke-width:0.79375"
+         x="145.77043"
+         y="41.261154"
+         id="tspan33">CS_B</tspan></text>
+    <path
+       style="fill:#008000;stroke:#000000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none;marker-end:url(#Triangle)"
+       d="M 55.424711,39.427628 H 135.95665"
+       id="path33"
+       sodipodi:nodetypes="cc" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#000000;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="69.122826"
+       y="38.883148"
+       id="text34"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#000000;stroke:none;stroke-width:0.79375"
+         x="69.122826"
+         y="38.883148"
+         id="tspan34">SS</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#d40000;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="84.967949"
+       y="57.250088"
+       id="text36"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#d40000;stroke:none;stroke-width:0.79375"
+         x="84.967949"
+         y="57.250088"
+         id="tspan36">MAESTRO</tspan></text>
+    <circle
+       style="fill:#ffd42a;stroke:#000000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none"
+       id="path36"
+       cx="124.50118"
+       cy="44.213882"
+       r="2.1336207" />
+    <path
+       style="fill:#ffd42a;stroke:#000000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none"
+       d="m 124.50118,42.080258 v -2.65263"
+       id="path37" />
+    <circle
+       style="fill:#000000;stroke:#000000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none"
+       id="path38"
+       cx="124.50118"
+       cy="39.427631"
+       r="0.42672414" />
+    <path
+       style="fill:#ffd42a;stroke:#000000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none"
+       d="M 124.50118,47.876302 V 46.453013"
+       id="path39" />
+    <path
+       style="fill:#ffd42a;stroke:#000000;stroke-width:0.264583;stroke-linecap:round;stroke-dasharray:none"
+       d="m 125.28637,47.863911 h -1.57038"
+       id="path40" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#000000;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="130.98196"
+       y="43.834473"
+       id="text40"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#000000;stroke:none;stroke-width:0.79375"
+         x="130.98196"
+         y="43.834473"
+         id="tspan40">Led</tspan><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#000000;stroke:none;stroke-width:0.79375"
+         x="130.98196"
+         y="47.009472"
+         id="tspan58"> CFG</tspan></text>
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none"
+       id="rect40"
+       width="4.1573005"
+       height="3.5538211"
+       x="100.56319"
+       y="59.907822" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#000080;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="53.50798"
+       y="19.913244"
+       id="text41"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#000080;stroke:none;stroke-width:0.79375"
+         x="53.50798"
+         y="19.913244"
+         id="tspan41">0</tspan></text>
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none"
+       id="rect41"
+       width="4.1573005"
+       height="3.5538211"
+       x="51.26741"
+       y="17.036194" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#000080;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="53.50798"
+       y="25.083115"
+       id="text42"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#000080;stroke:none;stroke-width:0.79375"
+         x="53.50798"
+         y="25.083115"
+         id="tspan42">1</tspan></text>
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none"
+       id="rect42"
+       width="4.1573005"
+       height="3.5538211"
+       x="51.26741"
+       y="22.206064" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#000080;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="53.50798"
+       y="30.252979"
+       id="text43"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#000080;stroke:none;stroke-width:0.79375"
+         x="53.50798"
+         y="30.252979"
+         id="tspan43">2</tspan></text>
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none"
+       id="rect43"
+       width="4.1573005"
+       height="3.5538211"
+       x="51.26741"
+       y="27.375933" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#000080;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="53.50798"
+       y="35.422848"
+       id="text44"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#000080;stroke:none;stroke-width:0.79375"
+         x="53.50798"
+         y="35.422848"
+         id="tspan44">3</tspan></text>
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none"
+       id="rect44"
+       width="4.1573005"
+       height="3.5538211"
+       x="51.26741"
+       y="32.545799" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#000080;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="53.50798"
+       y="40.592716"
+       id="text45"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#000080;stroke:none;stroke-width:0.79375"
+         x="53.50798"
+         y="40.592716"
+         id="tspan45">4</tspan></text>
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none"
+       id="rect45"
+       width="4.1573005"
+       height="3.5538211"
+       x="51.26741"
+       y="37.715668" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#000080;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="53.50798"
+       y="45.762585"
+       id="text46"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#000080;stroke:none;stroke-width:0.79375"
+         x="53.50798"
+         y="45.762585"
+         id="tspan46">5</tspan></text>
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none"
+       id="rect46"
+       width="4.1573005"
+       height="3.5538211"
+       x="51.26741"
+       y="42.885536" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#000080;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="53.50798"
+       y="50.932453"
+       id="text47"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#000080;stroke:none;stroke-width:0.79375"
+         x="53.50798"
+         y="50.932453"
+         id="tspan47">6</tspan></text>
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none"
+       id="rect47"
+       width="4.1573005"
+       height="3.5538211"
+       x="51.26741"
+       y="48.055405" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#000080;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="53.50798"
+       y="56.102322"
+       id="text48"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#000080;stroke:none;stroke-width:0.79375"
+         x="53.50798"
+         y="56.102322"
+         id="tspan48">7</tspan></text>
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none"
+       id="rect48"
+       width="4.1573005"
+       height="3.5538211"
+       x="51.26741"
+       y="53.225273" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:ubuntu;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;fill:#ff0000;stroke:#ff0000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none"
+       x="55.965393"
+       y="35.422848"
+       id="text49"><tspan
+         sodipodi:role="line"
+         id="tspan49"
+         style="fill:#ff0000;stroke:#ff0000;stroke-width:0.264583"
+         x="55.965393"
+         y="35.422848">X</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:ubuntu;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;fill:#ff0000;stroke:#ff0000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none"
+       x="55.965393"
+       y="45.762589"
+       id="text50"><tspan
+         sodipodi:role="line"
+         id="tspan50"
+         style="fill:#ff0000;stroke:#ff0000;stroke-width:0.264583"
+         x="55.965393"
+         y="45.762589">X</tspan></text>
+    <path
+       style="fill:none;stroke:#008000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none;marker-end:url(#Dot)"
+       d="M 108.87077,61.81703 V 18.813103"
+       id="path51"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#008000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none;marker-end:url(#Triangle)"
+       d="m 104.76452,61.81703 h 3.22992"
+       id="path52"
+       sodipodi:nodetypes="cc" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#008000;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="96.665161"
+       y="62.917168"
+       id="text52"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#008000;stroke:none;stroke-width:0.79375"
+         x="96.665161"
+         y="62.917168"
+         id="tspan52">SCK</tspan></text>
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none"
+       id="rect52"
+       width="4.1573005"
+       height="3.5538211"
+       x="100.56319"
+       y="66.021889" />
+    <path
+       style="fill:none;stroke:#008000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none;marker-end:url(#Triangle)"
+       d="m 104.76452,67.9311 h 6.54889"
+       id="path53"
+       sodipodi:nodetypes="cc" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#008000;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="95.425392"
+       y="69.031235"
+       id="text53"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#008000;stroke:none;stroke-width:0.79375"
+         x="95.425392"
+         y="69.031235"
+         id="tspan53">MOSI</tspan></text>
+    <path
+       style="fill:none;stroke:#008000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none;marker-end:url(#Dot)"
+       d="M 112.24645,67.79474 V 23.810182"
+       id="path54"
+       sodipodi:nodetypes="cc" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none"
+       id="rect54"
+       width="4.1573005"
+       height="3.5538211"
+       x="100.56319"
+       y="72.135956" />
+    <path
+       style="fill:none;stroke:#008000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none;marker-end:url(#Triangle)"
+       d="m 115.62213,74.02146 -10.05035,0.02371"
+       id="path55"
+       sodipodi:nodetypes="cc" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#008000;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="95.425392"
+       y="75.145302"
+       id="text55"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#008000;stroke:none;stroke-width:0.79375"
+         x="95.425392"
+         y="75.145302"
+         id="tspan55">MISO</tspan></text>
+    <path
+       style="fill:none;stroke:#008000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none;marker-end:url(#Dot)"
+       d="M 115.62213,74.02146 V 28.888261"
+       id="path56"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#008000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none;marker-end:url(#Dot)"
+       d="M 118.99781,79.92272 V 39.427628"
+       id="path57"
+       sodipodi:nodetypes="cc" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none"
+       id="rect57"
+       width="4.1573005"
+       height="3.5538211"
+       x="100.56319"
+       y="78.250023" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#008000;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="97.650055"
+       y="81.259369"
+       id="text57"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:ubuntu;fill:#008000;stroke:none;stroke-width:0.79375"
+         x="97.650055"
+         y="81.259369"
+         id="tspan57">SS</tspan></text>
+    <path
+       style="fill:none;stroke:#008000;stroke-width:0.264583;stroke-linecap:square;stroke-dasharray:none;marker-end:url(#Triangle)"
+       d="m 104.76452,80.026933 h 13.16044"
+       id="path58"
+       sodipodi:nodetypes="cc" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.175px;line-height:1;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#000000;stroke:none;stroke-width:0.79375;stroke-linecap:square"
+       x="69.276817"
+       y="9.2432175"
+       id="text59"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.175px;font-family:ubuntu;-inkscape-font-specification:'ubuntu Bold';fill:#000000;stroke:none;stroke-width:0.79375"
+         x="69.276817"
+         y="9.2432175"
+         id="tspan59">SPI</tspan></text>
+    <ellipse
+       style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:round;stroke-dasharray:0.264583, 1.05833;stroke-dashoffset:0"
+       id="path59"
+       cx="69.333038"
+       cy="27.414536"
+       rx="5.0960455"
+       ry="16.015486" />
+  </g>
+</svg>
