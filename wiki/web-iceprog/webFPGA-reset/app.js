@@ -70,7 +70,7 @@ async function updateUI(connected) {
         // Creamos el botón de desconectar en el área de acciones
         actionsArea.innerHTML = `
         <button id="disconnect-btn" class="secondary-btn danger">
-            ✕ Desconectar Placa
+            ✕ Desconectar
         </button>
         `;
         document.getElementById('disconnect-btn').onclick = performDisconnect;

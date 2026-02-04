@@ -189,10 +189,10 @@ body {
 
 
 /* Botón de desconexión mejorado */
-.secondary-btn.danger {
-    background: rgba(245, 158, 11, 0.1); /* Fondo ámbar muy sutil */
-    border: 1px solid #f59e0b;           /* Borde ámbar sólido */
-    color: #fbbf24;                      /* Texto ámbar brillante */
+/* .secondary-btn.danger {
+    background: rgba(245, 158, 11, 0.1); / Fondo ámbar muy sutil /
+    border: 1px solid #f59e0b;           / Borde ámbar sólido /
+    color: #fbbf24;                      / Texto ámbar brillante /
     font-weight: 600;
     margin-top: 1rem;
     width: 100%;
@@ -203,8 +203,34 @@ body {
 }
 
 .secondary-btn.danger:hover {
-    background: #f59e0b;                /* Se vuelve sólido al pasar el ratón */
-    color: #0f172a;                     /* Texto oscuro para máximo contraste */
+    background: #f59e0b;                /* Se vuelve sólido al pasar el ratón /
+    color: #0f172a;                     /* Texto oscuro para máximo contraste /
     box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
     transform: translateY(-2px);
+} */
+
+/* Opción B: Rojo Neón - Versión Compacta */
+.secondary-btn.danger {
+    background: rgba(255, 68, 68, 0.05);
+    border: 1px solid #ff4444;           /* Borde más fino (1px) */
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.75rem;                  /* Fuente más pequeña */
+    font-weight: 700;
+    
+    margin: 1rem auto;                   /* Centrado con margen */
+    display: block;                      /* Necesario para centrar con auto */
+    width: fit-content;                  /* Solo ocupa lo que mide el texto */
+    padding: 0.5rem 1.2rem;              /* Mucho más estrecho */
+    
+    border-radius: 8px;                  /* Esquinas un poco menos redondeadas */
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.secondary-btn.danger:hover {
+    background: #ff4444;
+    box-shadow: 0 0 12px rgba(255, 68, 68, 0.4);
+    transform: translateY(-1px);         /* Elevación muy sutil */
 }
