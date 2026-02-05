@@ -59,6 +59,7 @@ async function updateUI(connected) {
 
         //-- Tarjeta de estado: Ahora pertenece a la clase connected
         statusCard.classList.add('connected');
+        log("Conexion OK!", "success");
 
         //-- Actualizar textos
         statusText.textContent = "Estado: Activo";
@@ -99,6 +100,20 @@ async function updateUI(connected) {
     }
 }
 
+function log(message, type = 'default') {
+    const consoleElem = document.getElementById('console-log');
+    const entry = document.createElement('span');
+    entry.classList.add('log-entry', type);
+    
+    const time = new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    entry.textContent = `[${time}] ${message}`;
+    
+    consoleElem.appendChild(entry);
+    
+    // Auto-scroll al final
+    consoleElem.scrollTop = consoleElem.scrollHeight;
+}
+
 async function handleConnectionError(err) {
     statusCard.classList.add('error-active');
     const isLinux = (navigator.userAgentData?.platform === 'Linux') || 
@@ -107,6 +122,7 @@ async function handleConnectionError(err) {
     let title = "Error de conexión";
     let message = err.message;
     let solution = "";
+    log(`ERROR: ${err.message}`, "error");
 
     // ESCENARIO A: Permisos de sistema (udev)
     // Suele ocurrir en device.open() y devuelve SecurityError
@@ -161,6 +177,7 @@ async function handleReset() {
         resetBtn.textContent = "Reseteando...";
 
         // 1. Bajamos CRESET (Inicia el reset de la FPGA)
+        log("Iniciando pulso de Reset (Bit 7)...", "system");
         await ftdi.setResetPin(device, false);
         
         // 2. Esperamos 100ms (tiempo de seguridad)
@@ -170,9 +187,12 @@ async function handleReset() {
         await ftdi.setResetPin(device, true);
 
         statusText.textContent = "✅ FPGA Reiniciada";
+        log("Reset completado. Pin CRESET liberado.", "success");
+
     } catch (err) {
         console.error("Error en reset:", err);
         statusText.textContent = "❌ Fallo al resetear";
+        log(`ERROR: ${err.message}`, "error");
     } finally {
         setTimeout(() => {
             resetBtn.disabled = false;
@@ -192,6 +212,7 @@ if (checkCompatibility()) {
 
     //-- 2. Configurar el botón de conexión
     connectBtn.addEventListener('click', async () => {
+        log("Intentando conectar con Alhambra-II...", "system");
         try {
 
             //-- Boton PULSADO: Conectar al dispositivo FTDI
@@ -214,6 +235,7 @@ if (checkCompatibility()) {
         if (device && event.device === device) {
             device = null;
             updateUI(false);
+            log("Conexión cerrada por el usuario.", "system");
         }
     });
 }
