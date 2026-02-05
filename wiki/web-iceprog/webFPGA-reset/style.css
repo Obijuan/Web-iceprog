@@ -273,3 +273,52 @@ body {
     box-shadow: 0 0 12px rgba(255, 68, 68, 0.4);
     transform: translateY(-1px);         /* Elevación muy sutil */
 }
+
+/*------------------------------------- */
+/* -- Estilos para la consola de log -- */ 
+/*------------------------------------- */
+.console-wrapper {
+    margin-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1rem;
+}
+
+.console-log {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    height: 100px;
+    padding: 0.8rem;
+    overflow-y: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 0.7rem;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+/* Tipos de mensajes */
+.log-entry { 
+    color: #cbd5e1; 
+}
+ /* General */
+.log-entry.system { 
+    color: #38bdf8; 
+}
+/* Conexión/Sincronización */
+.log-entry.success { 
+    color: #4ade80; 
+}
+/* Reset exitoso */
+.log-entry.error { 
+    color: #fb7185; 
+} /* Fallos */
+
+/* Scrollbar minimalista para el log */
+.console-log::-webkit-scrollbar {
+     width: 4px; 
+}
+.console-log::-webkit-scrollbar-thumb { 
+    background: rgba(255, 255, 255, 0.2); 
+    border-radius: 10px; 
+}
