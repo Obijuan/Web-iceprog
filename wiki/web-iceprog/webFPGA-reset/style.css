@@ -76,14 +76,45 @@ body {
 /* ---------------------------------- */
 /* -- Estilo del panel principal   -- */
 /* ---------------------------------- */
+/* Modificación del contenedor base */
 .glass-container {
     background: var(--glass);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.1);
-    padding: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 24px;
-    width: 350px;
-    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    padding: 2rem;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    
+    /* Añadimos esto para asegurar que no se pegue al borde pero use el espacio */
+    margin: 1rem; 
+    transition: all 0.3s ease;
+}
+
+/* --- AJUSTES PARA MÓVIL --- */
+@media (max-width: 480px) {
+    body {
+        padding: 0.5rem; /* Reducimos el margen del cuerpo */
+        align-items: flex-start; /* Opcional: que empiece arriba en lugar de centrado */
+        padding-top: 2rem;
+    }
+
+    .glass-container {
+        margin: 0;           /* Eliminamos el margen exterior */
+        width: 100%;         /* Que ocupe todo el ancho disponible */
+        padding: 1.5rem 1rem; /* Reducimos padding interno para ganar espacio */
+        border-radius: 16px; /* Esquinas un poco más cerradas para aprovechar bordes */
+    }
+    
+    h1 {
+        font-size: 1.5rem;   /* Título un poco más pequeño para que no rompa línea */
+    }
+
+    .primary-btn, .secondary-btn {
+        padding: 1.2rem;     /* Botones más grandes (más fáciles de tocar con el dedo) */
+        font-size: 1rem;
+    }
 }
 
 
