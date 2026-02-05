@@ -277,30 +277,76 @@ body {
 /*------------------------------------- */
 /* -- Estilos para la consola de log -- */ 
 /*------------------------------------- */
-.console-wrapper {
-    margin-top: 1.5rem;
+
+.console-section {
+    margin-top: 1rem;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding-top: 1rem;
 }
 
-.console-log {
-    background: rgba(0, 0, 0, 0.4);
-    border-radius: 8px;
-    height: 100px;
+
+.toggle-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    width: 100%;
+    padding: 0.8rem 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+
+.console-wrapper {
+    display: grid;
+    grid-template-rows: 0fr; /* Plegado */
+    transition: grid-template-rows 0.3s ease-out;
+}
+
+/* 5. Estado cuando está abierto */
+.console-wrapper.expanded .console-log {
+    height: 120px; /* Altura fija para forzar el scroll si hay muchos mensajes */
     padding: 0.8rem;
-    overflow-y: auto;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.console-wrapper.expanded {
+    grid-template-rows: 1fr; /* Desplegado */
+}
+
+/* 4. La "caja" del log (El interior) */
+.console-log {
+    min-height: 0; /* CRUCIAL: permite que el contenido se colapse */
+    overflow-y: auto; /* Habilita el scroll vertical */
+    display: flex;
+    flex-direction: column; /* Mensajes uno debajo de otro */
+    gap: 4px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
     font-family: 'Courier New', monospace;
     font-size: 0.7rem;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    border: 1px solid rgba(0, 0, 0, 0.2);
+    padding: 0; /* Se ajustará cuando se expanda */
+    transition: padding 0.3s, margin 0.3s;
 }
 
-/* Tipos de mensajes */
-.log-entry { 
-    color: #cbd5e1; 
+/* 5. Estado cuando está abierto */
+.console-wrapper.expanded .console-log {
+    height: 120px; /* Altura fija para forzar el scroll si hay muchos mensajes */
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+/* 6. Estilo de los mensajes */
+.log-entry {
+    display: block;
+    word-break: break-all;
+    line-height: 1.2;
+}
+
+
  /* General */
 .log-entry.system { 
     color: #38bdf8; 
@@ -314,11 +360,17 @@ body {
     color: #fb7185; 
 } /* Fallos */
 
-/* Scrollbar minimalista para el log */
-.console-log::-webkit-scrollbar {
-     width: 4px; 
-}
+
+/* 
+
 .console-log::-webkit-scrollbar-thumb { 
     background: rgba(255, 255, 255, 0.2); 
     border-radius: 10px; 
-}
+} */
+
+
+.toggle-btn:hover { color: var(--primary); }
+
+.chevron { transition: transform 0.3s ease; }
+.toggle-btn.active .chevron { transform: rotate(180deg); }
+

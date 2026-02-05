@@ -9,7 +9,7 @@ const statusText = document.getElementById('status-text');
 const deviceName = document.getElementById('device-name');
 const actionsArea = document.getElementById('actions-area');
 
-
+log("Aplicacion iniciada...", "system");
 
 let device = null;
 
@@ -102,15 +102,20 @@ async function updateUI(connected) {
 
 function log(message, type = 'default') {
     const consoleElem = document.getElementById('console-log');
-    const entry = document.createElement('span');
+    const entry = document.createElement('div'); // Cambiado de span a div para forzar bloque
     entry.classList.add('log-entry', type);
     
-    const time = new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    entry.textContent = `[${time}] ${message}`;
+    const time = new Date().toLocaleTimeString([], { 
+        hour12: false, 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit' 
+    });
     
+    entry.textContent = `[${time}] ${message}`;
     consoleElem.appendChild(entry);
     
-    // Auto-scroll al final
+    // Auto-scroll
     consoleElem.scrollTop = consoleElem.scrollHeight;
 }
 
@@ -168,6 +173,9 @@ async function handleConnectionError(err) {
             ${solution}
         </div>
     `;
+    consoleWrapper.classList.add('expanded');
+    toggleLogBtn.classList.add('active');
+    log(`ERROR CRÍTICO: ${err.message}`, 'error');
 }
 
 async function handleReset() {
@@ -239,6 +247,25 @@ if (checkCompatibility()) {
         }
     });
 }
+
+// Selector del nuevo botón y contenedor
+const toggleLogBtn = document.getElementById('toggle-log');
+const consoleWrapper = document.getElementById('console-wrapper');
+
+toggleLogBtn.addEventListener('click', () => {
+    const isExpanded = consoleWrapper.classList.toggle('expanded');
+    toggleLogBtn.classList.toggle('active');
+    
+    // Cambiamos el texto según el estado
+    toggleLogBtn.querySelector('span').textContent = isExpanded ? 
+        "Ocultar Log" : "Ver Log de Sistema";
+    
+    // Si se expande, hacemos scroll al final automáticamente
+    if (isExpanded) {
+        const log = document.getElementById('console-log');
+        log.scrollTop = log.scrollHeight;
+    }
+});
 
 
 
