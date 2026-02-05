@@ -286,5 +286,18 @@ toggleLogBtn.addEventListener('click', () => {
     }
 });
 
+const clearLogBtn = document.getElementById('clear-log');
+
+clearLogBtn.addEventListener('click', (e) => {
+    // Evitamos que el clic se propague al toggle si estuvieran solapados
+    e.stopPropagation();
+    
+    const consoleLog = document.getElementById('console-log');
+    consoleLog.innerHTML = ''; 
+    
+    // Opcional: dejamos un mensaje indicando que se ha limpiado
+    log("Consola limpia.", "system");
+});
+
 
 

@@ -361,16 +361,40 @@ body {
 } /* Fallos */
 
 
-/* 
-
-.console-log::-webkit-scrollbar-thumb { 
-    background: rgba(255, 255, 255, 0.2); 
-    border-radius: 10px; 
-} */
-
-
 .toggle-btn:hover { color: var(--primary); }
 
 .chevron { transition: transform 0.3s ease; }
 .toggle-btn.active .chevron { transform: rotate(180deg); }
+
+.console-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 0.5rem;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.icon-btn:hover {
+    color: #fb7185; /* Un tono rojizo suave para indicar "borrar" */
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Ajustamos el toggle-btn para que no ocupe todo el ancho ahora que hay otro botón */
+.toggle-btn {
+    flex-grow: 1;
+    justify-content: flex-start; /* Alineado a la izquierda */
+    padding-left: 0.5rem;
+}
+
 
