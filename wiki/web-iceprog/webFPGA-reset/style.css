@@ -126,20 +126,28 @@ body {
 
 /* Estilo de los botones principales */
 .primary-btn {
+    background: var(--primary);
+    color: #0f172a; /* Texto oscuro para contraste */
+    border: none;
     width: 100%;
     padding: 1rem;
     border-radius: 12px;
-    border: none;
-    background: var(--primary);
-    color: var(--bg);
     font-weight: 700;
     cursor: pointer;
-    transition: transform 0.2s;
+    transition: all 0.3s ease;
+    margin-bottom: 0.5rem;
 }
 
-/* Darle movimiento a los botones principales al pasar por encima */
-.primary-btn:hover { 
-    transform: translateY(-2px); 
+.primary-btn:hover {
+    filter: brightness(1.2);
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+    transform: translateY(-2px);
+}
+
+.primary-btn:disabled {
+    background: #475569;
+    cursor: not-allowed;
+    transform: none;
 }
 
 /* Estilo para oculatar los elementos */

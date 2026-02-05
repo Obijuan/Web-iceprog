@@ -75,6 +75,13 @@ async function updateUI(connected) {
         `;
         document.getElementById('disconnect-btn').onclick = performDisconnect;
 
+        // Insertamos el botón de Reset ANTES del de desconectar
+        const resetBtnHTML = `<button id="reset-btn" class="primary-btn">Resetear FPGA</button>`;
+        actionsArea.insertAdjacentHTML('afterbegin', resetBtnHTML);
+        
+        document.getElementById('reset-btn').onclick = handleReset;
+        document.getElementById('disconnect-btn').onclick = performDisconnect;
+
 
     } else {
         //-- Tarjeta de estado: Ya no pertenece a la clase connected
@@ -82,7 +89,7 @@ async function updateUI(connected) {
 
         //-- Actualizar textos
         statusText.textContent = "Estado: Desconectado";
-        deviceName.textContent = "Placa no encontrada";
+        deviceName.textContent = "Placa no conectada";
 
         //-- Mostrar el botón de conexión 
         connectBtn.classList.remove('hidden');
@@ -145,6 +152,34 @@ async function handleConnectionError(err) {
             ${solution}
         </div>
     `;
+}
+
+async function handleReset() {
+    const resetBtn = document.getElementById('reset-btn');
+    try {
+        resetBtn.disabled = true;
+        resetBtn.textContent = "Reseteando...";
+
+        // 1. Bajamos CRESET (Inicia el reset de la FPGA)
+        await ftdi.setResetPin(device, false);
+        
+        // 2. Esperamos 100ms (tiempo de seguridad)
+        await new Promise(r => setTimeout(r, 100));
+        
+        // 3. Subimos CRESET (La FPGA arranca de nuevo)
+        await ftdi.setResetPin(device, true);
+
+        statusText.textContent = "✅ FPGA Reiniciada";
+    } catch (err) {
+        console.error("Error en reset:", err);
+        statusText.textContent = "❌ Fallo al resetear";
+    } finally {
+        setTimeout(() => {
+            resetBtn.disabled = false;
+            resetBtn.textContent = "Resetear FPGA";
+            statusText.textContent = "Estado: Activo";
+        }, 800);
+    }
 }
 
 //-----------------------------------------------------
