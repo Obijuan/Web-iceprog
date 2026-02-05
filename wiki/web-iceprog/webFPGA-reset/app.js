@@ -158,7 +158,7 @@ async function handleConnectionError(err) {
             message = "El módulo 'ftdi_sio' está bloqueando la placa.";
             solution = `
                 <p>Ejecuta este comando para liberarla:</p>
-                <code>sudo modprobe -r ftdi_sio</code>d
+                <code>sudo modprobe -r ftdi_sio</code>
             `;
         } else {
             message = "La placa está siendo usada por otro programa.";
@@ -180,35 +180,54 @@ async function handleConnectionError(err) {
 
 async function handleReset() {
     const resetBtn = document.getElementById('reset-btn');
+    
+    if (!device || !device.opened) {
+        log("Error: Dispositivo no inicializado.", "error");
+        return;
+    }
+
     try {
         resetBtn.disabled = true;
-        resetBtn.textContent = "Reseteando...";
+        resetBtn.textContent = "Verificando...";
+        log("--- Iniciando secuencia de Reset ---", "system");
 
-        // 1. Bajamos CRESET (Inicia el reset de la FPGA)
-        log("Iniciando pulso de Reset (Bit 7)...", "system");
+        // 2. Ejecutar Reset (CRESET_B es Bit 7)
+        log("Bajando CRESET (Reset activado)...", "system");
         await ftdi.setResetPin(device, false);
         
-        // 2. Esperamos 100ms (tiempo de seguridad)
+        // Espera de 100ms para asegurar que la FPGA detecta el flanco
         await new Promise(r => setTimeout(r, 100));
         
-        // 3. Subimos CRESET (La FPGA arranca de nuevo)
+        log("Subiendo CRESET (Liberando FPGA)...", "system");
         await ftdi.setResetPin(device, true);
 
+        // 3. Feedback final
+        log("Reset completado con éxito.", "success");
         statusText.textContent = "✅ FPGA Reiniciada";
-        log("Reset completado. Pin CRESET liberado.", "success");
 
     } catch (err) {
-        console.error("Error en reset:", err);
-        statusText.textContent = "❌ Fallo al resetear";
-        log(`ERROR: ${err.message}`, "error");
+        log(`FALLO: ${err.message}`, "error");
+        statusText.textContent = "❌ Error de Hardware";
+        
+        // Si el fallo es de conexión, limpiamos el estado de la app
+        if (err.message.includes("hardware no responde") || err.name === 'NetworkError') {
+            performDisconnect();
+        }
     } finally {
+        // Restauramos el botón tras un segundo
         setTimeout(() => {
-            resetBtn.disabled = false;
-            resetBtn.textContent = "Resetear FPGA";
-            statusText.textContent = "Estado: Activo";
+            if (device) {
+                resetBtn.disabled = false;
+                resetBtn.textContent = "Resetear FPGA";
+                statusText.textContent = "Estado: Activo";
+            }
         }, 800);
     }
 }
+
+
+
+
 
 //-----------------------------------------------------
 //-- MAIN: Punto de entrada
