@@ -588,20 +588,7 @@ btn_usb.onclick = async () => {
   await device.selectConfiguration(1);
   await device.claimInterface(0);
   
-  //-- Init the FTDI
   await mpsse_init(device);
-  console.log("✅ MPSSE: INIT: OK!")
-
-  //-- Test: Read FTDI chip id
-  await ftdi_read_chipid(device);
-  
-  let cdone = await get_cdone();
-  console.log("Cdone: " + (cdone ? "high" : "low"));
-
-  await flash_release_reset();
-  await sleep(100);
-
-  //------- Test Mode
   await test_mode();
 }
 
