@@ -372,21 +372,6 @@ async function flash_read_id()
   //console.log("FLASH: READ-ID. STOP!");
 }
 
-//-- FTDI: Reset cmd
-async function ftdi_reset(device) {
-
-  let result = await device.controlTransferOut({
-    requestType: 'vendor',
-    recipient: 'device',
-    request: SIO_RESET_REQUEST,
-    value: SIO_RESET_SIO,
-    index: INTERFACE_A
-  });
-  
-  //console.log("Reset: " + result.status);
-  console.assert (result.status == "ok", "Error resetting the FTDI");
-}
-
 // ----------------------------------------------------
 
 async function mpsse_init(device) {
