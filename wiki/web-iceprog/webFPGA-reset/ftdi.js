@@ -6,7 +6,7 @@
 const FTDI_VID = 0x0403;  //-- Vendor ID de FTDI
 const INTERFACE_A   = 1;  //-- Interfaz A (SPI)
 const SIO_RESET_SIO = 0;
-const BITMODE_MPSSE  = 0x02;
+const BITMODE_MPSSE = 0x02;
 
 //-- END_POINTS
 const OUT_EP = 0x02; //-- Transfering data from host to device (writing)
@@ -26,6 +26,7 @@ const SIO_READ_EEPROM_REQUEST = 0x90
 //-- Comandos FTDI del modo MPSSE
 const MC_TCK_D5 = 0x8B;      // Enable /5 div, backward compat to FT2232D
 const MC_SET_CLK_DIV = 0x86; // Set clock divisor
+const MC_SETB_LOW = 0x80;    // Set Data bits LowByte
 const MC_READB_LOW = 0x81;   // Read Data bits LowByte
 
 //--------------- Comandos de la flash (enviados por el SPI del FTDI)
@@ -197,6 +198,25 @@ async function ftdi_set_bitmode(device, bitmask, mode) {
   });
 }
 
+//--------------------------------------------------------
+//-- Establecer el valor de los pines gpio del FTDI
+//--
+//-- ENTRADAS:
+//--   - gpio: Valor a sacar por los pines
+//--   - direction: Mascara para indicar los pines de salida
+//--     - Bits 1: Salidas
+//--     - Bits 0: entradas
+//--------------------------------------------------------
+async function ftdi_set_gpio(device, gpio, direction) {
+  //-- Los pines se asignan con el comando SET_BITS_LOW
+  //-- Formato: [Comando, Valor, Direccion]
+ 
+   const data = new Uint8Array([MC_SETB_LOW, gpio, direction]);
+   await device.transferOut(OUT_EP, data);
+}
+
+
+
 
 
 
@@ -216,12 +236,7 @@ export async function setResetPin(device, level) {
     const direction = 0x80; // Queremos que el bit 7 sea SALIDA (1)
     const value = level ? 0x80 : 0x00; // Nivel alto (0x80) o bajo (0x00)
 
-    // Comando 0x80: SET_BITS_LOW
-    // Formato: [Comando, Valor, Dirección]
-    const data = new Uint8Array([0x80, value, direction]);
-    
-    // Enviamos al Endpoint 2 (salida de datos en el FTDI)
-    await device.transferOut(2, data);
+    await ftdi_set_gpio(device, value, direction);
 }
 
 export async function readPins(device) {
