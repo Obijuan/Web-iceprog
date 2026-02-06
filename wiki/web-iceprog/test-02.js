@@ -47,41 +47,8 @@ const btn_usb = document.getElementById('btn_usb');
 
 
 
-//-- FTDI: Purge RX buffer
-async function ftdi_purge_rx_buffer(device) {
 
-  let result = await device.controlTransferOut({
-    requestType: 'vendor',
-    recipient: 'device',
-    request: SIO_RESET_REQUEST,
-    value: SIO_RESET_PURGE_RX,
-    index: INTERFACE_A
-  });
 
-  //console.log("Purge RX: " + result.status);
-  console.assert (result.status == "ok", "Error purging RX buffer");
-}
-
-//-- FTDI: Purge TX Buffer
-async function ftdi_usb_purge_tx_buffer(device) {
-
-  let result = await device.controlTransferOut({
-    requestType: 'vendor',
-    recipient: 'device',
-    request: SIO_RESET_REQUEST,
-    value: SIO_RESET_PURGE_TX,
-    index: INTERFACE_A
-  });
-
-  //console.log("Purge TX: " + result.status);
-  console.assert (result.status == "ok", "Error purging TX buffer");
-}
-
-//-- FTDI: Purge Buffers
-async function ftdi_usb_purge_buffers(device) {
-  await ftdi_purge_rx_buffer(device);
-  await ftdi_usb_purge_tx_buffer(device);
-}
 
 //-- FTDI: Get latency timer
 async function ftdi_get_latency_timer(device) {
@@ -370,6 +337,18 @@ async function flash_read_id()
 
   console.log("✅FLASH-ID: " + flash_id_str);
   //console.log("FLASH: READ-ID. STOP!");
+}
+
+
+
+
+
+
+
+//-- FTDI: Purge Buffers
+async function ftdi_usb_purge_buffers(device) {
+  await ftdi.purge_rx_buffer(device);
+  await ftdi.purge_tx_buffer(device);
 }
 
 // ----------------------------------------------------

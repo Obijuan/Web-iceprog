@@ -132,7 +132,7 @@ export async function sio_reset(device) {
 //--------------------------------------------------------
 //-- Comando para limpiar el buffer de recepcion del FTDI
 //--------------------------------------------------------
-async function ftdi_purge_rx_buffer(device) {
+export async function purge_rx_buffer(device) {
 
   await device.controlTransferOut({
     requestType: 'vendor',
@@ -146,7 +146,7 @@ async function ftdi_purge_rx_buffer(device) {
 //--------------------------------------------------------
 //-- Comando para limpiar el buffer de transmision del FTDI
 //--------------------------------------------------------  
-async function ftdi_purge_tx_buffer(device) {
+export async function purge_tx_buffer(device) {
 
   let result = await device.controlTransferOut({
     requestType: 'vendor',
