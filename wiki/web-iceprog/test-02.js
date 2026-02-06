@@ -583,16 +583,7 @@ let queue = [];
 
 btn_usb.onclick = async () => {
 
-  const filters = [{ vendorId: 0x0403}];
-	await navigator.usb.requestDevice({ filters: filters })
-		.then((usbDevice) => {
-			device = usbDevice;
-		})
-		.catch((e) => {
-			device = null;
-			console.error("Error: " + e);
-		});
-
+  device = await ftdi.connect();
   await device.open();
   await device.selectConfiguration(1);
   await device.claimInterface(0);
