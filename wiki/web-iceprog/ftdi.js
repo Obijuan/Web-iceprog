@@ -184,7 +184,7 @@ export async function get_latency_timer(device) {
 //--------------------------------------------------------
 //-- Establecer la latencia del FTDI
 //--------------------------------------------------------
-async function ftdi_set_latency_timer(device, latency) {
+export async function set_latency_timer(device, latency) {
 
   let result = await device.controlTransferOut({
     requestType: 'vendor',

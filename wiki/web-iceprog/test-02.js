@@ -302,21 +302,6 @@ async function flash_read_id()
 }
 
 
-//-- FTDI: Set latency timer
-async function ftdi_set_latency_timer(device, latency) {
-
-  let result = await device.controlTransferOut({
-    requestType: 'vendor',
-    recipient: 'device',
-    request: SIO_SET_LATENCY_TIMER_REQUEST,
-    value: latency,
-    index: INTERFACE_A
-  });
-
-  //console.log("Set Latency: " + result.status);
-  console.assert (result.status == "ok", "Error setting latency timer");
-}
-
 // ----------------------------------------------------
 
 async function mpsse_init(device) {
@@ -328,8 +313,10 @@ async function mpsse_init(device) {
   console.log("Latency: " + latency);
 
   //-- Set latency to 1 (fastest)
-  //-- 1 is the fastest polling, it means 1 kHz polling
-  await ftdi_set_latency_timer(device, 1);
+  await ftdi.set_latency_timer(device, 1);
+
+
+
 
   // Enter MPSSE (Multi-Protocol Synchronous Serial Engine) mode.
   // Set all pins to output
