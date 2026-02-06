@@ -8,6 +8,13 @@
         {
             "type": "chrome",
             "request": "launch",
+            "name": "TEST INIT",
+            "url": "https://localhost:4443/",
+            "webRoot": "${workspaceFolder}"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
             "name": "Web-FPGA-01",
             "url": "https://localhost:4443/web-fpga-01/",
             "webRoot": "${workspaceFolder}"
