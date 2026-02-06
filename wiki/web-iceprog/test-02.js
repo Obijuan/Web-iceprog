@@ -565,15 +565,7 @@ async function test_mode()
   //console.log("cdone: " + (cdone ? "high" : "low"))
   await flash_reset();
   await flash_power_up();
-  
-  //console.log("**************************** Read flash ID..");
   await flash_read_id();
-  await flash_power_down();
-  await flash_release_reset();
-  await sleep(250);
-  cdone = await get_cdone()
-  //console.log("cdone: " + (cdone ? "high" : "low"))
-  //console.log("------>OK !!!!! -------"); 
 }
 
 //----------------- Main ---------------------
