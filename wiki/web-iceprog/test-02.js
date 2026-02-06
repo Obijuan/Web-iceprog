@@ -683,33 +683,6 @@ async function flash_read_status()
       }
   }
 
-//-- Implement flash_prog...
-async function flash_prog(addr, data, verbose)
-{
-  let n = data.byteLength;
-
- 	if (verbose)
-		console.log("prog 0x" + addr.toString(16) + " 0x" + n.toString(16));
-
-  let command = new Uint8Array(4);
-  command[0] = FC_PP;
-  command[1] = (addr >> 16);
-  command[2] = (addr >> 8);
-  command[3] = addr;
-
-	await flash_chip_select();
-	await mpsse_send_spi(command);
-	await mpsse_send_spi(data);
-	await flash_chip_deselect();
-
-	if (verbose) {
-    let str = ""
-		for (let i = 0; i < n; i++)
-			str += data[i].toString(16) + (i == n - 1 || i % 32 == 31 ? '\n' : ' ');
-    console.log(str);
-  }
-}
-
 
 //---------------------
 //-- UTILS
@@ -718,28 +691,6 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function ReadFile(file) {
-    let reader = new FileReader();
-
-    reader.onload = (e) => {
-       let contents = e.target.result;
-       console.log("Terminamos de leer");
-       return contents;
-    };
-    console.log("Vamos a comenzar a leer");
-    reader.readAsArrayBuffer(file);
-}
-
-
-function print_buffer(buff)
-{
-  let cad = "[ ";
-  for (let i=0; i<buff.byteLength; i = i + 1) {
-    cad += "0x" + buff.getUint8(i).toString(16) + " ";
-  }
-  cad += "]";
-  console.log(cad);
-}
 
 async function test_mode() 
 {
@@ -762,22 +713,10 @@ async function test_mode()
   //console.log("------>OK !!!!! -------"); 
 }
 
-
-
 //----------------- Main ---------------------
 
-
-if ('usb' in navigator == false) {
-    console.log("WEB-USB NO SOPORTADO!")
-}
-
 let device;
-
-//-- Buffer for storing incomming data from usb
 let queue = [];
-
-
-
 
 btn_usb.onclick = async () => {
 
