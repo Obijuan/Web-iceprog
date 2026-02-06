@@ -82,20 +82,19 @@ export async function initialize(device) {
     await device.claimInterface(0);
 
     //-------- Inicializacion y configuracion del FTDI (MPSEE_INIT)
-    await ftdi_sio_reset(device);
-    await ftdi_purge_rx_buffer(device);
-    await ftdi_purge_tx_buffer(device);
+    await sio_reset(device);
+    await purge_buffers(device);
 
     //-- Set latency to 1 (fastest)
     //-- 1 is the fastest polling, it means 1 kHz polling
-    await ftdi_set_latency_timer(device, 1);
+    await set_latency_timer(device, 1);
 
     //-- DEBUG! Comprobar que la latencia es efectivameente 1
-    let latency = await ftdi_get_latency_timer(device);
+    let latency = await get_latency_timer(device);
     console.assert(latency === 1, "Error al establecer latencia");
 
     //-- Configurar el modo Bit-Bang del FTDI (para controlar pines individuales)
-    await ftdi_set_bitmode(device, 0xFF, BITMODE_MPSSE);
+    await set_bitmode(device, 0xFF, BITMODE_MPSSE);
 
     //------ Enviar comandos al FTDI, por el canal de datos
     // enable clock divide by 5
@@ -115,6 +114,16 @@ export async function initialize(device) {
     let result = await device.transferIn(IN_EP, 3);
     //console.log("pins: ", result.data.getUint8(2).toString(16));
 }
+
+//-------------------------------------------------------
+// Comando para habilitar la división del reloj entre 5
+//-------------------------------------------------------
+export async function tck_d5(device)
+{
+    const data = new Uint8Array([MC_TCK_D5]);
+    await device.transferOut(OUT_EP, data);
+}
+  
 
 //---------------------------------------------------
 //-- Comando de reset del chip FTDI

@@ -282,11 +282,10 @@ async function mpsse_init(device) {
   //-- Configurar en modo SPI
   await ftdi.set_bitmode(device, 0xFF, BITMODE_MPSSE);
 
-
-
-  
   // enable clock divide by 5
-  await mpsse_send_byte(MC_TCK_D5);
+  await ftdi.tck_d5(device)
+
+
 
   // set 6 MHz clock
   await mpsse_send_byte(MC_SET_CLK_DIV);
