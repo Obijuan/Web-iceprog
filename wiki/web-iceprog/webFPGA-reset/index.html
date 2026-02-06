@@ -41,11 +41,16 @@
                 </div>
             </div>
 
-            <!-- Botón de conectar PLACA -->
-            <button id="connect-btn" class="primary-btn">Conectar</button>
-
-
-            <div id="actions-area" class="actions"></div>
+            <div id="actions-area" class="actions-area">
+                <button id="connect-btn" class="primary-btn">Conectar</button>
+                <button id="reset-btn" class="primary-btn hidden">Reset FPGA</button>
+                <button id="flash-id-btn" class="primary-btn hidden" style="background: #a855f7;">
+                    Identificar Flash
+                </button>
+                <button id="disconnect-btn" class="secondary-btn danger hidden">
+                    ✕ Desconectar
+                </button>
+            </div>
 
             <div class="console-section">
                 <div class="console-header">

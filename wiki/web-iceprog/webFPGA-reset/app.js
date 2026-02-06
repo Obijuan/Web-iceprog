@@ -3,15 +3,27 @@ import * as ftdi from './ftdi.js';
 //-- Elementos de Interfaz
 const mainApp = document.getElementById('main-app');
 const noSupport = document.getElementById('no-support');
-const connectBtn = document.getElementById('connect-btn');
 const statusCard = document.getElementById('status-card');
 const statusText = document.getElementById('status-text');
 const deviceName = document.getElementById('device-name');
 const actionsArea = document.getElementById('actions-area');
 
+// Referencias a los botones
+const connectBtn = document.getElementById('connect-btn');
+const resetBtn = document.getElementById('reset-btn');
+const flashBtn = document.getElementById('flash-id-btn');
+const disconnectBtn = document.getElementById('disconnect-btn');
+
 log("Aplicacion iniciada...", "system");
 
 let device = null;
+
+
+// Asignamos los eventos una sola vez al cargar el script
+flashBtn.onclick = handleCheckFlash;
+resetBtn.onclick = handleReset;
+disconnectBtn.onclick = performDisconnect;
+
 
 // -----------------------------------------------------
 //-- Comprobar si el navegador soporta WebUSB
@@ -50,7 +62,7 @@ async function performDisconnect() {
 //-- ENTRADA:
 //--   connected: true si el dispositivo está conectado
 //-----------------------------------------------------
-async function updateUI(connected) {
+function updateUI(connected) {
 
     //-- Limpiar el estado de error
     statusCard.classList.remove('error-active'); 
@@ -62,32 +74,16 @@ async function updateUI(connected) {
         log("Conexion OK!", "success");
 
         //-- Actualizar textos
-        statusText.textContent = "Estado: Activo";
+        statusText.textContent = "Estado: Conectad";
         deviceName.textContent = device.productName || "Alhambra-II";
 
         //-- Ocultar el botón de conexión
         connectBtn.classList.add('hidden');
 
-        // Creamos el botón de desconectar en el área de acciones
-        actionsArea.innerHTML = `
-        <button id="disconnect-btn" class="secondary-btn danger">
-            ✕ Desconectar
-        </button>
-        `;
-        document.getElementById('disconnect-btn').onclick = performDisconnect;
-
-        // Insertamos el botón de Reset ANTES del de desconectar
-        const resetBtnHTML = `<button id="reset-btn" class="primary-btn">Resetear FPGA</button>`;
-        actionsArea.insertAdjacentHTML('afterbegin', resetBtnHTML);
-        
-        document.getElementById('reset-btn').onclick = handleReset;
-        document.getElementById('disconnect-btn').onclick = performDisconnect;
-
-        //-- Insertar el boton de identificación de la flash
-        const flashBtnHTML = `<button id="flash-id-btn" class="primary-btn" style="background: #a855f7;">Identificar Flash</button>`;
-        actionsArea.insertAdjacentHTML('afterbegin', flashBtnHTML);
-        document.getElementById('flash-id-btn').onclick = handleCheckFlash;
-
+        //-- Mostrar el resto de botones de interfaz
+        resetBtn.classList.remove('hidden');
+        flashBtn.classList.remove('hidden');
+        disconnectBtn.classList.remove('hidden');
 
     } else {
         //-- Tarjeta de estado: Ya no pertenece a la clase connected
@@ -100,10 +96,13 @@ async function updateUI(connected) {
         //-- Mostrar el botón de conexión 
         connectBtn.classList.remove('hidden');
 
-        // Limpiamos botones cuando no hay conexión
-        actionsArea.innerHTML = ""; 
+        //-- Ocultar los otros botones
+        resetBtn.classList.add('hidden');
+        flashBtn.classList.add('hidden');
+        disconnectBtn.classList.add('hidden');
     }
 }
+
 
 function log(message, type = 'default') {
     const consoleElem = document.getElementById('console-log');
