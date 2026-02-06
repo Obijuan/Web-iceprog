@@ -338,8 +338,25 @@ async function handleCheckFlash() {
         log("Preparando bus SPI (FPGA en Reset)...", "system");
         
         // 1. Mantenemos la FPGA en reset para liberar el bus SPI
-        await ftdi.setResetPin(device, false);
+        await ftdi.FPGA_reset_assert(device)
         await new Promise(r => setTimeout(r, 50));
+
+        //--------------------------------- TEST. Hacer las pruebas aquí....
+        console.log("Pruebas...")
+        ftdi.FLASH_release_power_down(device)
+
+        //-- Esperar 1ms a que la flash despierte
+        await new Promise(r => setTimeout(r, 1));
+
+        //-- Leer el flash ID
+        ftdi.FLASH_read_id(device)
+
+
+
+
+        //-- TEST: Activar el cs de la flash
+        await ftdi.FLASH_cs_assert(device)
+        await new Promise(r => setTimeout(r, 2000));
 
         // 2. Leemos el ID
         const id = await ftdi.readFlashID(device);
@@ -356,7 +373,8 @@ async function handleCheckFlash() {
         log("Error al identificar Flash: " + err.message, "error");
     } finally {
         // 4. Liberamos la FPGA para que vuelva a su estado normal
-        await ftdi.setResetPin(device, true);
+        //await ftdi.setResetPin(device, true);
+        await ftdi.FPGA_reset_deassert(device)
     }
 }
 

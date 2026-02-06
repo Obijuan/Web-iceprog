@@ -20,22 +20,28 @@ const SIO_RESET_PURGE_TX = 2;  //-- Limpiar buffer TX
 const SIO_GET_LATENCY_TIMER_REQUEST = 0x0A;
 const SIO_SET_LATENCY_TIMER_REQUEST = 0x09;
 const SIO_SET_BITMODE_REQUEST = 0x0B;
-const SIO_READ_EEPROM_REQUEST = 0x90
+const SIO_READ_EEPROM_REQUEST = 0x90;
 
 
 //-- Comandos FTDI del modo MPSSE
-const MC_TCK_D5 = 0x8B;      // Enable /5 div, backward compat to FT2232D
-const MC_SET_CLK_DIV = 0x86; // Set clock divisor
-const MC_SETB_LOW = 0x80;    // Set Data bits LowByte
-const MC_READB_LOW = 0x81;   // Read Data bits LowByte
+const MC_SETB_LOW    = 0x80;   // Set Data bits LowByte
+const MC_READB_LOW   = 0x81;   // Read Data bits LowByte
+const MC_SET_CLK_DIV = 0x86;   // Set clock divisor
+const MC_TCK_D5      = 0x8B;   // Enable /5 div, backward compat to FT2232D
+const FTDI_SPI_WRITE = 0x31;
+
 
 //--------------- Comandos de la flash (enviados por el SPI del FTDI)
 //-- Leer el ID de la flash (3 bytes: fabricante, tipo, capacidad)
+const FLASH_RPD     = 0xAB;  // Release Power-Down
+const FLASH_READ_ID = 0x9E;  // Leer el identificador de la flash
 const CMD_READ_ID = 0x9E;
 
+
 //-- Máscaras de acceso a los pines de los gpios del FTDI
-const FPGA_RESET_PIN = 0x80  //-- ADBUS7: Salida: Señal de reset de la FPGA
+const FPGA_RESET_PIN  = 0x80  //-- ADBUS7: Salida: Señal de reset de la FPGA
 const FPGA_CDONE_PINS = 0x40  //-- ADBUS6: Entrada: Señal cdone de la FPGA
+const FLASH_CS_PIN    = 0x10  //-- ADBUS4: Salida: Señal cs de la FLASH
 
 //--------------------------------------------------
 //-- Conectar al dispositivo FTDI via WEBUSB
@@ -273,11 +279,74 @@ export async function FPGA_get_cdone(device)
         //-- Valor a devolver
         const value = pines == 0 ? 0 : 1;
         return value
-        
+
     } else {
         throw new Error("Fallo al leer pines del FTDI");
     }
 }
+
+//----------------------------------------------------------
+//-- Activar la memoria FLASH
+//-- Ahora ya podemos leer de ella, o escribir valores
+//----------------------------------------------------------
+export async function FLASH_cs_assert(device)
+{
+   //-- El chip select de la flash está en el ADBUS 4 del FTDI (bit 4)
+   //-- Logica negativa: El cs se activa poniendo a 0 el pin
+    await ftdi_set_gpio(device, 0, FLASH_CS_PIN);
+}
+
+//----------------------------------------------------------
+//-- Desactivar la memoria FLASH
+//----------------------------------------------------------
+export async function FLASH_cs_deassert(device)
+{
+    await ftdi_set_gpio(device, FLASH_CS_PIN, FLASH_CS_PIN);
+}
+
+//-------------------------------------------------------------
+//-- Sacar la flash del modo sleep (power_down)
+//-- Es necesario enviar este comando a la flash antes de hacer
+//-- cualquier otra cosa
+//--------------------------------------------------------------
+export async function FLASH_release_power_down(device)
+{
+    
+    //-- Activar el chip select de la flash
+    await FLASH_cs_assert(device)
+
+    //-- Enviar comando release-power-down a la flash
+    //-- Los 3 primeros bytes son para que el FTDI mande por el SPI
+    //-- un único byte
+    //-- [cmd ftdi, byte bajo (tamaño-1), byte alto (tamaño-1)]
+    const data = new Uint8Array([FTDI_SPI_WRITE, 0x00, 0x00, FLASH_RPD]);
+    await device.transferOut(OUT_EP, data);
+
+    //-- Debug: Leer respuesta al comando
+    //-- Deben ser 3 bytes
+    let result = await device.transferIn(IN_EP, 3);
+
+    //-- Obtener la cadena con los 3 bytes en hexadecimal e imprimirla!
+    const cad = Array.from(new Uint8Array(result.data.buffer, result.data.byteOffset, result.data.byteLength))
+                     .map(byte => byte.toString(16).toUpperCase().padStart(2, '0'))
+                     .join(' ');
+    console.log("POWER-DOWN: " + cad)
+
+    //-- Desactivar el chip select de la flash
+    await FLASH_cs_deassert(device)
+}
+
+//--------------------------------------------------------
+//-- Leer el identificador de la flash 
+//--------------------------------------------------------
+export async function FLASH_read_id(device)
+{
+    await FLASH_cs_assert(device)
+    const data = new Uint8Array([FTDI_SPI_WRITE, 0x00, 0x00, FLASH_RPD]);
+}
+
+
+
 
 //----------------------------------------------------------
 //-- Enviar un byte al FTDI (usado para comandos MPSSE)
