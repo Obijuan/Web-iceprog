@@ -3,7 +3,6 @@ import * as ftdi from './ftdi.js';
 
 // FTDI USB identifiers
 const BITMODE_MPSSE  = 0x02;
-const INTERFACE_A   = 1;
 
 /* Mode commands */
 const	MC_SETB_LOW = 0x80;    // Set Data bits LowByte
@@ -22,19 +21,8 @@ const MC_DATA_BITS = 0x02 // When set count bits not bytes
 // Flash command definitions
 // This command list is based on the Winbond W25Q128JV Datasheet
 
-const FC_WE = 0x06;  // Write Enable
 const FC_RPD = 0xAB; // Release Power-Down, returns Device ID
 const FC_JEDECID = 0x9F; // Read JEDEC ID
-
-//-- Request
-const SIO_RESET_REQUEST = 0;  //-- Reset the port
-const SIO_SET_LATENCY_TIMER_REQUEST = 0x09;
-const SIO_GET_LATENCY_TIMER_REQUEST = 0x0A;
-const SIO_SET_BITMODE_REQUEST = 0x0B;
-
-const SIO_RESET_SIO = 0;
-const SIO_RESET_PURGE_RX = 1;
-const SIO_RESET_PURGE_TX = 2;
 
 //-- Important information
 // ftdi->interface = 0;
@@ -43,29 +31,6 @@ const IN_EP = 0x02; //-- Endpoint for transfering data from host to device
 const OUT_EP = 0x01; //-- Endpoint!  0x81
 
 const btn_usb = document.getElementById('btn_usb');
-
-
-
-
-//-- FTDI: Set Bitmode
-async function ftdi_set_bitmode(device, bitmask, mode) {
-
-  //-- Calculate the value to sent to the FTDI
-  let usb_val = (mode << 8) | bitmask;  //-- Low byte: bitmask
-
-  let result = await device.controlTransferOut({
-    requestType: 'vendor',
-    recipient: 'device',
-    request: SIO_SET_BITMODE_REQUEST,
-    value: usb_val,
-    index: INTERFACE_A
-  });
-
-  //console.log("Set Bitmode: " + result.status + 
-  //            " -> Written: " + usb_val.toString(16));
-  console.assert (result.status == "ok", "Error setting bitmode");
-}
-
 
 //----- FTDI: Write_data
 //-- Escribir un buffer en el FTDI
@@ -301,7 +266,6 @@ async function flash_read_id()
   //console.log("FLASH: READ-ID. STOP!");
 }
 
-
 // ----------------------------------------------------
 
 async function mpsse_init(device) {
@@ -315,13 +279,12 @@ async function mpsse_init(device) {
   //-- Set latency to 1 (fastest)
   await ftdi.set_latency_timer(device, 1);
 
+  //-- Configurar en modo SPI
+  await ftdi.set_bitmode(device, 0xFF, BITMODE_MPSSE);
 
 
 
-  // Enter MPSSE (Multi-Protocol Synchronous Serial Engine) mode.
-  // Set all pins to output
-  await ftdi_set_bitmode(device, 0xFF, BITMODE_MPSSE);
-
+  
   // enable clock divide by 5
   await mpsse_send_byte(MC_TCK_D5);
 

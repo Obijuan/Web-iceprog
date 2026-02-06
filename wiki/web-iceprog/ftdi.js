@@ -198,7 +198,7 @@ export async function set_latency_timer(device, latency) {
 //---------------------------------------------------------------------------
 //-- Establecer el modo bitmode del FTDI (para controlar pines individuales)
 //---------------------------------------------------------------------------
-async function ftdi_set_bitmode(device, bitmask, mode) {
+export async function set_bitmode(device, bitmask, mode) {
 
   //-- Calculate the value to sent to the FTDI
   let usb_val = (mode << 8) | bitmask;  //-- Low byte: bitmask
