@@ -342,23 +342,12 @@ async function flash_read_id()
 
 
 
-
-
-
-//-- FTDI: Purge Buffers
-async function ftdi_usb_purge_buffers(device) {
-  await ftdi.purge_rx_buffer(device);
-  await ftdi.purge_tx_buffer(device);
-}
-
 // ----------------------------------------------------
 
 async function mpsse_init(device) {
 
   await ftdi.sio_reset(device);
-
-
-  await ftdi_usb_purge_buffers(device);
+  await ftdi.purge_buffers(device);
 
   let latency = await ftdi_get_latency_timer(device);
   //console.log("Latency: " + latency);

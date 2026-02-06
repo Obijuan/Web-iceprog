@@ -157,6 +157,12 @@ export async function purge_tx_buffer(device) {
   });
 }
 
+//-- FTDI: Purge Buffers
+export async function purge_buffers(device) {
+  await purge_rx_buffer(device);
+  await purge_tx_buffer(device);
+}
+
 //----------------------------------------------------------
 //-- FTDI: Get latency timer
 //----------------------------------------------------------
