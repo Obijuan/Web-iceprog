@@ -187,10 +187,6 @@ async function handleReset() {
     }
 
     try {
-        console.log("TEST2");
-        let pins = await ftdi.readPins(device);
-        console.log("Pins antes de reset: " + pins.toString(16));
-
         resetBtn.disabled = true;
         resetBtn.textContent = "Verificando...";
         log("--- Iniciando secuencia de Reset ---", "system");

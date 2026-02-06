@@ -60,8 +60,6 @@ export async function disconnect(device) {
 //--------------------------------------------------    
 export async function initialize(device) {
 
-    console.log("Debug1...")
-
     //-- Abrir dispositivo
     await device.open();
 
@@ -104,7 +102,7 @@ export async function initialize(device) {
 
     //-- Read data from the USB
     let result = await device.transferIn(IN_EP, 3);
-    console.log("pins: ", result.data.getUint8(2).toString(16));
+    //console.log("pins: ", result.data.getUint8(2).toString(16));
 }
 
 //---------------------------------------------------
@@ -225,8 +223,6 @@ export async function setResetPin(device, level) {
 }
 
 export async function readPins(device) {
-    console.log("readPins...")
-
     //-- Enviar comando
     let data = new Uint8Array([MC_READB_LOW]);
     await device.transferOut(OUT_EP, data);
@@ -234,7 +230,7 @@ export async function readPins(device) {
     //-- Leer datos del USB. Con este comando se reciben 3 bytes
     //-- El tercero es el que contiene el estado de los pines
     let result = await device.transferIn(IN_EP, 3);
-    console.log("pins: ", result.data.getUint8(2).toString(16));
+    //console.log("pins: ", result.data.getUint8(2).toString(16));
     
     if (result.status === 'ok') {
         return result.data.getUint8(2);
