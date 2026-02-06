@@ -2,14 +2,11 @@ import * as ftdi from './ftdi.js';
 
 
 // FTDI USB identifiers
-const usbVendor = 0x0403;
-const usbProduct = 0x6010;
 const BITMODE_MPSSE  = 0x02;
 const INTERFACE_A   = 1;
 
 /* Mode commands */
 const	MC_SETB_LOW = 0x80;    // Set Data bits LowByte
-const MC_READB_LOW = 0x81;   // Read Data bits LowByte
 const MC_TCK_D5 = 0x8B;      // Enable /5 div, backward compat to FT2232D
 const MC_SET_CLK_DIV = 0x86; // Set clock divisor
 
@@ -28,29 +25,12 @@ const MC_DATA_BITS = 0x02 // When set count bits not bytes
 const FC_WE = 0x06;  // Write Enable
 const FC_RPD = 0xAB; // Release Power-Down, returns Device ID
 const FC_JEDECID = 0x9F; // Read JEDEC ID
-const FC_PP = 0x02; // Page Program
-const FC_RD = 0x03; // Read Data
-const FC_PD = 0xB9; // Power-down
-const FC_RSR1 = 0x05; // Read Status Register 1
-const FC_BE64 = 0xD8; // Block Erase 64kb
 
 //-- Request
 const SIO_RESET_REQUEST = 0;  //-- Reset the port
-// #define SIO_SET_BAUDRATE_REQUEST      SIO_SET_BAUD_RATE
-// #define SIO_SET_DATA_REQUEST          SIO_SET_DATA
-// #define SIO_SET_FLOW_CTRL_REQUEST     SIO_SET_FLOW_CTRL
-// #define SIO_SET_MODEM_CTRL_REQUEST    SIO_MODEM_CTRL
-// #define SIO_POLL_MODEM_STATUS_REQUEST 0x05
-// #define SIO_SET_EVENT_CHAR_REQUEST    0x06
-// #define SIO_SET_ERROR_CHAR_REQUEST    0x07
 const SIO_SET_LATENCY_TIMER_REQUEST = 0x09;
 const SIO_GET_LATENCY_TIMER_REQUEST = 0x0A;
 const SIO_SET_BITMODE_REQUEST = 0x0B;
-// #define SIO_READ_PINS_REQUEST         0x0C
-const SIO_READ_EEPROM_REQUEST = 0x90
-// #define SIO_WRITE_EEPROM_REQUEST      0x91
-// #define SIO_ERASE_EEPROM_REQUEST      0x92
-
 
 const SIO_RESET_SIO = 0;
 const SIO_RESET_PURGE_RX = 1;
@@ -63,10 +43,7 @@ const IN_EP = 0x02; //-- Endpoint for transfering data from host to device
 const OUT_EP = 0x01; //-- Endpoint!  0x81
 
 const btn_usb = document.getElementById('btn_usb');
-const display = document.getElementById('display');
-const btn_list = document.getElementById('btn_list');
-const btn_close = document.getElementById('btn_close');
-const bitstream = document.getElementById('bitstream');
+
 
 //-- FTDI: Reset cmd
 async function ftdi_reset(device) {
@@ -173,65 +150,6 @@ async function ftdi_set_bitmode(device, bitmask, mode) {
   console.assert (result.status == "ok", "Error setting bitmode");
 }
 
-function ftdi_read_chipid_shift(value)
-{
-    return ((value & 1) << 1) |
-           ((value & 2) << 5) |
-           ((value & 4) >> 2) |
-           ((value & 8) << 4) |
-           ((value & 16) >> 1) |
-           ((value & 32) >> 1) |
-           ((value & 64) >> 4) |
-           ((value & 128) >> 2);
-}
-
-//-- FTDI: Read Chip ID
-async function ftdi_read_chipid(device) {
-
-  let result = await device.controlTransferIn({
-    requestType: 'vendor',
-    recipient: 'device',
-    request: SIO_READ_EEPROM_REQUEST,
-    value: 0,
-    index: 0x43
-  }, 2);
-
-  // console.log("Read: " + result.status +
-  // " -> Bytes: " + result.data.byteLength +
-  // ", Value: " + result.data.getUint16(0)
-  // );
-
-  let a = result.data.getUint16(0);
-  //console.log("a: " + a.toString(16));
-
-  a = a << 8 | a >> 8;
-
-  result = await device.controlTransferIn({
-    requestType: 'vendor',
-    recipient: 'device',
-    request: SIO_READ_EEPROM_REQUEST,
-    value: 0,
-    index: 0x44
-  }, 2);
-
-  // console.log("Read: " + result.status +
-  // " -> Bytes: " + result.data.byteLength +
-  // ", Value: " + result.data.getUint16(0)
-  // );
-
-  let b = result.data.getUint16(0);
-  //console.log("b: " + b.toString(16));
-
-  b = b << 8 | b >> 8;
-  a = (a << 16) | (b & 0xFFFF);
-
-  a = ftdi_read_chipid_shift(a) | ftdi_read_chipid_shift(a>>8)<<8
-      ftdi_read_chipid_shift(a>>16)<<16 | ftdi_read_chipid_shift(a>>24)<<24;
-
-  let chipid = a ^ 0xa5f0f7d1;
-
-  //console.log("Chipid: " + chipid.toString(16));
-}
 
 //----- FTDI: Write_data
 //-- Escribir un buffer en el FTDI
@@ -333,14 +251,6 @@ async function mpsse_recv_byte(device) {
 }
 
 
-//-------- MPSSE: readb_low()
-async function mpsse_readb_low(device) 
-{
-  await mpsse_send_byte(MC_READB_LOW);
-  let data = await mpsse_recv_byte(device);
-  //console.log("MPSSE: readb_low(): 0x" + data.toString(16));
-}
-
 //-------- MPSSE: set_gpio()
 async function mpsse_set_gpio(gpio, direction)
 {
@@ -392,37 +302,9 @@ async function mpsse_xfer_spi(buff)
   //console.log("MPSSE: xfer_spio. STOP!----------------")
 }
 
-//------ MPSSE: send_spi
-async function mpsse_send_spi(buff)
-{
-  //console.log("MPSSE: send_spi. START!---------")
-  if (buff.byteLength < 1)
-    return;
-
-  // Output only, update data on negative clock edge.
-  await mpsse_send_byte(MC_DATA_OUT | MC_DATA_OCN);
-  await mpsse_send_byte(buff.byteLength - 1);
-  await mpsse_send_byte((buff.byteLength - 1) >> 8);
-
-  let rc = await ftdi_write_data(device, buff);
-  //-- Todo! Check the correct number of bytes has been written....
-  //console.log("MPSSE: send_spi. STOP!---------")
-}
-
 // ---------------------------------------------------------
 // Hardware specific CS, CReset, CDone functions
-// ---------------------------------------------------------
-
-
-async function get_cdone()
-{
-  let data = await mpsse_readb_low(device);
-  let cdone = (data & 0x40) != 0;
-
-  //console.log("MPSSE: get_cdone(): " + cdone);
-  return cdone;
- }
-
+// --------------------------------------------------------
  async function set_cs_creset(cs_b, creset_b)
  {
    let gpio = 0;
@@ -447,14 +329,6 @@ async function get_cdone()
 // ---------------------------------------------------------
 // FLASH function implementations
 // ---------------------------------------------------------
-// the FPGA reset is released so also FLASH chip select should be deasserted
-async function flash_release_reset()
-{
-  //console.log("FLASH: release_reset() START!");
-  await set_cs_creset(1, 1);
-
-  //console.log("FLASH: release_reset() STOP!");
-}
 
 // FLASH chip select deassert
 async function flash_chip_deselect()
@@ -533,25 +407,6 @@ async function flash_read_id()
 
   console.log("✅FLASH-ID: " + flash_id_str);
   //console.log("FLASH: READ-ID. STOP!");
-}
-
-async function flash_power_down()
-{
-  console.log("FLASH: Power Down. START!");
-  let buff = new Uint8Array(1);
-  buff[0] = FC_PD;
-  await flash_chip_select();
-  await mpsse_xfer_spi(buff);
-  await flash_chip_deselect();
-  console.log("FLASH: Power Down. STOP!");
-}
-
-  
-//---------------------
-//-- UTILS
-//---------------------
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 
