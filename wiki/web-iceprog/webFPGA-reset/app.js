@@ -83,6 +83,11 @@ async function updateUI(connected) {
         document.getElementById('reset-btn').onclick = handleReset;
         document.getElementById('disconnect-btn').onclick = performDisconnect;
 
+        //-- Insertar el boton de identificación de la flash
+        const flashBtnHTML = `<button id="flash-id-btn" class="primary-btn" style="background: #a855f7;">Identificar Flash</button>`;
+        actionsArea.insertAdjacentHTML('afterbegin', flashBtnHTML);
+        document.getElementById('flash-id-btn').onclick = handleCheckFlash;
+
 
     } else {
         //-- Tarjeta de estado: Ya no pertenece a la clase connected
@@ -320,5 +325,31 @@ clearLogBtn.addEventListener('click', (e) => {
     log("Consola limpia.", "system");
 });
 
+async function handleCheckFlash() {
+    try {
+        log("Preparando bus SPI (FPGA en Reset)...", "system");
+        
+        // 1. Mantenemos la FPGA en reset para liberar el bus SPI
+        await ftdi.setResetPin(device, false);
+        await new Promise(r => setTimeout(r, 50));
+
+        // 2. Leemos el ID
+        const id = await ftdi.readFlashID(device);
+        
+        // 3. Verificamos si es una Micron (0x20)
+        if (id.manufacturer === 0x20) {
+            log(`Flash detectada: Micron (0x20)`, "success");
+            log(`Tipo: 0x${id.memType.toString(16)}, Capacidad: 0x${id.capacity.toString(16)}`, "success");
+        } else {
+            log(`ID desconocido: 0x${id.manufacturer.toString(16)}`, "error");
+        }
+
+    } catch (err) {
+        log("Error al identificar Flash: " + err.message, "error");
+    } finally {
+        // 4. Liberamos la FPGA para que vuelva a su estado normal
+        await ftdi.setResetPin(device, true);
+    }
+}
 
 

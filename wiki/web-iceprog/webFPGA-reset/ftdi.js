@@ -28,7 +28,9 @@ const MC_TCK_D5 = 0x8B;      // Enable /5 div, backward compat to FT2232D
 const MC_SET_CLK_DIV = 0x86; // Set clock divisor
 const MC_READB_LOW = 0x81;   // Read Data bits LowByte
 
-
+//--------------- Comandos de la flash (enviados por el SPI del FTDI)
+//-- Leer el ID de la flash (3 bytes: fabricante, tipo, capacidad)
+const CMD_READ_ID = 0x9E;
 
 
 
@@ -239,6 +241,38 @@ export async function readPins(device) {
     }
 }
 
+export async function readFlashID(device) {
+    // Para leer el ID, enviamos el comando 0x9E y esperamos 3 bytes de respuesta:
+    // 1. Manufacturer ID (Micron = 0x20)
+    // 2. Memory Type
+    // 3. Memory Capacity
+    
+    // Comando MPSSE: 0x31 (Escribir y leer bytes simultáneamente en flanco negativo/positivo)
+    // Formato: [0x31, LongitudL, LongitudH, Datos...]
+    // Queremos enviar 1 byte (0x9E) y recibir 3. 
+    // En MPSSE, para recibir datos después de enviar, a veces usamos secuencias separadas.
+    
+    // 1. Enviamos comando de escritura (0x11) para el código 0x9E
+    const writeCmd = new Uint8Array([0x11, 0x00, 0x00, CMD_READ_ID]);
+    await device.transferOut(2, writeCmd);
+
+    // 2. Enviamos comando de lectura (0x20) para 3 bytes
+    const readCmd = new Uint8Array([0x20, 0x02, 0x00]); // 0x0200 = 3 bytes (n-1)
+    await device.transferOut(2, readCmd);
+
+    // 3. Recogemos los 3 bytes + 2 de estado del modem = 5 bytes
+    const result = await device.transferIn(1, 5);
+    
+    if (result.status === 'ok' && result.data.byteLength === 5) {
+        return {
+            manufacturer: result.data.getUint8(2),
+            memType: result.data.getUint8(3),
+            capacity: result.data.getUint8(4)
+        };
+    }
+    throw new Error("No se pudo leer el ID de la Flash");
+}
+
 /*-- FTDI: Reset cmd
 async function ftdi_reset(device) {
 
@@ -254,3 +288,6 @@ async function ftdi_reset(device) {
   console.assert (result.status == "ok", "Error resetting the FTDI");
 }
 */
+
+
+
