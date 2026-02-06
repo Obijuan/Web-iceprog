@@ -1,3 +1,6 @@
+import * as ftdi from './ftdi.js';
+
+
 // FTDI USB identifiers
 const usbVendor = 0x0403;
 const usbProduct = 0x6010;
@@ -389,7 +392,7 @@ async function mpsse_xfer_spi(buff)
 
   //console.log("Rc: " + rc + ", Buff lenth: " + buff.byteLength);
 
-  for (i = 0; i < buff.byteLength; i++)
+  for (let i = 0; i < buff.byteLength; i++)
     buff[i] = await mpsse_recv_byte(device);
 
   //console.log("MPSSE: xfer_spi. Written: " + rc + " byte(s)!");
@@ -715,20 +718,6 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function ReadFile(file) {
-  return new Promise(resolve => {
-    let reader = new FileReader();
-
-    reader.onload = (e) => {
-       let contents = e.target.result;
-       console.log("Terminamos de leer");
-       resolve(contents);
-    };
-    console.log("Vamos a comenzar a leer");
-    reader.readAsArrayBuffer(file);
-  });
-}
-
 async function ReadFile(file) {
     let reader = new FileReader();
 
@@ -758,7 +747,7 @@ async function test_mode()
   //console.log("reset..")
   await flash_chip_deselect();
   await sleep(250);
-  cdone = await get_cdone()
+  let cdone = await get_cdone()
   //console.log("cdone: " + (cdone ? "high" : "low"))
   await flash_reset();
   await flash_power_up();
