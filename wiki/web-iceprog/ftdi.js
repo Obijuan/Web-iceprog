@@ -119,7 +119,7 @@ export async function initialize(device) {
 //---------------------------------------------------
 //-- Comando de reset del chip FTDI
 //---------------------------------------------------
-async function ftdi_sio_reset(device) {
+export async function sio_reset(device) {
     await device.controlTransferOut({
         requestType: 'vendor',
         recipient: 'device',

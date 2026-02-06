@@ -45,20 +45,7 @@ const OUT_EP = 0x01; //-- Endpoint!  0x81
 const btn_usb = document.getElementById('btn_usb');
 
 
-//-- FTDI: Reset cmd
-async function ftdi_reset(device) {
 
-  let result = await device.controlTransferOut({
-    requestType: 'vendor',
-    recipient: 'device',
-    request: SIO_RESET_REQUEST,
-    value: SIO_RESET_SIO,
-    index: INTERFACE_A
-  });
-  
-  //console.log("Reset: " + result.status);
-  console.assert (result.status == "ok", "Error resetting the FTDI");
-}
 
 //-- FTDI: Purge RX buffer
 async function ftdi_purge_rx_buffer(device) {
@@ -175,31 +162,7 @@ async function mpsse_send_byte(b) {
   //console.log("  -> Written: " + result.bytesWritten + ", Value: 0x" + b.toString(16));
 }
 
-//-- MPSSE: Init
-async function mpsse_init(device) {
-  //-- Initialization commands
-  await ftdi_reset(device);
-  await ftdi_usb_purge_buffers(device);
 
-  let latency = await ftdi_get_latency_timer(device);
-  //console.log("Latency: " + latency);
-
-  //-- Set latency to 1 (fastest)
-  //-- 1 is the fastest polling, it means 1 kHz polling
-  await ftdi_set_latency_timer(device, 1);
-
-  // Enter MPSSE (Multi-Protocol Synchronous Serial Engine) mode.
-  // Set all pins to output
-  await ftdi_set_bitmode(device, 0xFF, BITMODE_MPSSE);
-
-  // enable clock divide by 5
-  await mpsse_send_byte(MC_TCK_D5);
-
-  // set 6 MHz clock
-  await mpsse_send_byte(MC_SET_CLK_DIV);
-  await mpsse_send_byte(0x00);
-  await mpsse_send_byte(0x00);
-}
 
 //-------- MPSSE: mpsse_recv_byte()
 async function mpsse_recv_byte(device) {
@@ -409,6 +372,49 @@ async function flash_read_id()
   //console.log("FLASH: READ-ID. STOP!");
 }
 
+//-- FTDI: Reset cmd
+async function ftdi_reset(device) {
+
+  let result = await device.controlTransferOut({
+    requestType: 'vendor',
+    recipient: 'device',
+    request: SIO_RESET_REQUEST,
+    value: SIO_RESET_SIO,
+    index: INTERFACE_A
+  });
+  
+  //console.log("Reset: " + result.status);
+  console.assert (result.status == "ok", "Error resetting the FTDI");
+}
+
+// ----------------------------------------------------
+
+async function mpsse_init(device) {
+
+  await ftdi.sio_reset(device);
+
+
+  await ftdi_usb_purge_buffers(device);
+
+  let latency = await ftdi_get_latency_timer(device);
+  //console.log("Latency: " + latency);
+
+  //-- Set latency to 1 (fastest)
+  //-- 1 is the fastest polling, it means 1 kHz polling
+  await ftdi_set_latency_timer(device, 1);
+
+  // Enter MPSSE (Multi-Protocol Synchronous Serial Engine) mode.
+  // Set all pins to output
+  await ftdi_set_bitmode(device, 0xFF, BITMODE_MPSSE);
+
+  // enable clock divide by 5
+  await mpsse_send_byte(MC_TCK_D5);
+
+  // set 6 MHz clock
+  await mpsse_send_byte(MC_SET_CLK_DIV);
+  await mpsse_send_byte(0x00);
+  await mpsse_send_byte(0x00);
+}
 
 //----------------- Main ---------------------
 
@@ -422,7 +428,15 @@ btn_usb.onclick = async () => {
   await device.selectConfiguration(1);
   await device.claimInterface(0);
   
+
+
+
+
   await mpsse_init(device);
+
+
+
+
   await flash_reset();
   await flash_power_up();
   await flash_read_id();
