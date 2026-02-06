@@ -583,8 +583,6 @@ let queue = [];
 
 btn_usb.onclick = async () => {
 
-  //-- Solicitar al usuario la selección del dispositivo USB
-  //-- Es obligatorio (si el usuario no lo habre no se puede continuar)
   const filters = [{ vendorId: 0x0403}];
 	await navigator.usb.requestDevice({ filters: filters })
 		.then((usbDevice) => {
@@ -595,22 +593,8 @@ btn_usb.onclick = async () => {
 			console.error("Error: " + e);
 		});
 
-  //-- Abrir el dispositivo USB
-  //-- 🚧TODO🚧: Comprobacion de errores
   await device.open();
-
-  console.log("USB abierto") 
-
-  //-- Show the device on the screen
-  display.innerHTML = device.productName + " " + device.manufacturerName;
-
-  //-- Select the configuration (the FTDI chip only have 1, which value is 1)
-  //--- (given by bConfigurationValue)
   await device.selectConfiguration(1);
-  //console.log("Configuration value: " + device.configuration.configurationValue);
-
-  //-- Claim the interface
-  //-- NOTE: [LINUX]: Make sure the ftdi_sio modules has been unloaded previously!!!
   await device.claimInterface(0);
   
   //-- Init the FTDI
