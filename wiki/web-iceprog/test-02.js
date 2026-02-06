@@ -47,44 +47,6 @@ const btn_usb = document.getElementById('btn_usb');
 
 
 
-
-
-
-//-- FTDI: Get latency timer
-async function ftdi_get_latency_timer(device) {
-
-  //-- Read 1 byte from the FTDI
-  let result = await device.controlTransferIn({
-    requestType: 'vendor',
-    recipient: 'device',
-    request: SIO_GET_LATENCY_TIMER_REQUEST,
-    value: 0,
-    index: INTERFACE_A
-  }, 1);
-
-  // console.log("Get Latency: " + result.status +
-  //             " -> Bytes: " + result.data.byteLength +
-  //             ", Value: " + result.data.getUint8(0)
-  //             );
-
-  return result.data.getUint8(0);
-}
-
-//-- FTDI: Set latency timer
-async function ftdi_set_latency_timer(device, latency) {
-
-  let result = await device.controlTransferOut({
-    requestType: 'vendor',
-    recipient: 'device',
-    request: SIO_SET_LATENCY_TIMER_REQUEST,
-    value: latency,
-    index: INTERFACE_A
-  });
-
-  //console.log("Set Latency: " + result.status);
-  console.assert (result.status == "ok", "Error setting latency timer");
-}
-
 //-- FTDI: Set Bitmode
 async function ftdi_set_bitmode(device, bitmask, mode) {
 
@@ -340,7 +302,20 @@ async function flash_read_id()
 }
 
 
+//-- FTDI: Set latency timer
+async function ftdi_set_latency_timer(device, latency) {
 
+  let result = await device.controlTransferOut({
+    requestType: 'vendor',
+    recipient: 'device',
+    request: SIO_SET_LATENCY_TIMER_REQUEST,
+    value: latency,
+    index: INTERFACE_A
+  });
+
+  //console.log("Set Latency: " + result.status);
+  console.assert (result.status == "ok", "Error setting latency timer");
+}
 
 // ----------------------------------------------------
 
@@ -349,8 +324,8 @@ async function mpsse_init(device) {
   await ftdi.sio_reset(device);
   await ftdi.purge_buffers(device);
 
-  let latency = await ftdi_get_latency_timer(device);
-  //console.log("Latency: " + latency);
+  let latency = await ftdi.get_latency_timer(device);
+  console.log("Latency: " + latency);
 
   //-- Set latency to 1 (fastest)
   //-- 1 is the fastest polling, it means 1 kHz polling

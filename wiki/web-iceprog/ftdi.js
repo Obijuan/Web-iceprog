@@ -166,7 +166,7 @@ export async function purge_buffers(device) {
 //----------------------------------------------------------
 //-- FTDI: Get latency timer
 //----------------------------------------------------------
-async function ftdi_get_latency_timer(device) {
+export async function get_latency_timer(device) {
 
   //-- Read 1 byte from the FTDI
   let result = await device.controlTransferIn({
