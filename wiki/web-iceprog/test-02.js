@@ -555,19 +555,6 @@ function sleep(ms) {
 }
 
 
-async function test_mode() 
-{
-  //console.log("---> TEST MODE")
-  //console.log("reset..")
-  await flash_chip_deselect();
-  await sleep(250);
-  let cdone = await get_cdone()
-  //console.log("cdone: " + (cdone ? "high" : "low"))
-  await flash_reset();
-  await flash_power_up();
-  await flash_read_id();
-}
-
 //----------------- Main ---------------------
 
 let device;
@@ -581,6 +568,8 @@ btn_usb.onclick = async () => {
   await device.claimInterface(0);
   
   await mpsse_init(device);
-  await test_mode();
+  await flash_reset();
+  await flash_power_up();
+  await flash_read_id();
 }
 
