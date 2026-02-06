@@ -33,7 +33,9 @@ const MC_READB_LOW = 0x81;   // Read Data bits LowByte
 //-- Leer el ID de la flash (3 bytes: fabricante, tipo, capacidad)
 const CMD_READ_ID = 0x9E;
 
-
+//-- Máscaras de acceso a los pines de los gpios del FTDI
+const FPGA_RESET_PIN = 0x80  //-- ADBUS7: Salida: Señal de reset de la FPGA
+const FPGA_CDONE_PINS = 0x40  //-- ADBUS6: Entrada: Señal cdone de la FPGA
 
 //--------------------------------------------------
 //-- Conectar al dispositivo FTDI via WEBUSB
@@ -207,7 +209,8 @@ async function ftdi_set_bitmode(device, bitmask, mode) {
 //--     - Bits 1: Salidas
 //--     - Bits 0: entradas
 //--------------------------------------------------------
-async function ftdi_set_gpio(device, gpio, direction) {
+async function ftdi_set_gpio(device, gpio, direction) 
+{
   //-- Los pines se asignan con el comando SET_BITS_LOW
   //-- Formato: [Comando, Valor, Direccion]
  
@@ -215,10 +218,66 @@ async function ftdi_set_gpio(device, gpio, direction) {
    await device.transferOut(OUT_EP, data);
 }
 
+//-----------------------------------------------------------
+//-- Poner a la FPGA en modo reset
+//--
+//-- El reset se mantiene hasta que se quita llamando 
+//--  a FPGA_reset_deassert()
+//------------------------------------------------------------
+export async function FPGA_reset_assert(device)
+{
+    //-- Logica negativa: El reset se activa poniendo a 0 el pin
+    await ftdi_set_gpio(device, 0, FPGA_RESET_PIN);
 
+}
 
+//-----------------------------------------------------------
+//-- Sacar la FPGA del modo reset
+//--
+//-- La FPGA se empezará a configurar (cargando el bitstream
+//--   desde la flash)
+//------------------------------------------------------------
+export async function FPGA_reset_deassert(device)
+{
+    //-- Logica negativa: El reset se desactiva poniendo a 1 el pin
+    await ftdi_set_gpio(device, FPGA_RESET_PIN, FPGA_RESET_PIN);
 
+}
 
+//-----------------------------------------------------------
+//-- Leer el bit CDONE de la fpga
+//--
+//-- SALIDAS:
+//--   - CDONE:
+//--       1 : FPGA configurada
+//--       0 : FPGA en reset o configurándose
+//-----------------------------------------------------------
+export async function FPGA_get_cdone(device)
+{
+    //-- Enviar comando para leer pines
+    let data = new Uint8Array([MC_READB_LOW]);
+    await device.transferOut(OUT_EP, data);
+
+    //-- Leer datos del USB. Con este comando se reciben 3 bytes
+    //-- El tercero es el que contiene el estado de los pines
+    let result = await device.transferIn(IN_EP, 3);
+
+    if (result.status === 'ok') {
+
+        //-- Leer los pines
+        let pines = result.data.getUint8(2)
+
+        //-- Aplicar mascara para quedarse con CDONE
+        pines = pines & FPGA_CDONE_PINS
+
+        //-- Valor a devolver
+        const value = pines == 0 ? 0 : 1;
+        return value
+        
+    } else {
+        throw new Error("Fallo al leer pines del FTDI");
+    }
+}
 
 //----------------------------------------------------------
 //-- Enviar un byte al FTDI (usado para comandos MPSSE)
@@ -231,12 +290,9 @@ async function ftdi_send_byte(b) {
 
 
 export async function setResetPin(device, level) {
-    // Bit 7 es 0x80 (10000000 en binario)
-    const bit7 = 0x80;
-    const direction = 0x80; // Queremos que el bit 7 sea SALIDA (1)
-    const value = level ? 0x80 : 0x00; // Nivel alto (0x80) o bajo (0x00)
 
-    await ftdi_set_gpio(device, value, direction);
+    const value = level ? 0x80 : 0x00; // Nivel alto (0x80) o bajo (0x00)
+    await ftdi_set_gpio(device, value, 0x80);
 }
 
 export async function readPins(device) {

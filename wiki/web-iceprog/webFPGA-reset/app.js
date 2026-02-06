@@ -62,7 +62,7 @@ async function performDisconnect() {
 //-- ENTRADA:
 //--   connected: true si el dispositivo está conectado
 //-----------------------------------------------------
-function updateUI(connected) {
+async function updateUI(connected) {
 
     //-- Limpiar el estado de error
     statusCard.classList.remove('error-active'); 
@@ -84,6 +84,10 @@ function updateUI(connected) {
         resetBtn.classList.remove('hidden');
         flashBtn.classList.remove('hidden');
         disconnectBtn.classList.remove('hidden');
+
+        //-- TEST
+        let value = await ftdi.FPGA_get_cdone(device)
+        console.log("CDONE: " + value)
 
     } else {
         //-- Tarjeta de estado: Ya no pertenece a la clase connected
@@ -195,23 +199,32 @@ async function handleReset() {
         resetBtn.textContent = "Verificando...";
         log("--- Iniciando secuencia de Reset ---", "system");
 
-        // 2. Ejecutar Reset (CRESET_B es Bit 7)
         log("Bajando CRESET (Reset activado)...", "system");
-        await ftdi.setResetPin(device, false);
+        await ftdi.FPGA_reset_assert(device);
         
         // Espera de 100ms para asegurar que la FPGA detecta el flanco
         await new Promise(r => setTimeout(r, 100));
         
         log("Subiendo CRESET (Liberando FPGA)...", "system");
-        await ftdi.setResetPin(device, true);
+        //await ftdi.setResetPin(device, true);
+        await ftdi.FPGA_reset_deassert(device)
 
         // 3. Feedback final
         log("Reset completado con éxito.", "success");
         statusText.textContent = "✅ FPGA Reiniciada";
 
+        //-- TEST
+        let value = await ftdi.FPGA_get_cdone(device)
+        console.log("CDONE: " + value)
+
         // Esperamos a que la FPGA cargue desde la Flash
         await new Promise(r => setTimeout(r, 200)); 
         await checkFPGAStatus();
+
+        //-- TEST
+        value = await ftdi.FPGA_get_cdone(device)
+        console.log("CDONE: " + value)
+        
 
     } catch (err) {
         log(`FALLO: ${err.message}`, "error");
@@ -235,12 +248,8 @@ async function handleReset() {
 
 async function checkFPGAStatus() {
     
-    //-- Leer pines
-    const pins = await ftdi.readPins(device);
-    
-    // El bit 6 es CDONE (01000000 en binario = 0x40)
-    //-- cuando CDONE es 1, la FPGA ha cargado correctamente el diseño
-    const isDone = (pins & 0x40) !== 0;
+    //-- Leer señal CDONE
+    const isDone = await ftdi.FPGA_get_cdone(device);
 
     if (isDone) {
         log("Estado FPGA: DONE (Diseño cargado con éxito)", "success");
