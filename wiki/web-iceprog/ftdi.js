@@ -315,7 +315,7 @@ export async function FLASH_cs_assert(device)
 {
    //-- El chip select de la flash está en el ADBUS 4 del FTDI (bit 4)
    //-- Logica negativa: El cs se activa poniendo a 0 el pin
-    await set_gpio(device, 0, FLASH_CS_PIN);
+    await set_gpio(device, 0, FPGA_RESET_PIN | FLASH_CS_PIN | 3);
 }
 
 //----------------------------------------------------------
@@ -323,7 +323,7 @@ export async function FLASH_cs_assert(device)
 //----------------------------------------------------------
 export async function FLASH_cs_deassert(device)
 {
-    await set_gpio(device, FLASH_CS_PIN, FLASH_CS_PIN);
+    await set_gpio(device, FLASH_CS_PIN, FPGA_RESET_PIN | FLASH_CS_PIN | 3);
 }
 
 //-------------------------------------------------------------
@@ -341,12 +341,12 @@ export async function FLASH_release_power_down(device)
     //-- Los 3 primeros bytes son para que el FTDI mande por el SPI
     //-- un único byte
     //-- [cmd ftdi, byte bajo (tamaño-1), byte alto (tamaño-1)]
-    const data = new Uint8Array([FTDI_SPI_WRITE, 0x00, 0x00, 0x01]); //--FLASH_RPD]);
+    const data = new Uint8Array([FTDI_SPI_WRITE, 0x00, 0x00, FLASH_RPD]);
     await device.transferOut(OUT_EP, data);
 
     //-- Debug: Leer respuesta al comando
     //-- Deben ser 3 bytes
-    let result = await device.transferIn(IN_EP, 3);
+    let result = await device.transferIn(IN_EP, 1);
 
     //-- Obtener la cadena con los 3 bytes en hexadecimal e imprimirla!
     const cad = Array.from(new Uint8Array(result.data.buffer, result.data.byteOffset, result.data.byteLength))

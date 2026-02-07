@@ -102,29 +102,7 @@ async function mpsse_recv_byte(device) {
 
 
 
-//------ MPSSE: xfer_spi()
-async function mpsse_xfer_spi(buff)
-{
-  //console.log("MPSSE: xfer_spi. START!---------")
-   if (buff.byteLength < 1)
-     return;
 
-  /* Input and output, update data on negative edge read on positive. */
-  await mpsse_send_byte(MC_DATA_IN | MC_DATA_OUT | MC_DATA_OCN);
-  await mpsse_send_byte(buff.byteLength - 1);
-  await mpsse_send_byte((buff.byteLength - 1) >> 8);
-
-  let rc = await ftdi_write_data(device, buff);
-  //-- Todo! Check the correct number of bytes has been written....
-
-  //console.log("Rc: " + rc + ", Buff lenth: " + buff.byteLength);
-
-  for (let i = 0; i < buff.byteLength; i++)
-    buff[i] = await mpsse_recv_byte(device);
-
-  //console.log("MPSSE: xfer_spi. Written: " + rc + " byte(s)!");
-  //console.log("MPSSE: xfer_spio. STOP!----------------")
-}
 
 
 
@@ -184,7 +162,7 @@ async function flash_read_id()
  async function set_cs_creset(cs_b)
  {
    let gpio = 0;
-   const direction = 0x93;
+   const direction = 0x93;  //-- 0x93
  
    if (cs_b) {
      // ADBUS4 (GPIOL0)
@@ -203,20 +181,106 @@ async function flash_chip_select()
 }
 
 
+//------ MPSSE: xfer_spi()
+async function mpsse_xfer_spi(buff)
+{
+  //console.log("MPSSE: xfer_spi. START!---------")
+   if (buff.byteLength < 1)
+     return;
+
+  /* Input and output, update data on negative edge read on positive. */
+  await mpsse_send_byte(MC_DATA_IN | MC_DATA_OUT | MC_DATA_OCN);
+  await mpsse_send_byte(buff.byteLength - 1);
+  await mpsse_send_byte((buff.byteLength - 1) >> 8);
+
+  let rc = await ftdi_write_data(device, buff);
+  //-- Todo! Check the correct number of bytes has been written....
+
+  //console.log("Rc: " + rc + ", Buff lenth: " + buff.byteLength);
+
+  for (let i = 0; i < buff.byteLength; i++)
+    buff[i] = await mpsse_recv_byte(device);
+
+  //console.log("MPSSE: xfer_spi. Written: " + rc + " byte(s)!");
+  //console.log("MPSSE: xfer_spio. STOP!----------------")
+}
+
+async function mpsse_xfer_spi_2(buff)
+{
+
+  const data = new Uint8Array([MC_DATA_IN | MC_DATA_OUT | MC_DATA_OCN, 0x00, 0x00, FC_RPD]);
+  await device.transferOut(IN_EP, data);
+
+  for (let i = 0; i < buff.byteLength; i++)
+    buff[i] = await mpsse_recv_byte(device);
+
+}
+
+
+//-------- MPSSE: mpsse_recv_byte()
+async function mpsse_recv_byte2(device) {
+
+  //console.log("queue length: " + queue.length);
+
+  //-- Byte to read
+  let data;
+
+  //-- There at least 1 byte in the buffer. There is no need to
+  //-- access the USB
+  if (queue.length >= 1) {
+
+    //-- Read the first element in the buffer
+    data = queue.shift();
+
+    //console.log("MPSSE: recv_byte. Byte in buffer: " + data.toString(16));
+    return data;
+  }
+
+  //-- Buffer is empty. Read data from the USB
+  let result = await device.transferIn(OUT_EP, 4096);
+
+  // console.log("TransferIn: " + result.status +
+  // " -> Bytes: " + result.data.byteLength);
+
+  let cad = "";
+
+  //-- The first two bytes received are the modem status bytes
+  //-- Insert the data in the queue
+  for (let i = 2; i < result.data.byteLength; i = i + 1) {
+    queue.push(result.data.getUint8(i));
+    cad = cad + "0x" + result.data.getUint8(i).toString(16) + " ";
+  }
+
+  //console.log("QUEUE: [ " + cad + "]");
+
+  //-- Read the first element in the queue
+  if (queue.length > 0) {
+    data = queue.shift();
+    //console.log("MPSEE: recv_byte. Read: " + data.toString(16) + 
+    //            "Buffer size: " + queue.length);
+    return data;
+  }
+
+  //console.log("MPSSE: recv_byte. NO DATA READ! (EMPTY)");
+
+  //return -1;
+}
+
+
+
 
 async function flash_power_up()
 {
   let buff = new Uint8Array(1);
-  buff[0] = FC_RPD;
 
+  await ftdi.FLASH_cs_assert(device)
 
-  await flash_chip_select();
+  const data = new Uint8Array([MC_DATA_IN | MC_DATA_OUT | MC_DATA_OCN, 0x00, 0x00, FC_RPD]);
+  await device.transferOut(IN_EP, data);
 
-  //await ftdi.FLASH_cs_assert(device)
+  await device.transferIn(OUT_EP, 3);
 
-
-  await mpsse_xfer_spi(buff);
-  await flash_chip_deselect();
+  await ftdi.FLASH_cs_deassert(device)
 }
 
 
@@ -239,7 +303,9 @@ btn_usb.onclick = async () => {
 
   //-- Para enviar cualquier comando a la flash
   //-- la FPGA debe estar en estado de reset
-  await ftdi.FPGA_reset_assert(device)
+  await ftdi.FPGA_reset_assert(device);
+
+  //await ftdi.FLASH_release_power_down(device);
 
   await flash_power_up();
   await flash_read_id();
