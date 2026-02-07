@@ -209,13 +209,9 @@ async function mpsse_xfer_spi(buff)
 async function mpsse_xfer_spi2(buff)
 {
   
-  const data = new Uint8Array([MC_DATA_IN | MC_DATA_OUT | MC_DATA_OCN, 4, 0, FC_JEDECID]);
+  let data = new Uint8Array([MC_DATA_IN | MC_DATA_OUT | MC_DATA_OCN, 4, 0, FC_JEDECID]);
+  data = new Uint8Array([...data, 0, 0, 0, 0]);
   await device.transferOut(IN_EP, data);
-
-  let rc = await ftdi_write_data(device, buff);
-  //-- Todo! Check the correct number of bytes has been written....
-
-  //console.log("Rc: " + rc + ", Buff lenth: " + buff.byteLength);
 
   for (let i = 0; i < buff.byteLength; i++)
     buff[i] = await mpsse_recv_byte(device);
