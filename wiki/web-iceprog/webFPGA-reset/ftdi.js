@@ -34,9 +34,7 @@ const FTDI_SPI_WRITE = 0x31;
 //--------------- Comandos de la flash (enviados por el SPI del FTDI)
 //-- Leer el ID de la flash (3 bytes: fabricante, tipo, capacidad)
 const FLASH_RPD     = 0xAB;  // Release Power-Down
-const FLASH_READ_ID = 0x9E;  // Leer el identificador de la flash
-const CMD_READ_ID = 0x9E;
-
+const FLASH_READ_ID = 0x9F;  // Leer el identificador de la flash
 
 //-- Máscaras de acceso a los pines de los gpios del FTDI
 const FPGA_RESET_PIN  = 0x80  //-- ADBUS7: Salida: Señal de reset de la FPGA
@@ -80,22 +78,28 @@ export async function initialize(device) {
     //-- Reclamar la interfaz 0 (que es la interfaz A)
     //-- Es la que se usa para el spi
     await device.claimInterface(0);
+}
+
+//----------------------------------------------------
+//-- Configurar el FTDI para trabajar con el SPI
+//----------------------------------------------------
+export async function spi_init(device) 
+{
 
     //-------- Inicializacion y configuracion del FTDI (MPSEE_INIT)
-    await ftdi_sio_reset(device);
-    await ftdi_purge_rx_buffer(device);
-    await ftdi_purge_tx_buffer(device);
+    await sio_reset(device);
+    await purge_buffers(device);
 
     //-- Set latency to 1 (fastest)
     //-- 1 is the fastest polling, it means 1 kHz polling
-    await ftdi_set_latency_timer(device, 1);
+    await set_latency_timer(device, 1);
 
     //-- DEBUG! Comprobar que la latencia es efectivameente 1
-    let latency = await ftdi_get_latency_timer(device);
+    let latency = await get_latency_timer(device);
     console.assert(latency === 1, "Error al establecer latencia");
 
     //-- Configurar el modo Bit-Bang del FTDI (para controlar pines individuales)
-    await ftdi_set_bitmode(device, 0xFF, BITMODE_MPSSE);
+    await set_bitmode(device, 0xFF, BITMODE_MPSSE);
 
     //------ Enviar comandos al FTDI, por el canal de datos
     // enable clock divide by 5
@@ -105,21 +109,31 @@ export async function initialize(device) {
     // set 6 MHz clock
     data = new Uint8Array([MC_SET_CLK_DIV, 0x00, 0x00]);
     await device.transferOut(OUT_EP, data);
-
-    //-- TEST
-    //-- Enviar comando
-    data = new Uint8Array([MC_READB_LOW]);
-    await device.transferOut(OUT_EP, data);
-
-    //-- Read data from the USB
-    let result = await device.transferIn(IN_EP, 3);
-    //console.log("pins: ", result.data.getUint8(2).toString(16));
 }
+
+//-------------------------------------------------------
+// Comando para habilitar la división del reloj entre 5
+//-------------------------------------------------------
+export async function tck_d5(device)
+{
+    const data = new Uint8Array([MC_TCK_D5]);
+    await device.transferOut(OUT_EP, data);
+}
+  
+//------------------------------------------------------
+// Establecer un reloj de 6 MHZ
+//------------------------------------------------------
+export async function set_clk_div(device)
+{
+    const data = new Uint8Array([MC_SET_CLK_DIV, 0x00, 0x00]);
+    await device.transferOut(OUT_EP, data);
+}
+
 
 //---------------------------------------------------
 //-- Comando de reset del chip FTDI
 //---------------------------------------------------
-async function ftdi_sio_reset(device) {
+export async function sio_reset(device) {
     await device.controlTransferOut({
         requestType: 'vendor',
         recipient: 'device',
@@ -132,7 +146,7 @@ async function ftdi_sio_reset(device) {
 //--------------------------------------------------------
 //-- Comando para limpiar el buffer de recepcion del FTDI
 //--------------------------------------------------------
-async function ftdi_purge_rx_buffer(device) {
+export async function purge_rx_buffer(device) {
 
   await device.controlTransferOut({
     requestType: 'vendor',
@@ -146,7 +160,7 @@ async function ftdi_purge_rx_buffer(device) {
 //--------------------------------------------------------
 //-- Comando para limpiar el buffer de transmision del FTDI
 //--------------------------------------------------------  
-async function ftdi_purge_tx_buffer(device) {
+export async function purge_tx_buffer(device) {
 
   let result = await device.controlTransferOut({
     requestType: 'vendor',
@@ -157,10 +171,16 @@ async function ftdi_purge_tx_buffer(device) {
   });
 }
 
+//-- FTDI: Purge Buffers
+export async function purge_buffers(device) {
+  await purge_rx_buffer(device);
+  await purge_tx_buffer(device);
+}
+
 //----------------------------------------------------------
 //-- FTDI: Get latency timer
 //----------------------------------------------------------
-async function ftdi_get_latency_timer(device) {
+export async function get_latency_timer(device) {
 
   //-- Read 1 byte from the FTDI
   let result = await device.controlTransferIn({
@@ -178,7 +198,7 @@ async function ftdi_get_latency_timer(device) {
 //--------------------------------------------------------
 //-- Establecer la latencia del FTDI
 //--------------------------------------------------------
-async function ftdi_set_latency_timer(device, latency) {
+export async function set_latency_timer(device, latency) {
 
   let result = await device.controlTransferOut({
     requestType: 'vendor',
@@ -192,7 +212,7 @@ async function ftdi_set_latency_timer(device, latency) {
 //---------------------------------------------------------------------------
 //-- Establecer el modo bitmode del FTDI (para controlar pines individuales)
 //---------------------------------------------------------------------------
-async function ftdi_set_bitmode(device, bitmask, mode) {
+export async function set_bitmode(device, bitmask, mode) {
 
   //-- Calculate the value to sent to the FTDI
   let usb_val = (mode << 8) | bitmask;  //-- Low byte: bitmask
@@ -215,7 +235,7 @@ async function ftdi_set_bitmode(device, bitmask, mode) {
 //--     - Bits 1: Salidas
 //--     - Bits 0: entradas
 //--------------------------------------------------------
-async function ftdi_set_gpio(device, gpio, direction) 
+export async function set_gpio(device, gpio, direction) 
 {
   //-- Los pines se asignan con el comando SET_BITS_LOW
   //-- Formato: [Comando, Valor, Direccion]
@@ -233,7 +253,7 @@ async function ftdi_set_gpio(device, gpio, direction)
 export async function FPGA_reset_assert(device)
 {
     //-- Logica negativa: El reset se activa poniendo a 0 el pin
-    await ftdi_set_gpio(device, 0, FPGA_RESET_PIN);
+    await set_gpio(device, 0, FPGA_RESET_PIN);
 
 }
 
@@ -246,7 +266,7 @@ export async function FPGA_reset_assert(device)
 export async function FPGA_reset_deassert(device)
 {
     //-- Logica negativa: El reset se desactiva poniendo a 1 el pin
-    await ftdi_set_gpio(device, FPGA_RESET_PIN, FPGA_RESET_PIN);
+    await set_gpio(device, FPGA_RESET_PIN, FPGA_RESET_PIN);
 
 }
 
@@ -293,7 +313,7 @@ export async function FLASH_cs_assert(device)
 {
    //-- El chip select de la flash está en el ADBUS 4 del FTDI (bit 4)
    //-- Logica negativa: El cs se activa poniendo a 0 el pin
-    await ftdi_set_gpio(device, 0, FLASH_CS_PIN);
+    await set_gpio(device, 0, FPGA_RESET_PIN | FLASH_CS_PIN | 3);
 }
 
 //----------------------------------------------------------
@@ -301,7 +321,7 @@ export async function FLASH_cs_assert(device)
 //----------------------------------------------------------
 export async function FLASH_cs_deassert(device)
 {
-    await ftdi_set_gpio(device, FLASH_CS_PIN, FLASH_CS_PIN);
+    await set_gpio(device, FLASH_CS_PIN, FPGA_RESET_PIN | FLASH_CS_PIN | 3);
 }
 
 //-------------------------------------------------------------
@@ -322,15 +342,16 @@ export async function FLASH_release_power_down(device)
     const data = new Uint8Array([FTDI_SPI_WRITE, 0x00, 0x00, FLASH_RPD]);
     await device.transferOut(OUT_EP, data);
 
-    //-- Debug: Leer respuesta al comando
-    //-- Deben ser 3 bytes
+    //-- Leer respuesta al comando
+    //-- Deben ser 3 bytes. Los 2 primeros son el estado del model. 
+    //-- El tercero es 0xFF, que es lo que devuelve la flash con esta operacion
     let result = await device.transferIn(IN_EP, 3);
 
-    //-- Obtener la cadena con los 3 bytes en hexadecimal e imprimirla!
-    const cad = Array.from(new Uint8Array(result.data.buffer, result.data.byteOffset, result.data.byteLength))
-                     .map(byte => byte.toString(16).toUpperCase().padStart(2, '0'))
-                     .join(' ');
-    console.log("POWER-DOWN: " + cad)
+    //-- Debug: Obtener la cadena con los 3 bytes en hexadecimal e imprimirla!
+    // const cad = Array.from(new Uint8Array(result.data.buffer, result.data.byteOffset, result.data.byteLength))
+    //                  .map(byte => byte.toString(16).toUpperCase().padStart(2, '0'))
+    //                  .join(' ');
+    // console.log("POWER-DOWN2: " + cad)
 
     //-- Desactivar el chip select de la flash
     await FLASH_cs_deassert(device)
@@ -341,8 +362,31 @@ export async function FLASH_release_power_down(device)
 //--------------------------------------------------------
 export async function FLASH_read_id(device)
 {
+
+    //-- Activar el chip select de la flash
     await FLASH_cs_assert(device)
-    const data = new Uint8Array([FTDI_SPI_WRITE, 0x00, 0x00, FLASH_RPD]);
+    
+    //-- Enviar a la flash el comando para leer su ID
+    let data = new Uint8Array([FTDI_SPI_WRITE, 4, 0, FLASH_READ_ID]);
+
+    //-- Se espera recibir 4 bytes. Se envian por tanto 4 bytes dummy
+    data = new Uint8Array([...data, 0, 0, 0, 0]);
+    await device.transferOut(OUT_EP, data);
+
+    //-- La respuesta contiene 7 bytes: 2 bytes del modem, 
+    //-- 1 del comando y 4 de las respuestas
+    let result = await device.transferIn(IN_EP, 7);
+
+    //-- Desactivar el chip select de la flash
+    await FLASH_cs_deassert(device)
+
+    //-- Crear un buffer con la respuesta
+    let bufferId = new Uint8Array(result.data.buffer.slice(3));
+
+    //-- Devolver el buffer
+    return bufferId;
+
+    //-- En la ALHAMBRA-II: Se deberia leer: 0xEF 0x40 0x16 0x00
 }
 
 
@@ -361,7 +405,7 @@ async function ftdi_send_byte(b) {
 export async function setResetPin(device, level) {
 
     const value = level ? 0x80 : 0x00; // Nivel alto (0x80) o bajo (0x00)
-    await ftdi_set_gpio(device, value, 0x80);
+    await set_gpio(device, value, 0x80);
 }
 
 export async function readPins(device) {

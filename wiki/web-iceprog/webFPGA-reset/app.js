@@ -280,6 +280,10 @@ if (checkCompatibility()) {
 
             //-- Inicializar el FTDI
             await ftdi.initialize(device);
+
+            //-- Configurar para trabajar con el SPI
+            await ftdi.spi_init(device);
+
             log("FTDI inicializado", "success");
 
             //-- Actualizar la interfaz
@@ -333,47 +337,47 @@ clearLogBtn.addEventListener('click', (e) => {
     log("Consola limpia.", "system");
 });
 
+//-------------------------------------------------------------
+//-- Convertir un array con los bytes de identificacion de
+//-- la flash en una cadena
+//-------------------------------------------------------------
+function id_to_string(id)
+{
+  let cad = ""
+
+  for (const byte of id)
+    cad += " 0x" + byte.toString(16);
+
+  return cad
+}
+
+
 async function handleCheckFlash() {
     try {
         log("Preparando bus SPI (FPGA en Reset)...", "system");
         
-        // 1. Mantenemos la FPGA en reset para liberar el bus SPI
-        await ftdi.FPGA_reset_assert(device)
+        //-- Para enviar cualquier comando a la flash
+        //-- la FPGA debe estar en estado de reset
+        await ftdi.FPGA_reset_assert(device);
         await new Promise(r => setTimeout(r, 50));
 
-        //--------------------------------- TEST. Hacer las pruebas aquí....
-        console.log("Pruebas...")
-        ftdi.FLASH_release_power_down(device)
-
-        //-- Esperar 1ms a que la flash despierte
-        await new Promise(r => setTimeout(r, 1));
-
-        //-- Leer el flash ID
-        ftdi.FLASH_read_id(device)
-
-
-
-
-        //-- TEST: Activar el cs de la flash
-        await ftdi.FLASH_cs_assert(device)
-        await new Promise(r => setTimeout(r, 2000));
-
-        // 2. Leemos el ID
-        const id = await ftdi.readFlashID(device);
-        
-        // 3. Verificamos si es una Micron (0x20)
-        if (id.manufacturer === 0x20) {
-            log(`Flash detectada: Micron (0x20)`, "success");
-            log(`Tipo: 0x${id.memType.toString(16)}, Capacidad: 0x${id.capacity.toString(16)}`, "success");
-        } else {
-            log(`ID desconocido: 0x${id.manufacturer.toString(16)}`, "error");
-        }
+        //-- Sacar la flash del modo sleep (de bajo consumo
+        //-- Es obligatorio hacerlo, o de lo contrario NO
+        //-- se podra leer nada de ella
+        await ftdi.FLASH_release_power_down(device);
+    
+        const buffer_id = await ftdi.FLASH_read_id(device)
+    
+        //-- Obtener una cadena con el identificador
+        let flash_id_str = id_to_string(buffer_id);
+    
+        console.log("✅FLASH-ID: " + flash_id_str);
+        log("✅FLASH-ID: " + flash_id_str, "success");
 
     } catch (err) {
         log("Error al identificar Flash: " + err.message, "error");
     } finally {
-        // 4. Liberamos la FPGA para que vuelva a su estado normal
-        //await ftdi.setResetPin(device, true);
+        //-- Quitar el Reset de la FPGA (opcional)
         await ftdi.FPGA_reset_deassert(device)
     }
 }
