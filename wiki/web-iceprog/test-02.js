@@ -136,29 +136,7 @@ async function mpsse_xfer_spi(buff)
   //console.log("MPSSE: xfer_spio. STOP!----------------")
 }
 
-// ---------------------------------------------------------
-// Hardware specific CS, CReset, CDone functions
-// --------------------------------------------------------
- async function set_cs_creset(cs_b, creset_b)
- {
-   let gpio = 0;
-   const direction = 0x93;
- 
-   if (cs_b) {
-     // ADBUS4 (GPIOL0)
-     gpio |= 0x10;
-   }
- 
-   if (creset_b) {
-     // ADBUS7 (GPIOL3)
-     gpio |= 0x80;
-   }
- 
-   await mpsse_set_gpio(gpio, direction);
 
-   //console.log("MPSEE: set_cs_creset: cs_b: " + cs_b.toString(16) + 
-   //            ", creset_b: " + creset_b.toString(16));
- }
 
 // ---------------------------------------------------------
 // FLASH function implementations
@@ -170,27 +148,6 @@ async function flash_chip_deselect()
   //console.log("FLASH: chip_deselect() START!");
 	await set_cs_creset(1, 0);
   //console.log("FLASH: chip_deselect() STOP!");
-}
-
-// FLASH chip select assert
-// should only happen while FPGA reset is asserted
-async function flash_chip_select()
-{
-  //console.log("FLASH: chip_select() START!");
-	await set_cs_creset(0, 0);
-  //console.log("FLASH: chip_select() STOP!");
-}
-
-
-async function flash_power_up()
-{
-  //console.log("FLASH: Power UP. START!");
-  let buff = new Uint8Array(1);
-  buff[0] = FC_RPD;
-  await flash_chip_select();
-  await mpsse_xfer_spi(buff);
-  await flash_chip_deselect();
-  //console.log("FLASH: Power UP. START!");
 }
 
 
@@ -231,6 +188,49 @@ async function flash_read_id()
   //console.log("FLASH: READ-ID. STOP!");
 }
 
+// ---------------------------------------------------------
+// Hardware specific CS, CReset, CDone functions
+// --------------------------------------------------------
+ async function set_cs_creset(cs_b, creset_b)
+ {
+   let gpio = 0;
+   const direction = 0x93;
+ 
+   if (cs_b) {
+     // ADBUS4 (GPIOL0)
+     gpio |= 0x10;
+   }
+ 
+   if (creset_b) {
+     // ADBUS7 (GPIOL3)
+     gpio |= 0x80;
+   }
+ 
+   await mpsse_set_gpio(gpio, direction);
+
+   //console.log("MPSEE: set_cs_creset: cs_b: " + cs_b.toString(16) + 
+   //            ", creset_b: " + creset_b.toString(16));
+ }
+
+
+// FLASH chip select assert
+// should only happen while FPGA reset is asserted
+async function flash_chip_select()
+{
+	await set_cs_creset(0, 0);
+}
+
+
+
+async function flash_power_up()
+{
+  let buff = new Uint8Array(1);
+  buff[0] = FC_RPD;
+  await flash_chip_select();
+  await mpsse_xfer_spi(buff);
+  await flash_chip_deselect();
+}
+
 
 //----------------- Main ---------------------
 
@@ -249,7 +249,15 @@ btn_usb.onclick = async () => {
   //-- Configurar para trabajar con el SPI
   await ftdi.spi_init(device);
 
+  //-- Para enviar cualquier comando a la flash
+  //-- la FPGA debe estar en estado de reset
+  await ftdi.FPGA_reset_assert(device)
+
   await flash_power_up();
   await flash_read_id();
+
+  //-- Hemos terminado con la Flash
+  //-- Quitar el Reset de la FPGA (opcional)
+  await ftdi.FPGA_reset_deassert(device)
 }
 
