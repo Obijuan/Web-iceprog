@@ -72,9 +72,6 @@ async function flash_read_id()
 
   //console.log("FLASH: READ-ID. START!");
 
-  let buff = new Uint8Array(5); //-- command + 4 response bytes
-  buff[0] = FC_JEDECID;
-
   await flash_chip_select();
 
   let data = new Uint8Array([MC_DATA_IN | MC_DATA_OUT | MC_DATA_OCN, 4, 0, FC_JEDECID]);
@@ -85,7 +82,9 @@ async function flash_read_id()
 
   await flash_chip_deselect();
 
-  // TODO: Add full decode of the JEDEC ID.
+  //-- Crear un buffer con la respuesta
+  let buff = new Uint8Array(4);
+
   let flash_id_str = "flash ID: ";
   for (let i = 3; i < result.data.byteLength; i++)
     flash_id_str += " 0x" + result.data.getUint8(i).toString(16);
