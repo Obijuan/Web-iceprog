@@ -205,83 +205,6 @@ async function mpsse_xfer_spi(buff)
   //console.log("MPSSE: xfer_spio. STOP!----------------")
 }
 
-async function mpsse_xfer_spi_2(buff)
-{
-
-  const data = new Uint8Array([MC_DATA_IN | MC_DATA_OUT | MC_DATA_OCN, 0x00, 0x00, FC_RPD]);
-  await device.transferOut(IN_EP, data);
-
-  for (let i = 0; i < buff.byteLength; i++)
-    buff[i] = await mpsse_recv_byte(device);
-
-}
-
-
-//-------- MPSSE: mpsse_recv_byte()
-async function mpsse_recv_byte2(device) {
-
-  //console.log("queue length: " + queue.length);
-
-  //-- Byte to read
-  let data;
-
-  //-- There at least 1 byte in the buffer. There is no need to
-  //-- access the USB
-  if (queue.length >= 1) {
-
-    //-- Read the first element in the buffer
-    data = queue.shift();
-
-    //console.log("MPSSE: recv_byte. Byte in buffer: " + data.toString(16));
-    return data;
-  }
-
-  //-- Buffer is empty. Read data from the USB
-  let result = await device.transferIn(OUT_EP, 4096);
-
-  // console.log("TransferIn: " + result.status +
-  // " -> Bytes: " + result.data.byteLength);
-
-  let cad = "";
-
-  //-- The first two bytes received are the modem status bytes
-  //-- Insert the data in the queue
-  for (let i = 2; i < result.data.byteLength; i = i + 1) {
-    queue.push(result.data.getUint8(i));
-    cad = cad + "0x" + result.data.getUint8(i).toString(16) + " ";
-  }
-
-  //console.log("QUEUE: [ " + cad + "]");
-
-  //-- Read the first element in the queue
-  if (queue.length > 0) {
-    data = queue.shift();
-    //console.log("MPSEE: recv_byte. Read: " + data.toString(16) + 
-    //            "Buffer size: " + queue.length);
-    return data;
-  }
-
-  //console.log("MPSSE: recv_byte. NO DATA READ! (EMPTY)");
-
-  //return -1;
-}
-
-
-
-
-async function flash_power_up()
-{
-  let buff = new Uint8Array(1);
-
-  await ftdi.FLASH_cs_assert(device)
-
-  const data = new Uint8Array([MC_DATA_IN | MC_DATA_OUT | MC_DATA_OCN, 0x00, 0x00, FC_RPD]);
-  await device.transferOut(IN_EP, data);
-
-  await device.transferIn(OUT_EP, 3);
-
-  await ftdi.FLASH_cs_deassert(device)
-}
 
 
 //----------------- Main ---------------------
@@ -305,9 +228,12 @@ btn_usb.onclick = async () => {
   //-- la FPGA debe estar en estado de reset
   await ftdi.FPGA_reset_assert(device);
 
-  //await ftdi.FLASH_release_power_down(device);
+  //-- Sacar la flash del modo sleep (de bajo consumo
+  //-- Es obligatorio hacerlo, o de lo contrario NO
+  //-- se podra leer nada de ella
+  await ftdi.FLASH_release_power_down(device);
 
-  await flash_power_up();
+  
   await flash_read_id();
 
   //-- Hemos terminado con la Flash

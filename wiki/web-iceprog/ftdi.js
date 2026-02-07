@@ -344,15 +344,16 @@ export async function FLASH_release_power_down(device)
     const data = new Uint8Array([FTDI_SPI_WRITE, 0x00, 0x00, FLASH_RPD]);
     await device.transferOut(OUT_EP, data);
 
-    //-- Debug: Leer respuesta al comando
-    //-- Deben ser 3 bytes
-    let result = await device.transferIn(IN_EP, 1);
+    //-- Leer respuesta al comando
+    //-- Deben ser 3 bytes. Los 2 primeros son el estado del model. 
+    //-- El tercero es 0xFF, que es lo que devuelve la flash con esta operacion
+    let result = await device.transferIn(IN_EP, 3);
 
-    //-- Obtener la cadena con los 3 bytes en hexadecimal e imprimirla!
-    const cad = Array.from(new Uint8Array(result.data.buffer, result.data.byteOffset, result.data.byteLength))
-                     .map(byte => byte.toString(16).toUpperCase().padStart(2, '0'))
-                     .join(' ');
-    console.log("POWER-DOWN2: " + cad)
+    //-- Debug: Obtener la cadena con los 3 bytes en hexadecimal e imprimirla!
+    // const cad = Array.from(new Uint8Array(result.data.buffer, result.data.byteOffset, result.data.byteLength))
+    //                  .map(byte => byte.toString(16).toUpperCase().padStart(2, '0'))
+    //                  .join(' ');
+    // console.log("POWER-DOWN2: " + cad)
 
     //-- Desactivar el chip select de la flash
     await FLASH_cs_deassert(device)
