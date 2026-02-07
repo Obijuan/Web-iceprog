@@ -119,43 +119,6 @@ async function flash_chip_deselect()
 }
 
 
-async function flash_read_id()
-{
-  /* JEDEC ID structure:
-  * Byte No. | Data Type
-  * ---------+----------
-  *        0 | FC_JEDECID Request Command
-  *        1 | MFG ID
-  *        2 | Dev ID 1
-  *        3 | Dev ID 2
-  *        4 | Ext Dev Str Len
-  */
-
-  //console.log("FLASH: READ-ID. START!");
-
-  let buff = new Uint8Array(5); //-- command + 4 response bytes
-  buff[0] = FC_JEDECID;
-
-  await flash_chip_select();
-
-  // Write command and read first 4 bytes
-  await mpsse_xfer_spi2(buff);
-
-  if (buff[4] == 0xFF)
-      //console.log("Extended Device String Length is 0xFF, " +
-      //            "this is likely a read error. Ignorig...");
-
-  await flash_chip_deselect();
-
-  // TODO: Add full decode of the JEDEC ID.
-  let flash_id_str = "flash ID: ";
-  for (let i = 1; i < buff.byteLength; i++)
-    flash_id_str += " 0x" + buff[i].toString(16);
-
-  console.log("✅FLASH-ID: " + flash_id_str);
-  //console.log("FLASH: READ-ID. STOP!");
-}
-
 // ---------------------------------------------------------
 // Hardware specific CS, CReset, CDone functions
 // --------------------------------------------------------
@@ -223,7 +186,41 @@ async function mpsse_xfer_spi2(buff)
 }
 
 
+async function flash_read_id()
+{
+  /* JEDEC ID structure:
+  * Byte No. | Data Type
+  * ---------+----------
+  *        0 | FC_JEDECID Request Command
+  *        1 | MFG ID
+  *        2 | Dev ID 1
+  *        3 | Dev ID 2
+  *        4 | Ext Dev Str Len
+  */
 
+  //console.log("FLASH: READ-ID. START!");
+
+  let buff = new Uint8Array(5); //-- command + 4 response bytes
+  buff[0] = FC_JEDECID;
+
+  await flash_chip_select();
+
+  let data = new Uint8Array([MC_DATA_IN | MC_DATA_OUT | MC_DATA_OCN, 4, 0, FC_JEDECID]);
+  data = new Uint8Array([...data, 0, 0, 0, 0]);
+  await device.transferOut(IN_EP, data);
+
+  let result = await device.transferIn(OUT_EP, 10);
+
+  await flash_chip_deselect();
+
+  // TODO: Add full decode of the JEDEC ID.
+  let flash_id_str = "flash ID: ";
+  for (let i = 3; i < result.data.byteLength; i++)
+    flash_id_str += " 0x" + result.data.getUint8(i).toString(16);
+
+  console.log("✅FLASH-ID: " + flash_id_str);
+  //console.log("FLASH: READ-ID. STOP!");
+}
 
 
 //----------------- Main ---------------------
