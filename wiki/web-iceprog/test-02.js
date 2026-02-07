@@ -181,7 +181,7 @@ async function flash_read_id()
 // ---------------------------------------------------------
 // Hardware specific CS, CReset, CDone functions
 // --------------------------------------------------------
- async function set_cs_creset(cs_b, creset_b)
+ async function set_cs_creset(cs_b)
  {
    let gpio = 0;
    const direction = 0x93;
@@ -189,11 +189,6 @@ async function flash_read_id()
    if (cs_b) {
      // ADBUS4 (GPIOL0)
      gpio |= 0x10;
-   }
- 
-   if (creset_b) {
-     // ADBUS7 (GPIOL3)
-     gpio |= 0x80;
    }
  
    await ftdi.set_gpio(device, gpio, direction);
@@ -204,7 +199,7 @@ async function flash_read_id()
 // should only happen while FPGA reset is asserted
 async function flash_chip_select()
 {
-	await set_cs_creset(0, 0);
+	await set_cs_creset(0);
 }
 
 
