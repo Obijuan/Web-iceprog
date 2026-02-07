@@ -1,18 +1,11 @@
 import * as ftdi from './ftdi.js';
 
 
-// FTDI USB identifiers
-const BITMODE_MPSSE  = 0x02;
-
 /* Mode commands */
 const	MC_SETB_LOW = 0x80;    // Set Data bits LowByte
-const MC_TCK_D5 = 0x8B;      // Enable /5 div, backward compat to FT2232D
-const MC_SET_CLK_DIV = 0x86; // Set clock divisor
-
-const MC_DATA_IN  =  0x20 // When set read data (Data IN)
-const MC_DATA_OUT =  0x10 // When set write data (Data OUT)
+const MC_DATA_IN  = 0x20 // When set read data (Data IN)
+const MC_DATA_OUT = 0x10 // When set write data (Data OUT)
 const MC_DATA_OCN = 0x01  // When set update data on negative clock edge
-const MC_DATA_BITS = 0x02 // When set count bits not bytes
 
 // ---------------------------------------------------------
 // FLASH definitions
@@ -119,22 +112,6 @@ async function mpsse_set_gpio(gpio, direction)
   //            ", Dir: " + direction.toString(16));
 }
 
-//--------- MPSSE: xfer_spi_bits()
-async function mpsse_xfer_spi_bits(device, data, n)
-{
-  if (n < 1)
-    return 0;
-
-  // Input and output, update data on negative edge read on positive, bits.
-  await mpsse_send_byte(MC_DATA_IN | MC_DATA_OUT | MC_DATA_OCN | MC_DATA_BITS);
-  await mpsse_send_byte(n - 1);
-  await mpsse_send_byte(data);
-
-  let rcv = await mpsse_recv_byte(device);
-  //console.log("MPSSE: xfer_spi_bits. Received: 0x" + rcv.toString(16));
-  return rcv;
-}
-
 //------ MPSSE: xfer_spi()
 async function mpsse_xfer_spi(buff)
 {
@@ -204,18 +181,6 @@ async function flash_chip_select()
   //console.log("FLASH: chip_select() STOP!");
 }
 
-async function flash_reset()
-   {
-     //console.log("FLASH: Reset. START!");
-     await flash_chip_select();
-     await mpsse_xfer_spi_bits(device, 0xFF, 8);
-     await flash_chip_deselect();
-     await flash_chip_select();
-     await mpsse_xfer_spi_bits(device, 0xFF, 2);
-     await flash_chip_deselect();
-     //console.log("FLASH: Reset. STOP!");
-   }
-
 
 async function flash_power_up()
 {
@@ -284,9 +249,6 @@ btn_usb.onclick = async () => {
   //-- Configurar para trabajar con el SPI
   await ftdi.spi_init(device);
 
-
-
-  await flash_reset();
   await flash_power_up();
   await flash_read_id();
 }
