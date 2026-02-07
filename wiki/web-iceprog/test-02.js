@@ -1,84 +1,6 @@
 import * as ftdi from './ftdi.js';
 
-
-/* Mode commands */
-const MC_DATA_IN  = 0x20 // When set read data (Data IN)
-const MC_DATA_OUT = 0x10 // When set write data (Data OUT)
-const MC_DATA_OCN = 0x01  // When set update data on negative clock edge
-
-// ---------------------------------------------------------
-// FLASH definitions
-// ---------------------------------------------------------
-const FC_JEDECID = 0x9F; // Read JEDEC ID
-
-//-- Important information
-// ftdi->interface = 0;
-// ftdi->index     = INTERFACE_A;
-const IN_EP = 0x02; //-- Endpoint for transfering data from host to device
-const OUT_EP = 0x01; //-- Endpoint!  0x81
-
 const btn_usb = document.getElementById('btn_usb');
-
-
-// ---------------------------------------------------------
-// FLASH function implementations
-// ---------------------------------------------------------
-
-// FLASH chip select deassert
-async function flash_chip_deselect()
-{
-  //console.log("FLASH: chip_deselect() START!");
-	await set_cs_creset(1, 0);
-  //console.log("FLASH: chip_deselect() STOP!");
-}
-
-
-// ---------------------------------------------------------
-// Hardware specific CS, CReset, CDone functions
-// --------------------------------------------------------
- async function set_cs_creset(cs_b)
- {
-   let gpio = 0;
-   const direction = 0x93;  //-- 0x93
- 
-   if (cs_b) {
-     // ADBUS4 (GPIOL0)
-     gpio |= 0x10;
-   }
- 
-   await ftdi.set_gpio(device, gpio, direction);
- }
-
-
-// FLASH chip select assert
-// should only happen while FPGA reset is asserted
-async function flash_chip_select()
-{
-	await set_cs_creset(0);
-}
-
-
-async function flash_read_id()
-{
- 
-  //-- Activar el chip select de la flash
-  await ftdi.FLASH_cs_assert(device)
-  
-  let data = new Uint8Array([MC_DATA_IN | MC_DATA_OUT | MC_DATA_OCN, 4, 0, FC_JEDECID]);
-  data = new Uint8Array([...data, 0, 0, 0, 0]);
-  await device.transferOut(IN_EP, data);
-
-  //-- La respuesta contiene 7 bytes: 2 bytes del modem, 1 del comando y 4 de las respuestas
-  let result = await device.transferIn(OUT_EP, 7);
-
-  //-- Desactivar el chip select de la flash
-  await ftdi.FLASH_cs_deassert(device)
-
-  //-- Crear un buffer con la respuesta
-  let bufferId = new Uint8Array(result.data.buffer.slice(3));
-
-  return bufferId;
-}
 
 //-------------------------------------------------------------
 //-- Convertir un array con los bytes de identificacion de
@@ -121,7 +43,9 @@ btn_usb.onclick = async () => {
   await ftdi.FLASH_release_power_down(device);
 
   //-- Obtener la identificacion de la flash!
-  const buffer_id = await flash_read_id();
+  //const buffer_id = await flash_read_id();
+
+  const buffer_id = await ftdi.FLASH_read_id(device)
 
   //-- Obtener una cadena con el identificador
   let flash_id_str = id_to_string(buffer_id);

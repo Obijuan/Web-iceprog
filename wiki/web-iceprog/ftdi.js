@@ -34,9 +34,7 @@ const FTDI_SPI_WRITE = 0x31;
 //--------------- Comandos de la flash (enviados por el SPI del FTDI)
 //-- Leer el ID de la flash (3 bytes: fabricante, tipo, capacidad)
 const FLASH_RPD     = 0xAB;  // Release Power-Down
-const FLASH_READ_ID = 0x9E;  // Leer el identificador de la flash
-const CMD_READ_ID = 0x9E;
-
+const FLASH_READ_ID = 0x9F;  // Leer el identificador de la flash
 
 //-- Máscaras de acceso a los pines de los gpios del FTDI
 const FPGA_RESET_PIN  = 0x80  //-- ADBUS7: Salida: Señal de reset de la FPGA
@@ -364,22 +362,29 @@ export async function FLASH_release_power_down(device)
 //--------------------------------------------------------
 export async function FLASH_read_id(device)
 {
+
+    //-- Activar el chip select de la flash
     await FLASH_cs_assert(device)
-    const data = new Uint8Array([FTDI_SPI_WRITE, 0x00, 0x00, 0x01 ]); //FLASH_READ_ID]);
+    
+    //-- Enviar a la flash el comando para leer su ID
+    let data = new Uint8Array([FTDI_SPI_WRITE, 4, 0, FLASH_READ_ID]);
+
+    //-- Se espera recibir 4 bytes. Se envian por tanto 4 bytes dummy
+    data = new Uint8Array([...data, 0, 0, 0, 0]);
     await device.transferOut(OUT_EP, data);
 
-    //-- Debug: Leer respuesta al comando
-    //-- Deben ser 5 bytes
-    let result = await device.transferIn(IN_EP, 10);
-
-    //-- Obtener la cadena con los bytes en hexadecimal e imprimirla!
-    const cad = Array.from(new Uint8Array(result.data.buffer, result.data.byteOffset, result.data.byteLength))
-                     .map(byte => byte.toString(16).toUpperCase().padStart(2, '0'))
-                     .join(' ');
-    console.log("FLASH ID: " + cad)
+    //-- La respuesta contiene 7 bytes: 2 bytes del modem, 
+    //-- 1 del comando y 4 de las respuestas
+    let result = await device.transferIn(IN_EP, 7);
 
     //-- Desactivar el chip select de la flash
     await FLASH_cs_deassert(device)
+
+    //-- Crear un buffer con la respuesta
+    let bufferId = new Uint8Array(result.data.buffer.slice(3));
+
+    //-- Devolver el buffer
+    return bufferId;
 
     //-- En la ALHAMBRA-II: Se deberia leer: 0xEF 0x40 0x16 0x00
 }
