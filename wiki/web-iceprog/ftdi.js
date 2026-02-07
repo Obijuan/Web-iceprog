@@ -80,6 +80,13 @@ export async function initialize(device) {
     //-- Reclamar la interfaz 0 (que es la interfaz A)
     //-- Es la que se usa para el spi
     await device.claimInterface(0);
+}
+
+//----------------------------------------------------
+//-- Configurar el FTDI para trabajar con el SPI
+//----------------------------------------------------
+export async function spi_init(device) 
+{
 
     //-------- Inicializacion y configuracion del FTDI (MPSEE_INIT)
     await sio_reset(device);
@@ -104,15 +111,6 @@ export async function initialize(device) {
     // set 6 MHz clock
     data = new Uint8Array([MC_SET_CLK_DIV, 0x00, 0x00]);
     await device.transferOut(OUT_EP, data);
-
-    //-- TEST
-    //-- Enviar comando
-    data = new Uint8Array([MC_READB_LOW]);
-    await device.transferOut(OUT_EP, data);
-
-    //-- Read data from the USB
-    let result = await device.transferIn(IN_EP, 3);
-    //console.log("pins: ", result.data.getUint8(2).toString(16));
 }
 
 //-------------------------------------------------------
@@ -124,6 +122,15 @@ export async function tck_d5(device)
     await device.transferOut(OUT_EP, data);
 }
   
+//------------------------------------------------------
+// Establecer un reloj de 6 MHZ
+//------------------------------------------------------
+export async function set_clk_div(device)
+{
+    const data = new Uint8Array([MC_SET_CLK_DIV, 0x00, 0x00]);
+    await device.transferOut(OUT_EP, data);
+}
+
 
 //---------------------------------------------------
 //-- Comando de reset del chip FTDI

@@ -266,32 +266,6 @@ async function flash_read_id()
   //console.log("FLASH: READ-ID. STOP!");
 }
 
-// ----------------------------------------------------
-
-async function mpsse_init(device) {
-
-  await ftdi.sio_reset(device);
-  await ftdi.purge_buffers(device);
-
-  let latency = await ftdi.get_latency_timer(device);
-  console.log("Latency: " + latency);
-
-  //-- Set latency to 1 (fastest)
-  await ftdi.set_latency_timer(device, 1);
-
-  //-- Configurar en modo SPI
-  await ftdi.set_bitmode(device, 0xFF, BITMODE_MPSSE);
-
-  // enable clock divide by 5
-  await ftdi.tck_d5(device)
-
-
-
-  // set 6 MHz clock
-  await mpsse_send_byte(MC_SET_CLK_DIV);
-  await mpsse_send_byte(0x00);
-  await mpsse_send_byte(0x00);
-}
 
 //----------------- Main ---------------------
 
@@ -300,17 +274,15 @@ let queue = [];
 
 btn_usb.onclick = async () => {
 
+  //-- Pedir permiso explicito al usuario para
+  //-- conectarse
   device = await ftdi.connect();
-  await device.open();
-  await device.selectConfiguration(1);
-  await device.claimInterface(0);
   
+  //-- Abrir dispositivo
+  await ftdi.initialize(device);
 
-
-
-
-  await mpsse_init(device);
-
+  //-- Configurar para trabajar con el SPI
+  await ftdi.spi_init(device);
 
 
 
