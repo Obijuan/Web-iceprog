@@ -139,7 +139,7 @@ async function flash_read_id()
   await flash_chip_select();
 
   // Write command and read first 4 bytes
-  await mpsse_xfer_spi(buff);
+  await mpsse_xfer_spi2(buff);
 
   if (buff[4] == 0xFF)
       //console.log("Extended Device String Length is 0xFF, " +
@@ -204,6 +204,29 @@ async function mpsse_xfer_spi(buff)
   //console.log("MPSSE: xfer_spi. Written: " + rc + " byte(s)!");
   //console.log("MPSSE: xfer_spio. STOP!----------------")
 }
+
+//------ MPSSE: xfer_spi()
+async function mpsse_xfer_spi2(buff)
+{
+  
+  const data = new Uint8Array([MC_DATA_IN | MC_DATA_OUT | MC_DATA_OCN, 4, 0, FC_JEDECID]);
+  await device.transferOut(IN_EP, data);
+
+  let rc = await ftdi_write_data(device, buff);
+  //-- Todo! Check the correct number of bytes has been written....
+
+  //console.log("Rc: " + rc + ", Buff lenth: " + buff.byteLength);
+
+  for (let i = 0; i < buff.byteLength; i++)
+    buff[i] = await mpsse_recv_byte(device);
+
+  console.log("Test...")
+
+  //console.log("MPSSE: xfer_spi. Written: " + rc + " byte(s)!");
+  //console.log("MPSSE: xfer_spio. STOP!----------------")
+}
+
+
 
 
 
