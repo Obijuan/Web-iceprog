@@ -79,7 +79,15 @@ async function flash_read_id()
 }
 
  
+function id_to_string(id)
+{
+  let cad = ""
 
+  for (const byte of id)
+    cad += " 0x" + byte.toString(16);
+
+  return cad
+}
 
 
 //----------------- Main ---------------------
@@ -110,10 +118,8 @@ btn_usb.onclick = async () => {
   //-- Obtener la identificacion de la flash!
   const buffer_id = await flash_read_id();
 
-  //-- Imprimir el identificador en hexadecimal
-  let flash_id_str = "flash ID: ";
-  for (const byte of buffer_id)
-     flash_id_str += " 0x" + byte.toString(16);
+  //-- Obtener una cadena con el identificador
+  let flash_id_str = id_to_string(buffer_id);
 
   console.log("✅FLASH-ID: " + flash_id_str);
   
