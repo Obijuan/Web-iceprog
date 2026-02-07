@@ -61,8 +61,9 @@ async function flash_chip_select()
 async function flash_read_id()
 {
  
-  await flash_chip_select();
-
+  //-- Activar el chip select de la flash
+  await ftdi.FLASH_cs_assert(device)
+  
   let data = new Uint8Array([MC_DATA_IN | MC_DATA_OUT | MC_DATA_OCN, 4, 0, FC_JEDECID]);
   data = new Uint8Array([...data, 0, 0, 0, 0]);
   await device.transferOut(IN_EP, data);
@@ -70,7 +71,8 @@ async function flash_read_id()
   //-- La respuesta contiene 7 bytes: 2 bytes del modem, 1 del comando y 4 de las respuestas
   let result = await device.transferIn(OUT_EP, 7);
 
-  await flash_chip_deselect();
+  //-- Desactivar el chip select de la flash
+  await ftdi.FLASH_cs_deassert(device)
 
   //-- Crear un buffer con la respuesta
   let bufferId = new Uint8Array(result.data.buffer.slice(3));
@@ -78,7 +80,10 @@ async function flash_read_id()
   return bufferId;
 }
 
- 
+//-------------------------------------------------------------
+//-- Convertir un array con los bytes de identificacion de
+//-- la flash en una cadena
+//-------------------------------------------------------------
 function id_to_string(id)
 {
   let cad = ""
