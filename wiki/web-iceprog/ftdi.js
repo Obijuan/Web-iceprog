@@ -237,7 +237,7 @@ export async function set_bitmode(device, bitmask, mode) {
 //--     - Bits 1: Salidas
 //--     - Bits 0: entradas
 //--------------------------------------------------------
-async function ftdi_set_gpio(device, gpio, direction) 
+export async function set_gpio(device, gpio, direction) 
 {
   //-- Los pines se asignan con el comando SET_BITS_LOW
   //-- Formato: [Comando, Valor, Direccion]
@@ -255,7 +255,7 @@ async function ftdi_set_gpio(device, gpio, direction)
 export async function FPGA_reset_assert(device)
 {
     //-- Logica negativa: El reset se activa poniendo a 0 el pin
-    await ftdi_set_gpio(device, 0, FPGA_RESET_PIN);
+    await set_gpio(device, 0, FPGA_RESET_PIN);
 
 }
 
@@ -268,7 +268,7 @@ export async function FPGA_reset_assert(device)
 export async function FPGA_reset_deassert(device)
 {
     //-- Logica negativa: El reset se desactiva poniendo a 1 el pin
-    await ftdi_set_gpio(device, FPGA_RESET_PIN, FPGA_RESET_PIN);
+    await set_gpio(device, FPGA_RESET_PIN, FPGA_RESET_PIN);
 
 }
 
@@ -315,7 +315,7 @@ export async function FLASH_cs_assert(device)
 {
    //-- El chip select de la flash está en el ADBUS 4 del FTDI (bit 4)
    //-- Logica negativa: El cs se activa poniendo a 0 el pin
-    await ftdi_set_gpio(device, 0, FLASH_CS_PIN);
+    await set_gpio(device, 0, FLASH_CS_PIN);
 }
 
 //----------------------------------------------------------
@@ -323,7 +323,7 @@ export async function FLASH_cs_assert(device)
 //----------------------------------------------------------
 export async function FLASH_cs_deassert(device)
 {
-    await ftdi_set_gpio(device, FLASH_CS_PIN, FLASH_CS_PIN);
+    await set_gpio(device, FLASH_CS_PIN, FLASH_CS_PIN);
 }
 
 //-------------------------------------------------------------
@@ -399,7 +399,7 @@ async function ftdi_send_byte(b) {
 export async function setResetPin(device, level) {
 
     const value = level ? 0x80 : 0x00; // Nivel alto (0x80) o bajo (0x00)
-    await ftdi_set_gpio(device, value, 0x80);
+    await set_gpio(device, value, 0x80);
 }
 
 export async function readPins(device) {

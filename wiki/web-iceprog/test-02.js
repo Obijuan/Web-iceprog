@@ -101,16 +101,6 @@ async function mpsse_recv_byte(device) {
 }
 
 
-//-------- MPSSE: set_gpio()
-async function mpsse_set_gpio(gpio, direction)
-{
-	await mpsse_send_byte(MC_SETB_LOW);
-	await mpsse_send_byte(gpio); // Value
-	await mpsse_send_byte(direction); // Direction
-
-  //console.log("MPSSE: set_gpio: " + gpio.toString(16) + 
-  //            ", Dir: " + direction.toString(16));
-}
 
 //------ MPSSE: xfer_spi()
 async function mpsse_xfer_spi(buff)
@@ -206,10 +196,7 @@ async function flash_read_id()
      gpio |= 0x80;
    }
  
-   await mpsse_set_gpio(gpio, direction);
-
-   //console.log("MPSEE: set_cs_creset: cs_b: " + cs_b.toString(16) + 
-   //            ", creset_b: " + creset_b.toString(16));
+   await ftdi.set_gpio(device, gpio, direction);
  }
 
 
@@ -226,7 +213,13 @@ async function flash_power_up()
 {
   let buff = new Uint8Array(1);
   buff[0] = FC_RPD;
+
+
   await flash_chip_select();
+
+  //await ftdi.FLASH_cs_assert(device)
+
+
   await mpsse_xfer_spi(buff);
   await flash_chip_deselect();
 }
