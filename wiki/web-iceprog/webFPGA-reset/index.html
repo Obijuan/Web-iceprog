@@ -41,16 +41,32 @@
                 </div>
             </div>
 
+            
+
             <div id="actions-area" class="actions-area">
+                
                 <button id="connect-btn" class="primary-btn">Conectar</button>
                 <button id="reset-btn" class="primary-btn hidden">Reset FPGA</button>
+
+                <div id="flash-info" class="flash-info hidden">
+                    <span class="label">JEDEC ID:</span>
+                    <div id="id-chips-container" class="chips-container">
+                    </div>
+                </div>
+
+
                 <button id="flash-id-btn" class="primary-btn hidden" style="background: #a855f7;">
                     Identificar Flash
                 </button>
+
+                
+
                 <button id="disconnect-btn" class="secondary-btn danger hidden">
                     ✕ Desconectar
                 </button>
             </div>
+
+            
 
             <div class="console-section">
                 <div class="console-header">

@@ -7,6 +7,7 @@ const statusCard = document.getElementById('status-card');
 const statusText = document.getElementById('status-text');
 const deviceName = document.getElementById('device-name');
 const actionsArea = document.getElementById('actions-area');
+const infoArea = document.getElementById('flash-info'); 
 
 // Referencias a los botones
 const connectBtn = document.getElementById('connect-btn');
@@ -22,7 +23,7 @@ let device = null;
 // Asignamos los eventos una sola vez al cargar el script
 flashBtn.onclick = handleCheckFlash;
 resetBtn.onclick = handleReset;
-disconnectBtn.onclick = performDisconnect;
+disconnectBtn.onclick = handleDisconnect;
 
 
 // -----------------------------------------------------
@@ -47,14 +48,20 @@ function checkCompatibility() {
 }
 
 
-// Función centralizada para desconectar
-async function performDisconnect() {
-    if (device) {
-        await ftdi.disconnect(device);
+async function handleDisconnect() {
+    try {
+        if (device && device.opened) {
+            await device.close();
+        }
+    } catch (err) {
+        console.error("Error al cerrar:", err);
+    } finally {
         device = null;
-        updateUI(false);
+        updateUI(false); // Esto disparará la ocultación del ID
+        log("Dispositivo desconectado.", "system");
     }
 }
+
 
 //-----------------------------------------------------
 //-- Actualizar la interfaz de usuario
@@ -104,6 +111,12 @@ async function updateUI(connected) {
         resetBtn.classList.add('hidden');
         flashBtn.classList.add('hidden');
         disconnectBtn.classList.add('hidden');
+
+        // --- Ocultar el identificador de la flash
+        infoArea.classList.add('hidden'); // La transición ocurrirá sola
+       
+        //-- Vaciar los chips
+        //document.getElementById('id-chips-container').innerHTML = ''; 
     }
 }
 
@@ -213,17 +226,9 @@ async function handleReset() {
         log("Reset completado con éxito.", "success");
         statusText.textContent = "✅ FPGA Reiniciada";
 
-        //-- TEST
-        let value = await ftdi.FPGA_get_cdone(device)
-        console.log("CDONE: " + value)
-
         // Esperamos a que la FPGA cargue desde la Flash
         await new Promise(r => setTimeout(r, 200)); 
         await checkFPGAStatus();
-
-        //-- TEST
-        value = await ftdi.FPGA_get_cdone(device)
-        console.log("CDONE: " + value)
         
 
     } catch (err) {
@@ -352,6 +357,25 @@ function id_to_string(id)
 }
 
 
+function displayFlashID(idObject) {
+    const container = document.getElementById('id-chips-container');
+    const infoArea = document.getElementById('flash-info');
+    
+    // Convertimos el objeto en un array de bytes para iterar
+    //const bytes = [idObject.manufacturer, idObject.memType, idObject.capacity];
+    
+    container.innerHTML = ''; // Limpiar anterior
+    
+    idObject.forEach(byte => {
+        const chip = document.createElement('div');
+        chip.className = 'hex-chip';
+        chip.textContent = byte.toString(16).toUpperCase().padStart(2, '0');
+        container.appendChild(chip);
+    });
+
+    infoArea.classList.remove('hidden');
+}
+
 async function handleCheckFlash() {
     try {
         log("Preparando bus SPI (FPGA en Reset)...", "system");
@@ -366,13 +390,18 @@ async function handleCheckFlash() {
         //-- se podra leer nada de ella
         await ftdi.FLASH_release_power_down(device);
     
+        console.log("TEST!");
         const buffer_id = await ftdi.FLASH_read_id(device)
+        displayFlashID(buffer_id);
     
         //-- Obtener una cadena con el identificador
         let flash_id_str = id_to_string(buffer_id);
     
         console.log("✅FLASH-ID: " + flash_id_str);
         log("✅FLASH-ID: " + flash_id_str, "success");
+
+        
+        
 
     } catch (err) {
         log("Error al identificar Flash: " + err.message, "error");
