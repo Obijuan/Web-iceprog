@@ -42,9 +42,6 @@ btn_usb.onclick = async () => {
   //-- se podra leer nada de ella
   await ftdi.FLASH_release_power_down(device);
 
-  //-- Obtener la identificacion de la flash!
-  //const buffer_id = await flash_read_id();
-
   const buffer_id = await ftdi.FLASH_read_id(device)
 
   //-- Obtener una cadena con el identificador
