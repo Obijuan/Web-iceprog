@@ -60,38 +60,26 @@ async function flash_chip_select()
 
 async function flash_read_id()
 {
-  /* JEDEC ID structure:
-  * Byte No. | Data Type
-  * ---------+----------
-  *        0 | FC_JEDECID Request Command
-  *        1 | MFG ID
-  *        2 | Dev ID 1
-  *        3 | Dev ID 2
-  *        4 | Ext Dev Str Len
-  */
-
-  //console.log("FLASH: READ-ID. START!");
-
+ 
   await flash_chip_select();
 
   let data = new Uint8Array([MC_DATA_IN | MC_DATA_OUT | MC_DATA_OCN, 4, 0, FC_JEDECID]);
   data = new Uint8Array([...data, 0, 0, 0, 0]);
   await device.transferOut(IN_EP, data);
 
-  let result = await device.transferIn(OUT_EP, 10);
+  //-- La respuesta contiene 7 bytes: 2 bytes del modem, 1 del comando y 4 de las respuestas
+  let result = await device.transferIn(OUT_EP, 7);
 
   await flash_chip_deselect();
 
   //-- Crear un buffer con la respuesta
-  let buff = new Uint8Array(4);
+  let bufferId = new Uint8Array(result.data.buffer.slice(3));
 
-  let flash_id_str = "flash ID: ";
-  for (let i = 3; i < result.data.byteLength; i++)
-    flash_id_str += " 0x" + result.data.getUint8(i).toString(16);
-
-  console.log("✅FLASH-ID: " + flash_id_str);
-  //console.log("FLASH: READ-ID. STOP!");
+  return bufferId;
 }
+
+ 
+
 
 
 //----------------- Main ---------------------
@@ -119,10 +107,16 @@ btn_usb.onclick = async () => {
   //-- se podra leer nada de ella
   await ftdi.FLASH_release_power_down(device);
 
-  
-  await flash_read_id();
+  //-- Obtener la identificacion de la flash!
+  const buffer_id = await flash_read_id();
 
-  //-- Hemos terminado con la Flash
+  //-- Imprimir el identificador en hexadecimal
+  let flash_id_str = "flash ID: ";
+  for (const byte of buffer_id)
+     flash_id_str += " 0x" + byte.toString(16);
+
+  console.log("✅FLASH-ID: " + flash_id_str);
+  
   //-- Quitar el Reset de la FPGA (opcional)
   await ftdi.FPGA_reset_deassert(device)
 }
