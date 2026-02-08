@@ -452,6 +452,10 @@ async function handleRead8() {
             return;
         }
 
+        // Efecto visual: "limpiamos" el display un instante
+        byteDisplay.style.opacity = "0.5";
+        byteDisplay.textContent = "..";
+
         const address_str = "0x" + address.toString(16).toUpperCase().padStart(6, '0');
 
         log("Leyendo dirección " + address_str, "system");
@@ -474,6 +478,8 @@ async function handleRead8() {
         // --- ACTUALIZACIÓN GRÁFICA ---
         const hexString = value.toString(16).toUpperCase().padStart(2, '0');
         byteDisplay.textContent = hexString;
+        byteDisplay.style.opacity = "1";
+
         
         // También podemos cambiar ligeramente el brillo al actualizar para dar feedback
         byteDisplay.style.filter = "brightness(1.5)";
@@ -486,3 +492,17 @@ async function handleRead8() {
         await ftdi.FPGA_reset_deassert(device);
     }
 }
+
+
+// 1. Escuchar la tecla ENTER en el input
+addressInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+        event.preventDefault(); // Evitar comportamientos extraños del navegador
+        handleRead8();
+    }
+});
+
+// 2. UX: Seleccionar el texto al hacer foco para facilitar la edición
+addressInput.addEventListener('focus', () => {
+    addressInput.select();
+});

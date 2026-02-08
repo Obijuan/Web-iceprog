@@ -442,6 +442,12 @@ body {
     letter-spacing: 1px;
 }
 
+.label::after {
+    content: " [Enter]";
+    font-size: 0.6rem;
+    opacity: 0.5;
+}
+
 
 .read-tool {
     margin-top: 1rem;
@@ -503,3 +509,4 @@ body {
     color: #10b981;
     text-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
 }
+
