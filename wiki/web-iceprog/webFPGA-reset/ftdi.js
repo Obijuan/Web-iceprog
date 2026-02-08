@@ -35,6 +35,7 @@ const FTDI_SPI_WRITE = 0x31;
 //-- Leer el ID de la flash (3 bytes: fabricante, tipo, capacidad)
 const FLASH_RPD     = 0xAB;  // Release Power-Down
 const FLASH_READ_ID = 0x9F;  // Leer el identificador de la flash
+const FLASH_READ    = 0x03;  // Leer bytes de la flash
 
 //-- Máscaras de acceso a los pines de los gpios del FTDI
 const FPGA_RESET_PIN  = 0x80  //-- ADBUS7: Salida: Señal de reset de la FPGA
@@ -425,6 +426,7 @@ export async function readPins(device) {
     }
 }
 
+/* 🚧 FUNCION OBSOLETA */
 export async function readFlashID(device) {
     // Para leer el ID, enviamos el comando 0x9E y esperamos 3 bytes de respuesta:
     // 1. Manufacturer ID (Micron = 0x20)
@@ -437,7 +439,7 @@ export async function readFlashID(device) {
     // En MPSSE, para recibir datos después de enviar, a veces usamos secuencias separadas.
     
     // 1. Enviamos comando de escritura (0x11) para el código 0x9E
-    const writeCmd = new Uint8Array([0x11, 0x00, 0x00, CMD_READ_ID]);
+    const writeCmd = new Uint8Array([FTDI_SPI_WRITE, 0x00, 0x00, CMD_READ_ID]);
     await device.transferOut(2, writeCmd);
 
     // 2. Enviamos comando de lectura (0x20) para 3 bytes
@@ -457,21 +459,44 @@ export async function readFlashID(device) {
     throw new Error("No se pudo leer el ID de la Flash");
 }
 
-/*-- FTDI: Reset cmd
-async function ftdi_reset(device) {
 
-  let result = await device.controlTransferOut({
-    requestType: 'vendor',
-    recipient: 'device',
-    request: SIO_RESET_REQUEST,
-    value: SIO_RESET_SIO,
-    index: INTERFACE_A
-  });
-  
-  //console.log("Reset: " + result.status);
-  console.assert (result.status == "ok", "Error resetting the FTDI");
+/**
+ * Lee un solo byte de una dirección específica de la Flash
+ * @param {Object} device - El dispositivo USB
+ * @param {number} address - Dirección de 24 bits (ej: 0x000000)
+ */
+export async function FLASH_read8(device, address) {
+
+    // 1. Bajar CS para iniciar la transacción
+    await FLASH_cs_assert(device);
+
+    // 2. Preparar trama: Comando (0x03) + Dirección (3 bytes)
+    // Para la dirección 0x000000 -> [0x03, 0x00, 0x00, 0x00]
+    const addrH = (address >> 16) & 0xFF;
+    const addrM = (address >> 8) & 0xFF;
+    const addrL = address & 0xFF;
+    
+    //-- Enviar a la flash el comando para leer 
+    let cmdframe = new Uint8Array([FTDI_SPI_WRITE, 4, 0, FLASH_READ]);
+
+    //-- Parametros de READ: 3 bytes de la dirección + 1 dumy byte
+    cmdframe = new Uint8Array([...cmdframe, addrH, addrM, addrL, 0])
+    //cmdframe = new Uint8Array([...cmdframe, 0x00, 0x00, 0x04, 0])
+    await device.transferOut(OUT_EP, cmdframe);
+
+    //-- La respuesta contiene 7 bytes: 2 bytes del modem, 
+    //-- 1 del comando y 3 de la direccion y 1 byte de la respuesta
+    let result = await device.transferIn(IN_EP, 10);
+
+    //-- Desactivar el chip select de la flash
+    await FLASH_cs_deassert(device)
+
+    if (result.status === 'ok' && result.data.byteLength === 7) {
+        return result.data.getUint8(6); // El byte de la flash
+    }
+    throw new Error("Error leyendo byte de la Flash");
 }
-*/
+
 
 
 

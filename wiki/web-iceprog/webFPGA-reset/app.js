@@ -14,6 +14,7 @@ const connectBtn = document.getElementById('connect-btn');
 const resetBtn = document.getElementById('reset-btn');
 const flashBtn = document.getElementById('flash-id-btn');
 const disconnectBtn = document.getElementById('disconnect-btn');
+const readByteBtn = document.getElementById('read-byte-btn');
 
 log("Aplicacion iniciada...", "system");
 
@@ -24,6 +25,7 @@ let device = null;
 flashBtn.onclick = handleCheckFlash;
 resetBtn.onclick = handleReset;
 disconnectBtn.onclick = handleDisconnect;
+readByteBtn.onclick = handleRead8;
 
 
 // -----------------------------------------------------
@@ -91,6 +93,7 @@ async function updateUI(connected) {
         resetBtn.classList.remove('hidden');
         flashBtn.classList.remove('hidden');
         disconnectBtn.classList.remove('hidden');
+        readByteBtn.classList.remove('hidden');
 
         //-- TEST
         let value = await ftdi.FPGA_get_cdone(device)
@@ -111,6 +114,7 @@ async function updateUI(connected) {
         resetBtn.classList.add('hidden');
         flashBtn.classList.add('hidden');
         disconnectBtn.classList.add('hidden');
+        readByteBtn.classList.add('hidden');
 
         // --- Ocultar el identificador de la flash
         infoArea.classList.add('hidden'); // La transición ocurrirá sola
@@ -412,3 +416,33 @@ async function handleCheckFlash() {
 }
 
 
+async function handleRead8() {
+
+    const address = 0x000004;
+    const address_str = "0x" + address.toString(16).toUpperCase().padStart(6, '0');
+
+    try {
+
+        log("Leyendo dirección " + address_str, "system");
+
+        //-- Para enviar cualquier comando a la flash
+        //-- la FPGA debe estar en estado de reset
+        await ftdi.FPGA_reset_assert(device);
+        await new Promise(r => setTimeout(r, 50));
+
+        //-- Sacar la flash del modo sleep (de bajo consumo
+        //-- Es obligatorio hacerlo, o de lo contrario NO
+        //-- se podra leer nada de ella
+        await ftdi.FLASH_release_power_down(device);
+
+        
+        const value = await ftdi.FLASH_read8(device, address);
+        const value_str = value.toString(16).toUpperCase().padStart(2, '0');
+        log("Dato en " + address_str + ": " + value_str, "success");
+        
+    } catch (err) {
+        log("Error de lectura: " + err.message, "error");
+    } finally {
+        await ftdi.FPGA_reset_deassert(device);
+    }
+}
