@@ -18,6 +18,8 @@ const flashBtn = document.getElementById('flash-id-btn');
 const disconnectBtn = document.getElementById('disconnect-btn');
 const readByteBtn = document.getElementById('read-byte-btn');
 
+//-- Otros
+const byteDisplay = document.getElementById('byte-value-display');
 
 
 log("Aplicacion iniciada...", "system");
@@ -128,6 +130,10 @@ async function updateUI(connected) {
 
         //-- Otros
         readTool.classList.add('hidden');
+
+        // Dentro de updateUI(false)
+        byteDisplay.textContent = "--";
+        addressInput.value = "0";
 
        
         //-- Vaciar los chips
@@ -460,12 +466,21 @@ async function handleRead8() {
         //-- se podra leer nada de ella
         await ftdi.FLASH_release_power_down(device);
 
-        
+        //-- Lectura del byte
         const value = await ftdi.FLASH_read8(device, address);
         const value_str = value.toString(16).toUpperCase().padStart(2, '0');
         log("Dato en " + address_str + ": " + value_str, "success");
+
+        // --- ACTUALIZACIÓN GRÁFICA ---
+        const hexString = value.toString(16).toUpperCase().padStart(2, '0');
+        byteDisplay.textContent = hexString;
+        
+        // También podemos cambiar ligeramente el brillo al actualizar para dar feedback
+        byteDisplay.style.filter = "brightness(1.5)";
+        setTimeout(() => byteDisplay.style.filter = "brightness(1)", 1500);
         
     } catch (err) {
+        byteDisplay.textContent = "??";
         log("Error de lectura: " + err.message, "error");
     } finally {
         await ftdi.FPGA_reset_deassert(device);

@@ -60,9 +60,15 @@
                 <div id="read-tool" class="read-tool hidden">
                     <div class="input-group">
                         <label for="address-input" class="label">Dirección (Hex/Dec):</label>
-                        <input type="text" id="address-input" value="0" placeholder="Ej: 0x1000">
+                        <input type="text" id="address-input" value="0">
                     </div>
-                    <button id="read-byte-btn" class="primary-btn" style="background: #10b981; margin-top: 10px;">
+                    
+                    <div class="data-display">
+                        <div class="data-label">VALOR LEÍDO</div>
+                        <div id="byte-value-display" class="byte-hex">--</div>
+                    </div>
+                
+                    <button id="read-byte-btn" class="primary-btn" style="background: #10b981;">
                         Leer Byte
                     </button>
                 </div>
