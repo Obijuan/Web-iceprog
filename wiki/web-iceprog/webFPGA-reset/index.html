@@ -57,18 +57,19 @@
                     Identificar Flash
                 </button>
 
+
+
+
+
+
                 <div id="read-tool" class="read-tool hidden">
                     <div class="input-group">
-                        <label for="address-input" class="label">Dirección (Hex/Dec):</label>
-                        <input 
-                            type="text" 
-                            id="address-input" 
-                            value="0" 
-                            spellcheck="false" 
-                            autocomplete="off" 
-                            autocorrect="off" 
-                            autocapitalize="off"
-                        >
+                       <label for="address-input" class="label">Dirección (Hex/Dec):</label>
+                       <div class="navigation-controls">
+                           <button id="prev-addr-btn" class="nav-btn">◀</button>
+                           <input type="text" id="address-input" value="0" spellcheck="false" autocomplete="off">
+                           <button id="next-addr-btn" class="nav-btn">▶</button>
+                       </div>
                     </div>
 
                     <div class="data-display">

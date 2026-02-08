@@ -17,6 +17,8 @@ const resetBtn = document.getElementById('reset-btn');
 const flashBtn = document.getElementById('flash-id-btn');
 const disconnectBtn = document.getElementById('disconnect-btn');
 const readByteBtn = document.getElementById('read-byte-btn');
+const prevBtn = document.getElementById('prev-addr-btn');
+const nextBtn = document.getElementById('next-addr-btn');
 
 //-- Otros
 const byteDisplay = document.getElementById('byte-value-display');
@@ -32,6 +34,9 @@ flashBtn.onclick = handleCheckFlash;
 resetBtn.onclick = handleReset;
 disconnectBtn.onclick = handleDisconnect;
 readByteBtn.onclick = handleRead8;
+// Eventos de los botones
+prevBtn.onclick = () => stepAddress(-1);
+nextBtn.onclick = () => stepAddress(1);
 
 
 // -----------------------------------------------------
@@ -500,9 +505,56 @@ addressInput.addEventListener('keydown', (event) => {
         event.preventDefault(); // Evitar comportamientos extraños del navegador
         handleRead8();
     }
+    if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        stepAddress(1);
+    } else if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        stepAddress(-1);
+    }
 });
+
 
 // 2. UX: Seleccionar el texto al hacer foco para facilitar la edición
 addressInput.addEventListener('focus', () => {
     addressInput.select();
 });
+
+addressInput.addEventListener('input', () => {
+    let val = addressInput.value.trim();
+    // Regex para validar: o es solo números, o empieza por 0x seguido de hex
+    const isValid = /^(0x[0-9a-fA-F]+|[0-9]+)$/.test(val);
+    
+    if (isValid || val === "") {
+        addressInput.style.borderColor = "#10b981"; // Verde normal
+        addressInput.style.boxShadow = "none";
+    } else {
+        addressInput.style.borderColor = "#ef4444"; // Rojo error real
+        addressInput.style.boxShadow = "0 0 5px rgba(239, 68, 68, 0.5)";
+    }
+});
+
+/**
+ * Modifica la dirección actual y dispara la lectura
+ * @param {number} delta - Cantidad a sumar (1) o restar (-1)
+ */
+function stepAddress(delta) {
+    let rawValue = addressInput.value.trim();
+    let isHex = rawValue.toLowerCase().startsWith('0x');
+    let currentAddr = isHex ? parseInt(rawValue, 16) : parseInt(rawValue, 10);
+
+    if (isNaN(currentAddr)) currentAddr = 0;
+
+    let newAddr = currentAddr + delta;
+    if (newAddr < 0) newAddr = 0; // Evitar direcciones negativas
+
+    // Actualizamos el input manteniendo el formato preferido del usuario
+    if (isHex) {
+        addressInput.value = '0x' + newAddr.toString(16).toUpperCase();
+    } else {
+        addressInput.value = newAddr.toString(10);
+    }
+
+    // Disparamos la lectura automática
+    handleRead8();
+}
