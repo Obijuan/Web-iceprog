@@ -56,9 +56,16 @@
                 <button id="flash-id-btn" class="primary-btn hidden" style="background: #a855f7;">
                     Identificar Flash
                 </button>
-                <button id="read-byte-btn" class="primary-btn hidden" style="background: #10b981;">
-                    Leer Byte
-                </button>
+
+                <div id="read-tool" class="read-tool hidden">
+                    <div class="input-group">
+                        <label for="address-input" class="label">Dirección (Hex/Dec):</label>
+                        <input type="text" id="address-input" value="0" placeholder="Ej: 0x1000">
+                    </div>
+                    <button id="read-byte-btn" class="primary-btn" style="background: #10b981; margin-top: 10px;">
+                        Leer Byte
+                    </button>
+                </div>
 
 
                 <button id="disconnect-btn" class="secondary-btn danger hidden">

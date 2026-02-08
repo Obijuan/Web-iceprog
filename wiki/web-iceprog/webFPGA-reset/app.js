@@ -8,6 +8,8 @@ const statusText = document.getElementById('status-text');
 const deviceName = document.getElementById('device-name');
 const actionsArea = document.getElementById('actions-area');
 const infoArea = document.getElementById('flash-info'); 
+const readTool = document.getElementById('read-tool');
+const addressInput = document.getElementById('address-input');
 
 // Referencias a los botones
 const connectBtn = document.getElementById('connect-btn');
@@ -15,6 +17,8 @@ const resetBtn = document.getElementById('reset-btn');
 const flashBtn = document.getElementById('flash-id-btn');
 const disconnectBtn = document.getElementById('disconnect-btn');
 const readByteBtn = document.getElementById('read-byte-btn');
+
+
 
 log("Aplicacion iniciada...", "system");
 
@@ -95,6 +99,9 @@ async function updateUI(connected) {
         disconnectBtn.classList.remove('hidden');
         readByteBtn.classList.remove('hidden');
 
+        //-- Otros.. (por documentar)
+        readTool.classList.remove('hidden');
+
         //-- TEST
         let value = await ftdi.FPGA_get_cdone(device)
         console.log("CDONE: " + value)
@@ -118,6 +125,10 @@ async function updateUI(connected) {
 
         // --- Ocultar el identificador de la flash
         infoArea.classList.add('hidden'); // La transición ocurrirá sola
+
+        //-- Otros
+        readTool.classList.add('hidden');
+
        
         //-- Vaciar los chips
         //document.getElementById('id-chips-container').innerHTML = ''; 
@@ -418,10 +429,24 @@ async function handleCheckFlash() {
 
 async function handleRead8() {
 
-    const address = 0x000004;
-    const address_str = "0x" + address.toString(16).toUpperCase().padStart(6, '0');
-
     try {
+
+        // 1. Obtener y parsear la dirección
+        let rawValue = addressInput.value.trim();
+        let address;
+
+        if (rawValue.toLowerCase().startsWith('0x')) {
+            address = parseInt(rawValue, 16);
+        } else {
+            address = parseInt(rawValue, 10);
+        }
+
+        if (isNaN(address)) {
+            log("Error: Dirección no válida", "error");
+            return;
+        }
+
+        const address_str = "0x" + address.toString(16).toUpperCase().padStart(6, '0');
 
         log("Leyendo dirección " + address_str, "system");
 

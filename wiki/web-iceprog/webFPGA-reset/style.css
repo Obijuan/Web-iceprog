@@ -443,3 +443,37 @@ body {
 }
 
 
+.read-tool {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(30, 41, 59, 0.5);
+    border-radius: 8px;
+    border: 1px solid #10b981;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+#address-input {
+    background: #0f172a;
+    border: 1px solid #10b981;
+    color: #10b981;
+    padding: 8px;
+    border-radius: 4px;
+    text-align: center;
+    font-family: 'Courier New', monospace;
+    width: 120px;
+}
+
+#address-input:focus {
+    outline: none;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+}
+
