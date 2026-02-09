@@ -24,6 +24,8 @@ const nextBtn = document.getElementById('next-addr-btn');
 const byteDisplay = document.getElementById('byte-value-display');
 const hexdumpGrid = document.getElementById('hexdump-grid');
 const hexdumpContainer = document.getElementById('hexdump-container');
+const eraseBtn = document.getElementById('erase-btn');
+const writeTool = document.getElementById('write-tool');
 
 log("Aplicacion iniciada...", "system");
 
@@ -38,6 +40,7 @@ readByteBtn.onclick = handleRead8;
 // Eventos de los botones
 prevBtn.onclick = () => stepAddress(-1);
 nextBtn.onclick = () => stepAddress(1);
+eraseBtn.onclick = handleErase;
 
 
 // -----------------------------------------------------
@@ -110,6 +113,8 @@ async function updateUI(connected) {
         //-- Otros.. (por documentar)
         readTool.classList.remove('hidden');
         hexdumpContainer.classList.remove('hidden');
+        writeTool.classList.remove('hidden');
+
 
         //-- TEST
         let value = await ftdi.FPGA_get_cdone(device)
@@ -143,6 +148,7 @@ async function updateUI(connected) {
         addressInput.value = "0";
 
         hexdumpContainer.classList.add('hidden');
+        writeTool.classList.add('hidden');
 
        
         //-- Vaciar los chips
@@ -583,6 +589,59 @@ async function updateHexdump(address) {
         });
     } catch (err) {
         console.error("Error en hexdump:", err);
+    }
+}
+
+async function handleErase() {
+    //if (!confirm("¿Estás seguro de borrar 64KB a partir de 0x040000?")) return;
+
+    try {
+        log("Iniciando borrado de sector (0x040000)...", "system");
+        eraseBtn.disabled = true;
+        eraseBtn.textContent = "Borrando...";
+
+        //-- Poner la FPGA en reset
+        await ftdi.FPGA_reset_assert(device);
+        await new Promise(r => setTimeout(r, 50));
+
+        //-- Sacar la EEPROM del modo sleep
+        await ftdi.FLASH_release_power_down(device);
+
+        //-- Medir tiempo de inicio
+        const startTime = performance.now();
+
+        //-- DEBUG
+        console.log("TEST-3");
+        let status = await ftdi.FLASH_read_status(device);
+        console.log("Status: " + status);
+
+        // Habilitar escritura en la flash
+        await ftdi.FLASH_writeEnable(device);
+
+        //-- DEBUG
+        status = await ftdi.FLASH_read_status(device);
+        console.log("Status: " + status);
+
+        //-- Borrar bloque de 64KB
+        await ftdi.FLASH_erase64KB(device, 0x040000);
+
+        //-- Calcular la duracion del proceso
+        const duration = ((performance.now() - startTime) / 1000).toFixed(2);
+
+        log(`Borrado completado en ${duration}s`, "success");
+        
+        // Actualizamos la vista para comprobar el borrado
+        //addressInput.value = "0x040000";
+        //await handleRead8();
+
+    } catch (err) {
+        log("Error al borrar: " + err.message, "error");
+    } finally {
+        //-- Quitar el Reset de la FPGA (opcional)
+        await ftdi.FPGA_reset_deassert(device);
+
+        eraseBtn.disabled = false;
+        eraseBtn.textContent = "Borrar Bloque 64KB (0x040000)";
     }
 }
 
