@@ -1,3 +1,16 @@
+import * as ftdi from './ftdi.js';
+
+const btn_usb = document.getElementById('btn_usb');
+
+
+// 🚧 DEBUG 🚧  
+const display = document.getElementById('display');
+const btn_list = document.getElementById('btn_list');
+const btn_close = document.getElementById('btn_close');
+const bitstream = document.getElementById('bitstream');
+
+
+
 // FTDI USB identifiers
 const usbVendor = 0x0403;
 const usbProduct = 0x6010;
@@ -59,11 +72,7 @@ const SIO_RESET_PURGE_TX = 2;
 const IN_EP = 0x02; //-- Endpoint for transfering data from host to device
 const OUT_EP = 0x01; //-- Endpoint!  0x81
 
-const btn_usb = document.getElementById('btn_usb');
-const display = document.getElementById('display');
-const btn_list = document.getElementById('btn_list');
-const btn_close = document.getElementById('btn_close');
-const bitstream = document.getElementById('bitstream');
+
 
 //-- FTDI: Reset cmd
 async function ftdi_reset(device) {
@@ -762,52 +771,35 @@ async function test_mode()
 
 
 //----------------- Main ---------------------
+let device;
 
+// 🚧 DEBUG 🚧  
 
 if ('usb' in navigator == false) {
     console.log("WEB-USB NO SOPORTADO!")
 }
 
-let device;
-
 //-- Buffer for storing incomming data from usb
 let queue = [];
 
 
-
-
 btn_usb.onclick = async () => {
 
-  //-- Solicitar al usuario la selección del dispositivo USB
-  //-- Es obligatorio (si el usuario no lo habre no se puede continuar)
-  const filters = [{ vendorId: 0x0403}];
-	await navigator.usb.requestDevice({ filters: filters })
-		.then((usbDevice) => {
-			device = usbDevice;
-		})
-		.catch((e) => {
-			device = null;
-			console.error("Error: " + e);
-		});
+  //-- Pedir permiso explicito al usuario para
+  //-- conectarse
+  device = await ftdi.connect();
 
-  //-- Abrir el dispositivo USB
-  //-- 🚧TODO🚧: Comprobacion de errores
-  await device.open();
+  //-- Abrir dispositivo
+    await ftdi.initialize(device);
 
   console.log("USB abierto") 
 
   //-- Show the device on the screen
   display.innerHTML = device.productName + " " + device.manufacturerName;
-
-  //-- Select the configuration (the FTDI chip only have 1, which value is 1)
-  //--- (given by bConfigurationValue)
-  await device.selectConfiguration(1);
-  //console.log("Configuration value: " + device.configuration.configurationValue);
-
-  //-- Claim the interface
-  //-- NOTE: [LINUX]: Make sure the ftdi_sio modules has been unloaded previously!!!
-  await device.claimInterface(0);
   
+
+  //-- 🚧 DEBUG 🚧 
+
   //-- Init the FTDI
   await mpsse_init(device);
   console.log("✅ MPSSE: INIT: OK!")
@@ -943,7 +935,7 @@ async function load_bitstream(contents)
   //   VERYFICATION
   //-----------------------------------------------------------
 
-  console.log("reading.. for verification");
+  console.log("reading.. for verification!!!!!!!!!!!!!!");
   let addr = 0;
   
   //let buf_file = contents.slice(addr, addr + 256); 
@@ -952,14 +944,14 @@ async function load_bitstream(contents)
   for (let b = 0; b < total_blocks; b++) {
     let buf_file = contents.slice(addr, addr + 256);
     let buf_flash = new ArrayBuffer(256);
-    flash_read(rw_offset + addr, buf_flash, 256, false);
-    await sleep(1);
+    //flash_read(rw_offset + addr, buf_flash, 256, false);
+    //await sleep(1);
 
     if (!array_equals(buf_flash, buf_file))
       mpsse_error(3, "Found difference between flash and file!")
 
     addr += 256;
-    console.log(b + " ");
+    //console.log(b + " ");
   }
 
 
@@ -1107,3 +1099,5 @@ navigator.usb.addEventListener('disconnect', event => {
 
 //   reader.readAsArrayBuffer(file);
 // }
+
+
