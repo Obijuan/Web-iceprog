@@ -88,6 +88,13 @@
             "name": "Alhambra-RESET",
             "url": "https://localhost:4443/webFPGA-reset/",
             "webRoot": "${workspaceFolder}"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "WebFPGA-tools",
+            "url": "https://localhost:4443/webFPGA-tools/",
+            "webRoot": "${workspaceFolder}"
         }
     ]
 }
