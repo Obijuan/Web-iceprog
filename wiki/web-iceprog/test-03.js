@@ -595,7 +595,7 @@ btn_usb.onclick = async () => {
   //-- se podra leer nada de ella
   await ftdi.FLASH_release_power_down(device);
 
-  const buffer_id = await ftdi.FLASH_read_id(device)
+  let buffer_id = await ftdi.FLASH_read_id(device)
 
   //-- Obtener una cadena con el identificador
   let flash_id_str = id_to_string(buffer_id);
@@ -613,7 +613,7 @@ btn_usb.onclick = async () => {
   //------- Test Mode
   await test_mode(device);
 
-  
+
   console.log("🚧 DEBUG 🚧");
 
   //--------- Programing the FPGA
