@@ -523,7 +523,18 @@ async function flash_write_enable(device, verbose)
   await device.transferOut(IN_EP, data);
 
 
-  await mpsse_recv_byte(device);
+  //await mpsse_recv_byte(device);
+  let result = await device.transferIn(OUT_EP, 4096);
+
+  let cad = "";
+
+  //-- The first two bytes received are the modem status bytes
+  //-- Insert the data in the queue
+  for (let i = 2; i < result.data.byteLength; i = i + 1) {
+    queue.push(result.data.getUint8(i));
+    cad = cad + "0x" + result.data.getUint8(i).toString(16) + " ";
+  }
+  data = queue.shift();
 
 
   await ftdi.FLASH_cs_deassert(device);
