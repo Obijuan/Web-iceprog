@@ -534,12 +534,17 @@ async function test_mode(device)
   await ftdi.FLASH_cs_deassert(device);
   await sleep(250);
   let cdone = await ftdi.FPGA_get_cdone(device);
+  await ftdi.FLASH_release_power_down(device);
 
-  await flash_reset();
-  await flash_power_up();
-  
-  //console.log("**************************** Read flash ID..");
-  await flash_read_id();
+
+  const buffer_id = await ftdi.FLASH_read_id(device)
+  let flash_id_str = id_to_string(buffer_id);
+  console.log("✅FLASH-ID: " + flash_id_str);
+  console.log("🚧 DEBUG 🚧");
+
+
+
+  //await flash_read_id();
   await flash_power_down();
   await flash_release_reset();
   await sleep(250);
