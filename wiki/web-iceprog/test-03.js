@@ -523,7 +523,12 @@ async function flash_write_enable(device, verbose)
   let data = new Uint8Array([0x31, 0, 0]);
   await device.transferOut(IN_EP, data);
 
-  let rc = await ftdi_write_data(device, buff);
+  let result = await device.transferOut(IN_EP, buff); 
+
+  //let rc = await ftdi_write_data(device, buff);
+
+
+  
   for (let i = 0; i < buff.byteLength; i++)
     buff[i] = await mpsse_recv_byte(device);
 
