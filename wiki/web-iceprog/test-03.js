@@ -508,12 +508,7 @@ async function flash_write_enable(device, verbose)
     //flash_print_status(status)
   }
 
-  await ftdi.FLASH_write_enable2(device); 
-
-  
-  await device.transferIn(OUT_EP, 4096);
-
-  await ftdi.FLASH_cs_deassert(device);
+  await ftdi.FLASH_write_enable(device); 
 
   if (verbose) {
     //console.log("status after enable:");

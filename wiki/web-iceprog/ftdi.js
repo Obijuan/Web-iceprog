@@ -620,11 +620,6 @@ export async function FLASH_erase64KB(device, address) {
     }
 }
 
-export async function FLASH_write_enable2(device) {
-    await FLASH_cs_assert(device);
-    let data = new Uint8Array([0x31, 0, 0, 0x06]);
-    await device.transferOut(OUT_EP, data);
-}
 
 /**
  * Envía el comando Write Enable (0x06)
