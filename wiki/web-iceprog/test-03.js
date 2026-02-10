@@ -536,21 +536,14 @@ async function test_mode(device)
   let cdone = await ftdi.FPGA_get_cdone(device);
   await ftdi.FLASH_release_power_down(device);
 
-
   const buffer_id = await ftdi.FLASH_read_id(device)
   let flash_id_str = id_to_string(buffer_id);
   console.log("✅FLASH-ID: " + flash_id_str);
-  console.log("🚧 DEBUG 🚧");
 
-
-
-  //await flash_read_id();
-  await flash_power_down();
-  await flash_release_reset();
+  ftdi.FLASH_power_down(device);
+  await ftdi.FPGA_reset_deassert(device)
   await sleep(250);
-  cdone = await get_cdone()
-  //console.log("cdone: " + (cdone ? "high" : "low"))
-  //console.log("------>OK !!!!! -------"); 
+  cdone = await ftdi.FPGA_get_cdone(device);  
 }
 
 //-------------------------------------------------------------
@@ -617,11 +610,11 @@ btn_usb.onclick = async () => {
 
   await sleep(100);
 
-
-  console.log("🚧 DEBUG 🚧");
-
   //------- Test Mode
   await test_mode(device);
+
+  
+  console.log("🚧 DEBUG 🚧");
 
   //--------- Programing the FPGA
 

@@ -33,8 +33,9 @@ const FTDI_SPI_WRITE = 0x31;
 
 //--------------- Comandos de la flash (enviados por el SPI del FTDI)
 //-- Leer el ID de la flash (3 bytes: fabricante, tipo, capacidad)
-const FLASH_RPD     = 0xAB;  // Release Power-Down
 const FLASH_READ_ID = 0x9F;  // Leer el identificador de la flash
+const FLASH_RPD     = 0xAB;  // Release Power-Down
+const FLASH_PD      = 0xB9; // Power-down
 
 //-- Máscaras de acceso a los pines de los gpios del FTDI
 const FPGA_RESET_PIN  = 0x80  //-- ADBUS7: Salida: Señal de reset de la FPGA
@@ -356,6 +357,30 @@ export async function FLASH_release_power_down(device)
     //-- Desactivar el chip select de la flash
     await FLASH_cs_deassert(device)
 }
+
+//-------------------------------------------------------------
+//-- Poner la flash otra vez en modo sleep
+//--------------------------------------------------------------
+export async function FLASH_power_down(device)
+{
+    
+    //-- Activar el chip select de la flash
+    await FLASH_cs_assert(device)
+
+    //-- Enviar comando 
+    const data = new Uint8Array([FTDI_SPI_WRITE, 0x00, 0x00, FLASH_PD]);
+    await device.transferOut(OUT_EP, data);
+
+    //-- Leer respuesta al comando
+    let result = await device.transferIn(IN_EP, 3);
+
+    //-- Desactivar el chip select de la flash
+    await FLASH_cs_deassert(device)
+}
+
+
+
+
 
 //--------------------------------------------------------
 //-- Leer el identificador de la flash 
