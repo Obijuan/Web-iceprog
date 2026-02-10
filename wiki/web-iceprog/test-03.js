@@ -398,7 +398,7 @@ async function flash_read_status()
     await flash_chip_deselect();
   }
 
-  async function flash_wait(verbose) {
+  async function flash_wait(device) {
 
     //if (verbose)
     //    console.log("waiting..");
@@ -411,6 +411,7 @@ async function flash_read_status()
         data[0] = FC_RSR1;
 
         await flash_chip_select();
+        //await ftdi.FLASH_cs_assert(device)
         await mpsse_xfer_spi(data);
         await flash_chip_deselect();
 
@@ -664,7 +665,7 @@ async function load_bitstream(contents)
      let status = await ftdi.FLASH_read_status(device);
      //if (verbose)
      //  flash_print_status(status)
-     await flash_wait(verbose);
+     await flash_wait(device);
   }
   console.log("✅Erase");
 
@@ -694,7 +695,7 @@ async function load_bitstream(contents)
       await flash_write_enable(device, false);
       await flash_write_enable(device, false);
       await flash_prog(rw_offset + caddr, buf, false);
-      await flash_wait();
+      await flash_wait(device);
 
       caddr += 256;
       if (b % 50 == 0) 
@@ -707,7 +708,7 @@ async function load_bitstream(contents)
       let buf = contents.slice(caddr, caddr + remaining);
       await flash_write_enable(device, false);
       await flash_prog(rw_offset + caddr, buf, false);
-      await flash_wait();
+      await flash_wait(device);
   }
   console.log("✅Program");
 
