@@ -382,33 +382,6 @@ async function flash_read_status()
     console.log(" - ~RDY: " + (((status & 0x1) == 0) ? "Ready" : "Busy"));
   }
 
-  async function flash_write_enable(verbose) 
-  {
-    console.log("FLASH: write_enable. START!");
-    if (verbose) {
-      console.log("status before enable:");
-      //let status = await flash_read_status();
-      let status = await ftdi.FLASH_read_status(device);
-      flash_print_status(status)
-    }
-
-    //if (verbose)
-    //  console.log("write enable..");
-
-    let buff = new Uint8Array(1);
-    buff[0] = FC_WE;
-
-    await flash_chip_select();
-    await mpsse_xfer_spi(buff);
-    await flash_chip_deselect();
-
-    if (verbose) {
-      //console.log("status after enable:");
-      let status = await flash_read_status();
-      //flash_print_status(fstatus)
-    }
-    //console.log("FLASH: write_enable. STOP!");
-  }
 
   async function flash_64kB_sector_erase(addr)
   {
@@ -526,8 +499,36 @@ function print_buffer(buff)
 
 
 
+async function flash_write_enable(verbose) 
+{
+  //console.log("FLASH: write_enable. START!");
+  if (verbose) {
+    console.log("status before enable:");
+    //let status = await ftdi.FLASH_read_status(device);
+    let status = await flash_read_status();
+    //flash_print_status(status)
+  }
 
+  //if (verbose)
+  //  console.log("write enable..");
 
+  let buff = new Uint8Array(1);
+  buff[0] = FC_WE;
+
+  //ftdi.FLASH_write_enable(device); 
+
+  await flash_chip_select();
+  await mpsse_xfer_spi(buff);
+  await flash_chip_deselect();
+
+  if (verbose) {
+    //console.log("status after enable:");
+    //let status = await ftdi.FLASH_read_status(device);
+    let status = await flash_read_status();
+    //flash_print_status(status)
+  }
+  //console.log("FLASH: write_enable. STOP!");
+}
 
 
 async function test_mode(device) 

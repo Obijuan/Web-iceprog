@@ -623,7 +623,7 @@ export async function FLASH_erase64KB(device, address) {
 /**
  * Envía el comando Write Enable (0x06)
  */
-export async function FLASH_writeEnable(device) {
+export async function FLASH_write_enable(device) {
 
     //-- Activar el chip select de la flash
     await FLASH_cs_assert(device)
