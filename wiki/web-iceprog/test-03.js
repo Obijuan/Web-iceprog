@@ -517,9 +517,13 @@ async function flash_write_enable(device, verbose)
 
   //ftdi.FLASH_write_enable(device); 
 
-  await flash_chip_select();
+  await ftdi.FLASH_cs_assert(device)
+  //await flash_chip_select();
+
   await mpsse_xfer_spi(buff);
-  await flash_chip_deselect();
+
+  await ftdi.FLASH_cs_deassert(device);
+  //await flash_chip_deselect();
 
   if (verbose) {
     //console.log("status after enable:");
