@@ -518,21 +518,15 @@ async function flash_write_enable(device, verbose)
   //ftdi.FLASH_write_enable(device); 
 
   await ftdi.FLASH_cs_assert(device)
-  //await flash_chip_select();
 
   let data = new Uint8Array([0x31, 0, 0, FC_WE]);
   await device.transferOut(IN_EP, data);
 
-  //let result = await device.transferOut(IN_EP, buff); 
 
-  
-  for (let i = 0; i < buff.byteLength; i++)
-    buff[i] = await mpsse_recv_byte(device);
-
+  await mpsse_recv_byte(device);
 
 
   await ftdi.FLASH_cs_deassert(device);
-  //await flash_chip_deselect();
 
   if (verbose) {
     //console.log("status after enable:");
