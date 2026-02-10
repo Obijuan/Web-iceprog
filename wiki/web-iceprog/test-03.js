@@ -412,9 +412,15 @@ async function flash_read_status()
 
         await ftdi.FLASH_cs_assert(device);
 
-        await mpsse_send_byte(0x31);
-        await mpsse_send_byte(1);
-        await mpsse_send_byte(0);
+        //await mpsse_send_byte(0x31);
+        await device.transferOut(IN_EP, new Uint8Array([0x31])); 
+
+        //await mpsse_send_byte(1);
+        await device.transferOut(IN_EP, new Uint8Array([1])); 
+
+        //await mpsse_send_byte(0);
+        await device.transferOut(IN_EP, new Uint8Array([0])); 
+
 
         let rc = await ftdi_write_data(device, data);
 
