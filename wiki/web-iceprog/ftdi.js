@@ -33,9 +33,14 @@ const FTDI_SPI_WRITE = 0x31;
 
 //--------------- Comandos de la flash (enviados por el SPI del FTDI)
 //-- Leer el ID de la flash (3 bytes: fabricante, tipo, capacidad)
-const FLASH_READ_ID = 0x9F;  // Leer el identificador de la flash
 const FLASH_RPD     = 0xAB;  // Release Power-Down
-const FLASH_PD      = 0xB9; // Power-down
+const FLASH_PD      = 0xB9;  // Power-down
+const FLASH_READ_ID = 0x9F;  // Leer el identificador de la flash
+const FLASH_READ    = 0x03;  // Leer bytes de la flash
+const FLASH_WE      = 0x06;  // Habilitar la escritura de la flash
+const FLASH_READ_STATUS = 0x05; //-- Leer el estado de la eeprom (busy?)
+const FLASH_BLOCK_ERASE = 0xD8; // Borrar un bloque de 64KB
+
 
 //-- Máscaras de acceso a los pines de los gpios del FTDI
 const FPGA_RESET_PIN  = 0x80  //-- ADBUS7: Salida: Señal de reset de la FPGA
@@ -378,10 +383,6 @@ export async function FLASH_power_down(device)
     await FLASH_cs_deassert(device)
 }
 
-
-
-
-
 //--------------------------------------------------------
 //-- Leer el identificador de la flash 
 //--------------------------------------------------------
@@ -450,6 +451,7 @@ export async function readPins(device) {
     }
 }
 
+/* 🚧 FUNCION OBSOLETA */
 export async function readFlashID(device) {
     // Para leer el ID, enviamos el comando 0x9E y esperamos 3 bytes de respuesta:
     // 1. Manufacturer ID (Micron = 0x20)
@@ -462,7 +464,7 @@ export async function readFlashID(device) {
     // En MPSSE, para recibir datos después de enviar, a veces usamos secuencias separadas.
     
     // 1. Enviamos comando de escritura (0x11) para el código 0x9E
-    const writeCmd = new Uint8Array([0x11, 0x00, 0x00, CMD_READ_ID]);
+    const writeCmd = new Uint8Array([FTDI_SPI_WRITE, 0x00, 0x00, CMD_READ_ID]);
     await device.transferOut(2, writeCmd);
 
     // 2. Enviamos comando de lectura (0x20) para 3 bytes
@@ -482,21 +484,185 @@ export async function readFlashID(device) {
     throw new Error("No se pudo leer el ID de la Flash");
 }
 
-/*-- FTDI: Reset cmd
-async function ftdi_reset(device) {
 
-  let result = await device.controlTransferOut({
-    requestType: 'vendor',
-    recipient: 'device',
-    request: SIO_RESET_REQUEST,
-    value: SIO_RESET_SIO,
-    index: INTERFACE_A
-  });
-  
-  //console.log("Reset: " + result.status);
-  console.assert (result.status == "ok", "Error resetting the FTDI");
+/**
+ * Lee un solo byte de una dirección específica de la Flash
+ * @param {Object} device - El dispositivo USB
+ * @param {number} address - Dirección de 24 bits (ej: 0x000000)
+ */
+export async function FLASH_read8(device, address) {
+
+    // 1. Bajar CS para iniciar la transacción
+    await FLASH_cs_assert(device);
+
+    // 2. Preparar trama: Comando (0x03) + Dirección (3 bytes)
+    // Para la dirección 0x000000 -> [0x03, 0x00, 0x00, 0x00]
+    const addrH = (address >> 16) & 0xFF;
+    const addrM = (address >> 8) & 0xFF;
+    const addrL = address & 0xFF;
+    
+    //-- Enviar a la flash el comando para leer 
+    let cmdframe = new Uint8Array([FTDI_SPI_WRITE, 4, 0, FLASH_READ]);
+
+    //-- Parametros de READ: 3 bytes de la dirección + 1 dumy byte
+    cmdframe = new Uint8Array([...cmdframe, addrH, addrM, addrL, 0])
+    //cmdframe = new Uint8Array([...cmdframe, 0x00, 0x00, 0x04, 0])
+    await device.transferOut(OUT_EP, cmdframe);
+
+    //-- La respuesta contiene 7 bytes: 2 bytes del modem, 
+    //-- 1 del comando y 3 de la direccion y 1 byte de la respuesta
+    let result = await device.transferIn(IN_EP, 10);
+
+    //-- Desactivar el chip select de la flash
+    await FLASH_cs_deassert(device)
+
+    if (result.status === 'ok' && result.data.byteLength === 7) {
+        return result.data.getUint8(6); // El byte de la flash
+    }
+    throw new Error("Error leyendo byte de la Flash");
 }
-*/
 
 
+/**
+ * Lee una ráfaga de bytes de la Flash
+ * @param {Object} device 
+ * @param {number} startAddress 
+ * @param {number} count - Cuántos bytes leer
+ */
+export async function FLASH_read(device, address, count) {
+
+    // 1. Bajar CS para iniciar la transacción
+    await FLASH_cs_assert(device);
+
+    // 2. Preparar trama: Comando (0x03) + Dirección (3 bytes)
+    // Para la dirección 0x040000 -> [0x03, 0x04, 0x00, 0x00]
+    const addrH = (address >> 16) & 0xFF;
+    const addrM = (address >> 8) & 0xFF;
+    const addrL = address & 0xFF;
+
+    //-- Trama a enviar al FTDI: Cabecera:
+    //-- | cmd | len0 | len1 | cmd_flash |
+    //-- | addr2 | addr1 | addr 0 | d0 | d1 | ... | count - 1 |
+    //-- Len = count + 3
+    
+    //-- Calcular la longitud a poner en la cabecera
+    const len = count + 3;
+    const lenL = len & 0xFF;
+    const lenH = (len >> 8) & 0xFF;
+
+    //-- Crear Trama inicial (cabecera)
+    let cmdframe = new Uint8Array([FTDI_SPI_WRITE, lenL, lenH, FLASH_READ]);
+
+    //-- Añadir a la trama la direccion
+    cmdframe = new Uint8Array([...cmdframe, addrH, addrM, addrL]);
+
+    //-- Dummy bytes con los datos
+    let dummy = new Uint8Array(count);
+
+    //-- Trama final
+    cmdframe = new Uint8Array([...cmdframe, ...dummy]);
+
+    //-- Enviar el paquete!
+    await device.transferOut(OUT_EP, cmdframe);
+
+
+    //-- La respuesta contiene 6+count bytes:
+    //--   2 bytes del modem + 1 del comando
+    //--   3 bytes de la direccion
+    //--   n bytes de los datos recibidos
+    let result = await device.transferIn(IN_EP, count+6);
+
+    //-- Desactivar el chip select de la flash
+    await FLASH_cs_deassert(device)
+
+    if (result.status === 'ok') {
+        // Devolvemos solo los datos de la flash
+        return new Uint8Array(result.data.buffer, 6);
+    }
+    throw new Error("Error en lectura burst");
+}
+
+/**
+ * Borra un sector de 64KB (Comando 0xD8)
+ */
+export async function FLASH_erase64KB(device, address) {
+    
+    //-- Obtener los bytes de la direccion
+    const addrH = (address >> 16) & 0xFF;
+    const addrM = (address >> 8) & 0xFF;
+    const addrL = address & 0xFF;
+
+    //-- Activar chip de la flash
+    await FLASH_cs_assert(device);
+
+    console.log("TEST-2!");
+
+    //-- Enviar comando de borrado
+    let cmdframe = new Uint8Array([FTDI_SPI_WRITE, 0, 0, FLASH_BLOCK_ERASE]);
+    await device.transferOut(OUT_EP, cmdframe);
+
+    //-- Leer la respuesta (3 bytes)
+    let result = await device.transferIn(IN_EP, 10);
+
+    //-- Desactivar el chip select de la flash
+    await FLASH_cs_deassert(device)
+
+    //-- DEGUG
+    let status = await FLASH_read_status(device);
+    console.log("Status: " + status);
+
+    // 3. Esperar a que termine (Polling)
+    let busy = true;
+    while (busy) {
+        const status = await FLASH_read_status(device);
+        busy = (status & 0x01) !== 0; // Bit 0 es WIP
+        if (busy) await new Promise(r => setTimeout(r, 100)); // Esperar 100ms
+    }
+}
+
+/**
+ * Envía el comando Write Enable (0x06)
+ */
+export async function FLASH_writeEnable(device) {
+
+    //-- Activar el chip select de la flash
+    await FLASH_cs_assert(device)
+
+    //-- Enviar a la flash el comando
+    let data = new Uint8Array([FTDI_SPI_WRITE, 0, 0, FLASH_WE]);
+    await device.transferOut(OUT_EP, data);
+
+    //-- Leer la respuest: 2 bytes del model + 1 del comando
+    //-- (se lee para vaciar el buffer)
+    let result = await device.transferIn(IN_EP, 10);
+
+    //-- Desactivar el chip select de la flash
+    await FLASH_cs_deassert(device);
+}
+
+/**
+ * Lee el Status Register (0x05) y devuelve el byte
+ */
+export async function FLASH_read_status(device) {
+
+    //-- Activar el chip select de la flash
+    await FLASH_cs_assert(device)
+
+    //-- Enviar a la flash el comando
+    let data = new Uint8Array([FTDI_SPI_WRITE, 1, 0, FLASH_READ_STATUS, 0]);
+    await device.transferOut(OUT_EP, data);
+
+    //-- Leer la respuest: 2 bytes del modem + 1 dummy del comando
+    //-- + 1 byte con la respuesta
+    //-- (se lee para vaciar el buffer)
+    let result = await device.transferIn(IN_EP, 10);
+
+    //-- Desactivar el chip select de la flash
+    await FLASH_cs_deassert(device)
+
+    if (result.status === 'ok' && result.data.byteLength === 4) {
+        return result.data.getUint8(3); // El byte de la flash
+    }
+    throw new Error("Error leyendo byte de la Flash");
+}
 

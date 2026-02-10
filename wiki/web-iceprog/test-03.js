@@ -384,11 +384,12 @@ async function flash_read_status()
 
   async function flash_write_enable(verbose) 
   {
-    //console.log("FLASH: write_enable. START!");
+    console.log("FLASH: write_enable. START!");
     if (verbose) {
-      //console.log("status before enable:");
-      let status = await flash_read_status();
-      //flash_print_status(status)
+      console.log("status before enable:");
+      //let status = await flash_read_status();
+      let status = await ftdi.FLASH_read_status(device);
+      flash_print_status(status)
     }
 
     //if (verbose)
@@ -651,7 +652,7 @@ async function load_bitstream(contents)
   console.log("✅FLASH-ID: " + flash_id_str);
 
 
-  
+
   console.log("🚧 DEBUG 🚧");
 
 

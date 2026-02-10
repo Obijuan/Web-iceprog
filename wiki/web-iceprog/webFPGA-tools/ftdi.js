@@ -362,6 +362,26 @@ export async function FLASH_release_power_down(device)
     await FLASH_cs_deassert(device)
 }
 
+//-------------------------------------------------------------
+//-- Poner la flash otra vez en modo sleep
+//--------------------------------------------------------------
+export async function FLASH_power_down(device)
+{
+    
+    //-- Activar el chip select de la flash
+    await FLASH_cs_assert(device)
+
+    //-- Enviar comando 
+    const data = new Uint8Array([FTDI_SPI_WRITE, 0x00, 0x00, FLASH_PD]);
+    await device.transferOut(OUT_EP, data);
+
+    //-- Leer respuesta al comando
+    let result = await device.transferIn(IN_EP, 3);
+
+    //-- Desactivar el chip select de la flash
+    await FLASH_cs_deassert(device)
+}
+
 //--------------------------------------------------------
 //-- Leer el identificador de la flash 
 //--------------------------------------------------------
