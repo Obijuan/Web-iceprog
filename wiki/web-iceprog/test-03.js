@@ -613,14 +613,11 @@ btn_usb.onclick = async () => {
   //------- Test Mode
   await test_mode(device);
 
-
-  console.log("🚧 DEBUG 🚧");
-
   //--------- Programing the FPGA
 
   //-- Open the bitstream file
   const filename = bitstream.files[0];
-  //console.log("File: " + bitstream.value);
+  console.log("File: " + bitstream.value);
 
   let reader = new FileReader();
 
@@ -641,8 +638,12 @@ async function load_bitstream(contents)
   console.log("Length: " + file_size);
 
   console.log("reset..");
-  await flash_chip_deselect();
+  await ftdi.FLASH_cs_deassert(device);
   await sleep(250);
+
+
+  console.log("🚧 DEBUG 🚧");
+
 
   let cdone = await get_cdone();
   console.log("cdone: " + (cdone ? "high" : "low"))
