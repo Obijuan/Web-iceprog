@@ -620,6 +620,10 @@ export async function FLASH_erase64KB(device, address) {
     }
 }
 
+export async function FLASH_write_enable2(device) {
+    await FLASH_cs_assert(device);
+}
+
 /**
  * Envía el comando Write Enable (0x06)
  */

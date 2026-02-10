@@ -508,11 +508,9 @@ async function flash_write_enable(device, verbose)
     //flash_print_status(status)
   }
 
-  //ftdi.FLASH_write_enable(device); 
+  ftdi.FLASH_write_enable2(device); 
 
-  await ftdi.FLASH_cs_assert(device)
-
-  let data = new Uint8Array([0x31, 0, 0, FC_WE]);
+  let data = new Uint8Array([0x31, 0, 0, 0x06]);
   await device.transferOut(IN_EP, data);
   await device.transferIn(OUT_EP, 4096);
 
