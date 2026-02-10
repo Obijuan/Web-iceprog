@@ -501,19 +501,12 @@ function print_buffer(buff)
 
 async function flash_write_enable(device, verbose) 
 {
-  //console.log("FLASH: write_enable. START!");
   if (verbose) {
-    console.log("status before enable:");
+    //console.log("status before enable:");
     //let status = await ftdi.FLASH_read_status(device);
     let status = await flash_read_status();
     //flash_print_status(status)
   }
-
-  //if (verbose)
-  //  console.log("write enable..");
-
-  //let buff = new Uint8Array(1);
-  //buff[0] = FC_WE;
 
   //ftdi.FLASH_write_enable(device); 
 
@@ -531,7 +524,6 @@ async function flash_write_enable(device, verbose)
     let status = await flash_read_status();
     //flash_print_status(status)
   }
-  //console.log("FLASH: write_enable. STOP!");
 }
 
 
