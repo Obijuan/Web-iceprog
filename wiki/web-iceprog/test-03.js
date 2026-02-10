@@ -401,12 +401,10 @@ async function flash_read_status()
   async function flash_wait(device) {
 
       let count = 0;
+      let status = 0;
       
       while (1)
       {
-
-        let data = new Uint8Array(2);
-        data[0] = FC_RSR1;
 
         await ftdi.FLASH_cs_assert(device);
 
@@ -429,16 +427,16 @@ async function flash_read_status()
           //-- Esto es una ñapa. Si no se lee la trama de 4 bytes, devolvemos un 0
           //-- en el registro de status, para que se repita la opercion
           //-- En algun momento se sincronizará otra vez...
-          data[1] = 0;
+          status = 0;
         }
         else {
           //-- Trama ok. Devolver el byte de status
-          data[1] = r2.data.getUint8(3); // El byte de la flash
+          status = r2.data.getUint8(3); // El byte de la flash
         }
 
         await ftdi.FLASH_cs_deassert(device);
 
-        if ((data[1] & 0x01) == 0) {
+        if ((status & 0x01) == 0) {
           if (count < 2) {
             count++;
             //if (verbose) {
