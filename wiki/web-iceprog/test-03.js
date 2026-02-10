@@ -660,7 +660,8 @@ async function load_bitstream(contents)
      await flash_64kB_sector_erase(addr);
      //if (verbose)
      //  console.log("************ Status after block erase:");
-     let status = await flash_read_status()
+     //let status = await flash_read_status()
+     let status = await ftdi.FLASH_read_status(device);
      //if (verbose)
      //  flash_print_status(status)
      await flash_wait(verbose);
