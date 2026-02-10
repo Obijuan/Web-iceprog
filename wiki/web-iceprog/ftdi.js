@@ -656,7 +656,18 @@ export async function FLASH_read_status(device) {
     //-- Leer la respuest: 2 bytes del modem + 1 dummy del comando
     //-- + 1 byte con la respuesta
     //-- (se lee para vaciar el buffer)
-    let result = await device.transferIn(IN_EP, 10);
+    let result = await device.transferIn(IN_EP, 4);
+
+    //-- Comprobar posibles errores
+    if (result.status != 'ok') {
+        throw("----> FLASH_read_status: ERROR en TransferIn")
+    }
+
+    //-- Esperar hasta recibir la trama de 4 bytes. Podría ocurrir
+    //-- que se reciba una menor a 4
+    if (result.byteLength < 4) {
+        console.log("---> FLASH_read_status: PROBLEMA: Leidos: " + r2.data.byteLength + "bytes");
+    }
 
     //-- Desactivar el chip select de la flash
     await FLASH_cs_deassert(device)

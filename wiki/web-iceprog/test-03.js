@@ -422,9 +422,9 @@ async function flash_read_status()
         }
 
         if (r2.data.byteLength != 4) {
-          console.log("PROBLEMA: Leidos: " + r2.data.byteLength + "bytes");
+          //console.log("PROBLEMA: Leidos: " + r2.data.byteLength + "bytes");
           for (let i=0; i < r2.data.byteLength; i++) {
-            console.log("  * " + r2.data.getUint8(i));
+            //console.log("  * " + r2.data.getUint8(i));
           } 
           //-- Esto es una ñapa. Si no se lee la trama de 4 bytes, devolvemos un 0
           //-- en el registro de status, para que se repita la opercion
