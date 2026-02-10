@@ -520,7 +520,18 @@ async function flash_write_enable(device, verbose)
   await ftdi.FLASH_cs_assert(device)
   //await flash_chip_select();
 
-  await mpsse_xfer_spi(buff);
+
+  
+  //await mpsse_xfer_spi(buff);
+  await mpsse_send_byte(MC_DATA_IN | MC_DATA_OUT | MC_DATA_OCN);
+  await mpsse_send_byte(buff.byteLength - 1);
+  await mpsse_send_byte((buff.byteLength - 1) >> 8);
+
+  let rc = await ftdi_write_data(device, buff);
+  for (let i = 0; i < buff.byteLength; i++)
+    buff[i] = await mpsse_recv_byte(device);
+
+
 
   await ftdi.FLASH_cs_deassert(device);
   //await flash_chip_deselect();
