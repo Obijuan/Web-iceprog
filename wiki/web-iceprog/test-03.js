@@ -503,8 +503,8 @@ async function flash_write_enable(device, verbose)
 {
   if (verbose) {
     //console.log("status before enable:");
-    //let status = await ftdi.FLASH_read_status(device);
-    let status = await flash_read_status();
+    let status = await ftdi.FLASH_read_status(device);
+    //let status = await flash_read_status();
     //flash_print_status(status)
   }
 
@@ -512,8 +512,8 @@ async function flash_write_enable(device, verbose)
 
   if (verbose) {
     //console.log("status after enable:");
-    //let status = await ftdi.FLASH_read_status(device);
-    let status = await flash_read_status();
+    let status = await ftdi.FLASH_read_status(device);
+    //let status = await flash_read_status();
     //flash_print_status(status)
   }
 }
