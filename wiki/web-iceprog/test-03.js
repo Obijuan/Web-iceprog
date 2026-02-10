@@ -410,10 +410,8 @@ async function flash_read_status()
         let data = new Uint8Array(2);
         data[0] = FC_RSR1;
 
-        //await flash_chip_select();
         await ftdi.FLASH_cs_assert(device);
         await mpsse_xfer_spi(data);
-        //await flash_chip_deselect();
         await ftdi.FLASH_cs_deassert(device);
 
         if ((data[1] & 0x01) == 0) {
