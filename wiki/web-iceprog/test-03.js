@@ -640,11 +640,6 @@ async function load_bitstream(contents)
   let flash_id_str = id_to_string(buffer_id);
   console.log("✅FLASH-ID: " + flash_id_str);
 
-
-
-  console.log("🚧 DEBUG 🚧");
-
-
   // ---------------------------------------------------------
   // Program
   // ---------------------------------------------------------
@@ -658,8 +653,9 @@ async function load_bitstream(contents)
   let begin_addr = rw_offset & ~0xffff;
   let end_addr = (rw_offset + file_size + 0xffff) & ~0xffff;
 
+  console.log("🚧 DEBUG 🚧");
+
   for (let addr = begin_addr; addr < end_addr; addr += 0x10000) {
-     //await flash_write_enable(device, true);
      await ftdi.FLASH_write_enable(device); 
      await flash_64kB_sector_erase(addr);
      //if (verbose)
