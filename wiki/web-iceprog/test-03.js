@@ -12,8 +12,6 @@ const bitstream = document.getElementById('bitstream');
 
 
 // FTDI USB identifiers
-const usbVendor = 0x0403;
-const usbProduct = 0x6010;
 const BITMODE_MPSSE  = 0x02;
 const INTERFACE_A   = 1;
 
@@ -46,21 +44,10 @@ const FC_BE64 = 0xD8; // Block Erase 64kb
 
 //-- Request
 const SIO_RESET_REQUEST = 0;  //-- Reset the port
-// #define SIO_SET_BAUDRATE_REQUEST      SIO_SET_BAUD_RATE
-// #define SIO_SET_DATA_REQUEST          SIO_SET_DATA
-// #define SIO_SET_FLOW_CTRL_REQUEST     SIO_SET_FLOW_CTRL
-// #define SIO_SET_MODEM_CTRL_REQUEST    SIO_MODEM_CTRL
-// #define SIO_POLL_MODEM_STATUS_REQUEST 0x05
-// #define SIO_SET_EVENT_CHAR_REQUEST    0x06
-// #define SIO_SET_ERROR_CHAR_REQUEST    0x07
 const SIO_SET_LATENCY_TIMER_REQUEST = 0x09;
 const SIO_GET_LATENCY_TIMER_REQUEST = 0x0A;
 const SIO_SET_BITMODE_REQUEST = 0x0B;
-// #define SIO_READ_PINS_REQUEST         0x0C
 const SIO_READ_EEPROM_REQUEST = 0x90
-// #define SIO_WRITE_EEPROM_REQUEST      0x91
-// #define SIO_ERASE_EEPROM_REQUEST      0x92
-
 
 const SIO_RESET_SIO = 0;
 const SIO_RESET_PURGE_RX = 1;
@@ -768,20 +755,25 @@ async function test_mode()
   //console.log("------>OK !!!!! -------"); 
 }
 
+//-------------------------------------------------------------
+//-- Convertir un array con los bytes de identificacion de
+//-- la flash en una cadena
+//-------------------------------------------------------------
+function id_to_string(id)
+{
+  let cad = ""
 
+  for (const byte of id)
+    cad += " 0x" + byte.toString(16);
+
+  return cad
+}
 
 //----------------- Main ---------------------
 let device;
 
-// 🚧 DEBUG 🚧  
-
-if ('usb' in navigator == false) {
-    console.log("WEB-USB NO SOPORTADO!")
-}
-
 //-- Buffer for storing incomming data from usb
 let queue = [];
-
 
 btn_usb.onclick = async () => {
 
@@ -790,22 +782,42 @@ btn_usb.onclick = async () => {
   device = await ftdi.connect();
 
   //-- Abrir dispositivo
-    await ftdi.initialize(device);
+  await ftdi.initialize(device);
 
   console.log("USB abierto") 
 
   //-- Show the device on the screen
   display.innerHTML = device.productName + " " + device.manufacturerName;
+
+  //-- Init the FTDI
+  await ftdi.spi_init(device);
+  console.log("✅ MPSSE: INIT: OK!")
+
+  //-- Para enviar cualquier comando a la flash
+  //-- la FPGA debe estar en estado de reset
+  await ftdi.FPGA_reset_assert(device);
+
+  //-- Sacar la flash del modo sleep (de bajo consumo
+  //-- Es obligatorio hacerlo, o de lo contrario NO
+  //-- se podra leer nada de ella
+  await ftdi.FLASH_release_power_down(device);
+
+  const buffer_id = await ftdi.FLASH_read_id(device)
+
+  //-- Obtener una cadena con el identificador
+  let flash_id_str = id_to_string(buffer_id);
+
+  console.log("✅FLASH-ID: " + flash_id_str);
   
+  //-- Quitar el Reset de la FPGA (opcional)
+  await ftdi.FPGA_reset_deassert(device)
+
+
 
   //-- 🚧 DEBUG 🚧 
 
-  //-- Init the FTDI
-  await mpsse_init(device);
-  console.log("✅ MPSSE: INIT: OK!")
-
   //-- Test: Read FTDI chip id
-  await ftdi_read_chipid(device);
+  //await ftdi_read_chipid(device);
   
   let cdone = await get_cdone();
   console.log("Cdone: " + (cdone ? "high" : "low"));
