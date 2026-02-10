@@ -641,17 +641,19 @@ async function load_bitstream(contents)
   await ftdi.FLASH_cs_deassert(device);
   await sleep(250);
 
+  let cdone = await ftdi.FPGA_get_cdone(device);
+  console.log("Cdone: " + (cdone ? "high" : "low"));
+  console.log("**************************** TEST1 *******");
+  
+  await ftdi.FLASH_release_power_down(device);
+  let buffer_id = await ftdi.FLASH_read_id(device)
+  let flash_id_str = id_to_string(buffer_id);
+  console.log("✅FLASH-ID: " + flash_id_str);
 
+
+  
   console.log("🚧 DEBUG 🚧");
 
-
-  let cdone = await get_cdone();
-  console.log("cdone: " + (cdone ? "high" : "low"))
-  console.log("**************************** TEST1 *******");
-
-  await flash_reset();
-  await flash_power_up();
-  await flash_read_id(); 
 
   // ---------------------------------------------------------
   // Program
