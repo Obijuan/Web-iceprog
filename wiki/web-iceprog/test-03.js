@@ -400,7 +400,6 @@ async function flash_read_status()
 
   async function flash_wait(device) {
 
-      console.log("FLASH_WAIT!");
       let count = 0;
       
       while (1)
@@ -427,21 +426,15 @@ async function flash_read_status()
           for (let i=0; i < r2.data.byteLength; i++) {
             console.log("  * " + r2.data.getUint8(i));
           } 
+          //-- Esto es una ñapa. Si no se lee la trama de 4 bytes, devolvemos un 0
+          //-- en el registro de status, para que se repita la opercion
+          //-- En algun momento se sincronizará otra vez...
           data[1] = 0;
         }
         else {
+          //-- Trama ok. Devolver el byte de status
           data[1] = r2.data.getUint8(3); // El byte de la flash
         }
-        
-
-        //await mpsse_send_byte(0);
-        //await device.transferOut(IN_EP, new Uint8Array([0])); 
-
-
-        //let rc = await ftdi_write_data(device, data);
-
-        //for (let i = 0; i < data.byteLength; i++)
-        //  data[i] = await mpsse_recv_byte(device);
 
         await ftdi.FLASH_cs_deassert(device);
 
@@ -464,7 +457,7 @@ async function flash_read_status()
           count = 0;
         }
 
-        console.log("Data[1]: " + data[1]);
+        //console.log("Data[1]: " + data[1]);
         //console.log("***************************************************************PAUSA!!!!!!")
         await sleep(10);
       }
