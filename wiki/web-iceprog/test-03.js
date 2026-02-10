@@ -520,13 +520,10 @@ async function flash_write_enable(device, verbose)
   await ftdi.FLASH_cs_assert(device)
   //await flash_chip_select();
 
-  let data = new Uint8Array([0x31, 0, 0]);
+  let data = new Uint8Array([0x31, 0, 0, FC_WE]);
   await device.transferOut(IN_EP, data);
 
-  let result = await device.transferOut(IN_EP, buff); 
-
-  //let rc = await ftdi_write_data(device, buff);
-
+  //let result = await device.transferOut(IN_EP, buff); 
 
   
   for (let i = 0; i < buff.byteLength; i++)
