@@ -603,15 +603,13 @@ btn_usb.onclick = async () => {
   //-- Quitar el Reset de la FPGA (opcional)
   await ftdi.FPGA_reset_deassert(device)
 
-
-
-  //-- 🚧 DEBUG 🚧 
-  
-  let cdone = await get_cdone();
+  let cdone = await ftdi.FPGA_get_cdone(device);
   console.log("Cdone: " + (cdone ? "high" : "low"));
 
-  await flash_release_reset();
   await sleep(100);
+
+
+  console.log("🚧 DEBUG 🚧");
 
   //------- Test Mode
   await test_mode();
@@ -706,8 +704,10 @@ async function load_bitstream(contents)
       await flash_wait();
 
       caddr += 256;
-      console.log(b + " ");
+      if (b % 50 == 0) 
+        console.log(b + " ");
   }
+
 
   //-- Write the remaining not full block
   if (remaining > 0) {
