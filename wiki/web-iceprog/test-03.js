@@ -10,16 +10,9 @@ const btn_close = document.getElementById('btn_close');
 const bitstream = document.getElementById('bitstream');
 
 
-
-// FTDI USB identifiers
-const BITMODE_MPSSE  = 0x02;
-const INTERFACE_A   = 1;
-
 /* Mode commands */
 const	MC_SETB_LOW = 0x80;    // Set Data bits LowByte
 const MC_READB_LOW = 0x81;   // Read Data bits LowByte
-const MC_TCK_D5 = 0x8B;      // Enable /5 div, backward compat to FT2232D
-const MC_SET_CLK_DIV = 0x86; // Set clock divisor
 
 const MC_DATA_IN  =  0x20 // When set read data (Data IN)
 const MC_DATA_OUT =  0x10 // When set write data (Data OUT)
@@ -42,189 +35,11 @@ const FC_PD = 0xB9; // Power-down
 const FC_RSR1 = 0x05; // Read Status Register 1
 const FC_BE64 = 0xD8; // Block Erase 64kb
 
-//-- Request
-const SIO_RESET_REQUEST = 0;  //-- Reset the port
-const SIO_SET_LATENCY_TIMER_REQUEST = 0x09;
-const SIO_GET_LATENCY_TIMER_REQUEST = 0x0A;
-const SIO_SET_BITMODE_REQUEST = 0x0B;
-const SIO_READ_EEPROM_REQUEST = 0x90
-
-const SIO_RESET_SIO = 0;
-const SIO_RESET_PURGE_RX = 1;
-const SIO_RESET_PURGE_TX = 2;
-
 //-- Important information
 // ftdi->interface = 0;
 // ftdi->index     = INTERFACE_A;
 const IN_EP = 0x02; //-- Endpoint for transfering data from host to device
 const OUT_EP = 0x01; //-- Endpoint!  0x81
-
-
-
-//-- FTDI: Reset cmd
-async function ftdi_reset(device) {
-
-  let result = await device.controlTransferOut({
-    requestType: 'vendor',
-    recipient: 'device',
-    request: SIO_RESET_REQUEST,
-    value: SIO_RESET_SIO,
-    index: INTERFACE_A
-  });
-  
-  //console.log("Reset: " + result.status);
-  console.assert (result.status == "ok", "Error resetting the FTDI");
-}
-
-//-- FTDI: Purge RX buffer
-async function ftdi_purge_rx_buffer(device) {
-
-  let result = await device.controlTransferOut({
-    requestType: 'vendor',
-    recipient: 'device',
-    request: SIO_RESET_REQUEST,
-    value: SIO_RESET_PURGE_RX,
-    index: INTERFACE_A
-  });
-
-  //console.log("Purge RX: " + result.status);
-  console.assert (result.status == "ok", "Error purging RX buffer");
-}
-
-//-- FTDI: Purge TX Buffer
-async function ftdi_usb_purge_tx_buffer(device) {
-
-  let result = await device.controlTransferOut({
-    requestType: 'vendor',
-    recipient: 'device',
-    request: SIO_RESET_REQUEST,
-    value: SIO_RESET_PURGE_TX,
-    index: INTERFACE_A
-  });
-
-  //console.log("Purge TX: " + result.status);
-  console.assert (result.status == "ok", "Error purging TX buffer");
-}
-
-//-- FTDI: Purge Buffers
-async function ftdi_usb_purge_buffers(device) {
-  await ftdi_purge_rx_buffer(device);
-  await ftdi_usb_purge_tx_buffer(device);
-}
-
-//-- FTDI: Get latency timer
-async function ftdi_get_latency_timer(device) {
-
-  //-- Read 1 byte from the FTDI
-  let result = await device.controlTransferIn({
-    requestType: 'vendor',
-    recipient: 'device',
-    request: SIO_GET_LATENCY_TIMER_REQUEST,
-    value: 0,
-    index: INTERFACE_A
-  }, 1);
-
-  // console.log("Get Latency: " + result.status +
-  //             " -> Bytes: " + result.data.byteLength +
-  //             ", Value: " + result.data.getUint8(0)
-  //             );
-
-  return result.data.getUint8(0);
-}
-
-//-- FTDI: Set latency timer
-async function ftdi_set_latency_timer(device, latency) {
-
-  let result = await device.controlTransferOut({
-    requestType: 'vendor',
-    recipient: 'device',
-    request: SIO_SET_LATENCY_TIMER_REQUEST,
-    value: latency,
-    index: INTERFACE_A
-  });
-
-  //console.log("Set Latency: " + result.status);
-  console.assert (result.status == "ok", "Error setting latency timer");
-}
-
-//-- FTDI: Set Bitmode
-async function ftdi_set_bitmode(device, bitmask, mode) {
-
-  //-- Calculate the value to sent to the FTDI
-  let usb_val = (mode << 8) | bitmask;  //-- Low byte: bitmask
-
-  let result = await device.controlTransferOut({
-    requestType: 'vendor',
-    recipient: 'device',
-    request: SIO_SET_BITMODE_REQUEST,
-    value: usb_val,
-    index: INTERFACE_A
-  });
-
-  //console.log("Set Bitmode: " + result.status + 
-  //            " -> Written: " + usb_val.toString(16));
-  console.assert (result.status == "ok", "Error setting bitmode");
-}
-
-function ftdi_read_chipid_shift(value)
-{
-    return ((value & 1) << 1) |
-           ((value & 2) << 5) |
-           ((value & 4) >> 2) |
-           ((value & 8) << 4) |
-           ((value & 16) >> 1) |
-           ((value & 32) >> 1) |
-           ((value & 64) >> 4) |
-           ((value & 128) >> 2);
-}
-
-//-- FTDI: Read Chip ID
-async function ftdi_read_chipid(device) {
-
-  let result = await device.controlTransferIn({
-    requestType: 'vendor',
-    recipient: 'device',
-    request: SIO_READ_EEPROM_REQUEST,
-    value: 0,
-    index: 0x43
-  }, 2);
-
-  // console.log("Read: " + result.status +
-  // " -> Bytes: " + result.data.byteLength +
-  // ", Value: " + result.data.getUint16(0)
-  // );
-
-  let a = result.data.getUint16(0);
-  //console.log("a: " + a.toString(16));
-
-  a = a << 8 | a >> 8;
-
-  result = await device.controlTransferIn({
-    requestType: 'vendor',
-    recipient: 'device',
-    request: SIO_READ_EEPROM_REQUEST,
-    value: 0,
-    index: 0x44
-  }, 2);
-
-  // console.log("Read: " + result.status +
-  // " -> Bytes: " + result.data.byteLength +
-  // ", Value: " + result.data.getUint16(0)
-  // );
-
-  let b = result.data.getUint16(0);
-  //console.log("b: " + b.toString(16));
-
-  b = b << 8 | b >> 8;
-  a = (a << 16) | (b & 0xFFFF);
-
-  a = ftdi_read_chipid_shift(a) | ftdi_read_chipid_shift(a>>8)<<8
-      ftdi_read_chipid_shift(a>>16)<<16 | ftdi_read_chipid_shift(a>>24)<<24;
-
-  let chipid = a ^ 0xa5f0f7d1;
-
-  //console.log("Chipid: " + chipid.toString(16));
-}
 
 //----- FTDI: Write_data
 //-- Escribir un buffer en el FTDI
@@ -255,32 +70,6 @@ async function mpsse_send_byte(b) {
 
   //console.log("MPSSE: Send_byte: " + result.status);
   //console.log("  -> Written: " + result.bytesWritten + ", Value: 0x" + b.toString(16));
-}
-
-//-- MPSSE: Init
-async function mpsse_init(device) {
-  //-- Initialization commands
-  await ftdi_reset(device);
-  await ftdi_usb_purge_buffers(device);
-
-  let latency = await ftdi_get_latency_timer(device);
-  //console.log("Latency: " + latency);
-
-  //-- Set latency to 1 (fastest)
-  //-- 1 is the fastest polling, it means 1 kHz polling
-  await ftdi_set_latency_timer(device, 1);
-
-  // Enter MPSSE (Multi-Protocol Synchronous Serial Engine) mode.
-  // Set all pins to output
-  await ftdi_set_bitmode(device, 0xFF, BITMODE_MPSSE);
-
-  // enable clock divide by 5
-  await mpsse_send_byte(MC_TCK_D5);
-
-  // set 6 MHz clock
-  await mpsse_send_byte(MC_SET_CLK_DIV);
-  await mpsse_send_byte(0x00);
-  await mpsse_send_byte(0x00);
 }
 
 //-------- MPSSE: mpsse_recv_byte()
@@ -769,7 +558,9 @@ function id_to_string(id)
   return cad
 }
 
-//----------------- Main ---------------------
+//--------------------------------------------
+//---   MAIN 
+//--------------------------------------------
 let device;
 
 //-- Buffer for storing incomming data from usb
@@ -815,9 +606,6 @@ btn_usb.onclick = async () => {
 
 
   //-- 🚧 DEBUG 🚧 
-
-  //-- Test: Read FTDI chip id
-  //await ftdi_read_chipid(device);
   
   let cdone = await get_cdone();
   console.log("Cdone: " + (cdone ? "high" : "low"));
