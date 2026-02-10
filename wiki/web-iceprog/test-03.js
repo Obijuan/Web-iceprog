@@ -411,7 +411,20 @@ async function flash_read_status()
         data[0] = FC_RSR1;
 
         await ftdi.FLASH_cs_assert(device);
-        await mpsse_xfer_spi(data);
+
+        //await mpsse_xfer_spi(data);
+
+        /* Input and output, update data on negative edge read on positive. */
+        await mpsse_send_byte(MC_DATA_IN | MC_DATA_OUT | MC_DATA_OCN);
+        await mpsse_send_byte(data.byteLength - 1);
+        await mpsse_send_byte((data.byteLength - 1) >> 8);
+
+        let rc = await ftdi_write_data(device, data);
+
+        for (let i = 0; i < data.byteLength; i++)
+          data[i] = await mpsse_recv_byte(device);
+
+
         await ftdi.FLASH_cs_deassert(device);
 
         if ((data[1] & 0x01) == 0) {
