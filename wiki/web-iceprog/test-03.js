@@ -400,8 +400,7 @@ async function flash_read_status()
 
   async function flash_wait(device) {
 
-    //if (verbose)
-    //    console.log("waiting..");
+      console.log("FLASH_WAIT!");
       let count = 0;
       
       while (1)
@@ -412,21 +411,37 @@ async function flash_read_status()
 
         await ftdi.FLASH_cs_assert(device);
 
-        //await mpsse_send_byte(0x31);
-        await device.transferOut(IN_EP, new Uint8Array([0x31])); 
+        let r1 = await device.transferOut(IN_EP, new Uint8Array([0x31, 1, 0, 0x05, 0])); 
+        if (r1.status != 'ok' || r1.bytesWritten != 5) {
+          throw("(----> FLASH_WAIT: Error en TransferOUT!");
+        }
 
-        //await mpsse_send_byte(1);
-        await device.transferOut(IN_EP, new Uint8Array([1])); 
+        let r2 = await device.transferIn(OUT_EP, 4096);
+
+        if (r2.status != 'ok') {
+          throw("----> FLASH_WAIT: Error en TransferIN!. Status NO OK!")
+        }
+
+        if (r2.data.byteLength != 4) {
+          console.log("PROBLEMA: Leidos: " + r2.data.byteLength + "bytes");
+          for (let i=0; i < r2.data.byteLength; i++) {
+            console.log("  * " + r2.data.getUint8(i));
+          } 
+          data[1] = 0;
+        }
+        else {
+          data[1] = r2.data.getUint8(3); // El byte de la flash
+        }
+        
 
         //await mpsse_send_byte(0);
-        await device.transferOut(IN_EP, new Uint8Array([0])); 
+        //await device.transferOut(IN_EP, new Uint8Array([0])); 
 
 
-        let rc = await ftdi_write_data(device, data);
+        //let rc = await ftdi_write_data(device, data);
 
-        for (let i = 0; i < data.byteLength; i++)
-          data[i] = await mpsse_recv_byte(device);
-
+        //for (let i = 0; i < data.byteLength; i++)
+        //  data[i] = await mpsse_recv_byte(device);
 
         await ftdi.FLASH_cs_deassert(device);
 
@@ -449,7 +464,7 @@ async function flash_read_status()
           count = 0;
         }
 
-        //console.log("Data[1]: " + data[1]);
+        console.log("Data[1]: " + data[1]);
         //console.log("***************************************************************PAUSA!!!!!!")
         await sleep(10);
       }
@@ -663,9 +678,6 @@ async function load_bitstream(contents)
 
   let rw_offset = 0;
 
-  //-- Flash erase
-  let verbose = true;
-
   let begin_addr = rw_offset & ~0xffff;
   let end_addr = (rw_offset + file_size + 0xffff) & ~0xffff;
 
@@ -678,8 +690,7 @@ async function load_bitstream(contents)
      //  console.log("************ Status after block erase:");
      //let status = await flash_read_status()
      let status = await ftdi.FLASH_read_status(device);
-     //if (verbose)
-     //  flash_print_status(status)
+     //flash_print_status(status)
      await flash_wait(device);
   }
   console.log("✅Erase");
