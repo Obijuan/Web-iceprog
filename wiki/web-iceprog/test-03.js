@@ -499,7 +499,7 @@ function print_buffer(buff)
 
 
 
-async function flash_write_enable(verbose) 
+async function flash_write_enable(device, verbose) 
 {
   //console.log("FLASH: write_enable. START!");
   if (verbose) {
@@ -671,7 +671,7 @@ async function load_bitstream(contents)
   let end_addr = (rw_offset + file_size + 0xffff) & ~0xffff;
 
   for (let addr = begin_addr; addr < end_addr; addr += 0x10000) {
-     await flash_write_enable(true);
+     await flash_write_enable(device, true);
      await flash_64kB_sector_erase(addr);
      //if (verbose)
      //  console.log("************ Status after block erase:");
@@ -705,8 +705,8 @@ async function load_bitstream(contents)
   for (let b = 0; b < total_blocks; b++) {
       let buf = contents.slice(caddr, caddr + 256);
       //console.log("Bloque: " + b + ". Size: " + buf.byteLength);
-      await flash_write_enable();
-      await flash_write_enable();
+      await flash_write_enable(device, false);
+      await flash_write_enable(device, false);
       await flash_prog(rw_offset + caddr, buf, false);
       await flash_wait();
 
@@ -719,7 +719,7 @@ async function load_bitstream(contents)
   //-- Write the remaining not full block
   if (remaining > 0) {
       let buf = contents.slice(caddr, caddr + remaining);
-      await flash_write_enable();
+      await flash_write_enable(device, false);
       await flash_prog(rw_offset + caddr, buf, false);
       await flash_wait();
   }
