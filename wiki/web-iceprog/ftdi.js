@@ -760,7 +760,7 @@ export async function FLASH_write_byte(device, address, value) {
 //--   -addr: Direccion donde grabar el bloque
 //--   -data: Uint8Array de como máximo 256 bytes
 //--------------------------------------------------------------
-export async function FLASH_prog(device, addr, data)
+export async function FLASH_prog_page(device, addr, data)
 {
 
   //-- Obtener los 3 bytes de la direccion
