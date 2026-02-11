@@ -641,6 +641,37 @@ export async function FLASH_write_enable(device) {
     await FLASH_cs_deassert(device);
 }
 
+
+
+export async function FLASH_read_status2(device) {
+
+    await FLASH_cs_assert(device);
+
+    let r2;
+
+    do {
+
+      //-- Enviar trama para la lectura del status
+      let r1 = await device.transferOut(OUT_EP, new Uint8Array([0x31, 1, 0, 0x05, 0])); 
+      if (r1.status != 'ok' || r1.bytesWritten != 5) {
+        throw("(----> FLASH_WAIT: Error en TransferOUT!");
+      }
+
+      //-- Leer la respuesta
+      r2 = await device.transferIn(IN_EP, 4);
+
+      //-- Se deben recibir 4 bytes
+      //-- Si NO es así, se repite la lectura!
+        
+    } while (r2.data.byteLength < 4);
+
+    await FLASH_cs_deassert(device);
+
+    //-- Devolver el status
+    return r2.data.getUint8(3);
+}
+
+
 /**
  * Lee el Status Register (0x05) y devuelve el byte
  */
