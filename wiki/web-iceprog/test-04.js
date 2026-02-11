@@ -334,18 +334,13 @@ async function flash_power_down()
 
 
 //-- Implement flash_prog...
-async function flash_prog(device, addr, data, verbose)
+async function flash_prog(device, addr, data)
 {
-  let n = data.byteLength;
-
- 	if (verbose)
-		console.log("prog 0x" + addr.toString(16) + " 0x" + n.toString(16));
 
   //-- Obtener los 3 bytes de la direccion
   const addrH = (addr >> 16) & 0xFF;
   const addrM = (addr >> 8) & 0xFF;
   const addrL = addr & 0xFF;
-
 
 	await ftdi.FLASH_cs_assert(device);
 
@@ -356,6 +351,7 @@ async function flash_prog(device, addr, data, verbose)
 
   //-- Enviar otra trama con los datos
   //-- Primero cabecera y despues cuerpo
+  let n = data.byteLength;
   let dlenL = (n-1) & 0xFF;
   let dlenH = ((n-1) >> 8) & 0xFF;
   let header2 = new Uint8Array([0x11, dlenL, dlenH]);
@@ -368,12 +364,6 @@ async function flash_prog(device, addr, data, verbose)
 
 	await ftdi.FLASH_cs_deassert(device);
 
-	if (verbose) {
-    let str = ""
-		for (let i = 0; i < n; i++)
-			str += data[i].toString(16) + (i == n - 1 || i % 32 == 31 ? '\n' : ' ');
-    console.log(str);
-  }
 }
 
 
@@ -574,7 +564,7 @@ async function load_bitstream(contents)
       //console.log("Bloque: " + b + ". Size: " + buf.byteLength);
       await ftdi.FLASH_write_enable(device); 
       await ftdi.FLASH_write_enable(device); 
-      await flash_prog(device, rw_offset + caddr, buf, false);
+      await flash_prog(device, rw_offset + caddr, buf);
       await ftdi.FLASH_wait(device);
 
       caddr += 256;
@@ -587,7 +577,7 @@ async function load_bitstream(contents)
   if (remaining > 0) {
       let buf = contents.slice(caddr, caddr + remaining);
       await ftdi.FLASH_write_enable(device); 
-      await flash_prog(device, rw_offset + caddr, buf, false);
+      await flash_prog(device, rw_offset + caddr, buf);
       await ftdi.FLASH_wait(device);
   }
   console.log("✅Program");
