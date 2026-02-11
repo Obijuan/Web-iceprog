@@ -531,13 +531,13 @@ async function load_bitstream(contents)
   }
   console.log("✅Erase");
 
+  cdone = await ftdi.FPGA_get_cdone(device);
+  console.log("Cdone: " + (cdone ? "high" : "low"));
+  console.log("**************************** TEST1 *******");
+
   console.log("🚧 DEBUG 🚧");
 
-  cdone = await get_cdone();
-  console.log("cdone: " + (cdone ? "high" : "low"))
-  console.log("**************************** TEST2 *******");
-
-  await flash_reset();
+  //await flash_reset();
   await flash_power_up();
   await flash_read_id(); 
 
