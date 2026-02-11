@@ -409,27 +409,6 @@ function print_buffer(buff)
 }
 
 
-
-async function flash_write_enable(device, verbose) 
-{
-  if (verbose) {
-    //console.log("status before enable:");
-    let status = await ftdi.FLASH_read_status(device);
-    //let status = await flash_read_status();
-    //flash_print_status(status)
-  }
-
-  await ftdi.FLASH_write_enable(device); 
-
-  if (verbose) {
-    //console.log("status after enable:");
-    let status = await ftdi.FLASH_read_status(device);
-    //let status = await flash_read_status();
-    //flash_print_status(status)
-  }
-}
-
-
 async function test_mode(device) 
 {
   await ftdi.FLASH_cs_deassert(device);
@@ -446,9 +425,6 @@ async function test_mode(device)
   await sleep(250);
   cdone = await ftdi.FPGA_get_cdone(device);  
 }
-
-
-
 
 
 //-------------------------------------------------------------
@@ -599,7 +575,6 @@ async function load_bitstream(contents)
       //console.log("Bloque: " + b + ". Size: " + buf.byteLength);
       await ftdi.FLASH_write_enable(device); 
       await ftdi.FLASH_write_enable(device); 
-      //await flash_write_enable(device, false);
       await flash_prog(rw_offset + caddr, buf, false);
       await ftdi.FLASH_wait(device);
 
@@ -612,7 +587,7 @@ async function load_bitstream(contents)
   //-- Write the remaining not full block
   if (remaining > 0) {
       let buf = contents.slice(caddr, caddr + remaining);
-      await flash_write_enable(device, false);
+      await ftdi.FLASH_write_enable(device); 
       await flash_prog(rw_offset + caddr, buf, false);
       await ftdi.FLASH_wait(device);
   }
