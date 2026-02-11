@@ -497,24 +497,7 @@ async function test_mode(device)
 }
 
 
-async function flash_wait(device) {
 
-  let is_busy = false;
-
-  do {
-    //-- Leer status
-    let status = await ftdi.FLASH_read_status(device);
-
-    //-- Comprobar si esta ocupado
-    is_busy = ((status & 0x01) == 1);
-
-    //-- Si esta ocupado, realizamos una espera
-    if (is_busy) {
-      await sleep(10);
-    }
-
-  } while (is_busy);
-}
 
 
 //-------------------------------------------------------------
@@ -636,7 +619,7 @@ async function load_bitstream(contents)
   for (let addr = begin_addr; addr < end_addr; addr += 0x10000) {
      await ftdi.FLASH_write_enable(device); 
      await flash_64kB_sector_erase(addr);
-     await flash_wait(device);
+     await ftdi.FLASH_wait(device);
   }
   console.log("✅Erase");
 
@@ -666,7 +649,7 @@ async function load_bitstream(contents)
       await flash_write_enable(device, false);
       await flash_write_enable(device, false);
       await flash_prog(rw_offset + caddr, buf, false);
-      await flash_wait(device);
+      await ftdi.FLASH_wait(device);
 
       caddr += 256;
       if (b % 50 == 0) 
@@ -679,7 +662,7 @@ async function load_bitstream(contents)
       let buf = contents.slice(caddr, caddr + remaining);
       await flash_write_enable(device, false);
       await flash_prog(rw_offset + caddr, buf, false);
-      await flash_wait(device);
+      await ftdi.FLASH_wait(device);
   }
   console.log("✅Program");
 

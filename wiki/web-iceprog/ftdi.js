@@ -670,4 +670,25 @@ export async function FLASH_read_status(device) {
     return r2.data.getUint8(3);
 }
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
+export async function FLASH_wait(device) {
+
+  let is_busy = false;
+
+  do {
+    //-- Leer status
+    let status = await FLASH_read_status(device);
+
+    //-- Comprobar si esta ocupado
+    is_busy = ((status & 0x01) == 1);
+
+    //-- Si esta ocupado, realizamos una espera
+    if (is_busy) {
+      await sleep(10);
+    }
+
+  } while (is_busy);
+}
