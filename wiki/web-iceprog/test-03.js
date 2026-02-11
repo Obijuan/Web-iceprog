@@ -653,11 +653,6 @@ async function load_bitstream(contents)
   for (let addr = begin_addr; addr < end_addr; addr += 0x10000) {
      await ftdi.FLASH_write_enable(device); 
      await flash_64kB_sector_erase(addr);
-     //if (verbose)
-     //  console.log("************ Status after block erase:");
-     //let status = await flash_read_status()
-     let status = await ftdi.FLASH_read_status(device);
-     //flash_print_status(status)
      await flash_wait(device);
   }
   console.log("✅Erase");
