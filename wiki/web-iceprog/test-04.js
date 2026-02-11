@@ -341,15 +341,28 @@ async function flash_prog(device, addr, data, verbose)
  	if (verbose)
 		console.log("prog 0x" + addr.toString(16) + " 0x" + n.toString(16));
 
+  //-- Obtener los 3 bytes de la direccion
+  const addrH = (addr >> 16) & 0xFF;
+  const addrM = (addr >> 8) & 0xFF;
+  const addrL = addr & 0xFF;
+
   let command = new Uint8Array(4);
   command[0] = FC_PP;
-  command[1] = (addr >> 16);
-  command[2] = (addr >> 8);
-  command[3] = addr;
 
 	await ftdi.FLASH_cs_assert(device);
-	await mpsse_send_spi(command);
+
+  //-- Enviar a la flash el comando
+  let cmd = new Uint8Array([0x31, 3, 0, FC_PP, 
+                             addrH, addrM, addrL]);
+
+  await device.transferOut(IN_EP, cmd);
+
+
+	//await mpsse_send_spi(command);
 	await mpsse_send_spi(data);
+
+
+
 	await ftdi.FLASH_cs_deassert(device);
 
 	if (verbose) {
