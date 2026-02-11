@@ -541,25 +541,24 @@ async function load_bitstream(contents)
   }
   console.log("✅Program");
 
-  console.log("🚧 DEBUG 🚧");
 
-
-
-  // cdone = await get_cdone();
-  // console.log("cdone: " + (cdone ? "high" : "low"))
-  // console.log("**************************** TEST3 *******");
-
-  // await flash_reset();
-  // await flash_power_up();
-  // await flash_read_id(); 
-
-
+  cdone = await ftdi.FPGA_get_cdone(device);
+  console.log("Cdone: " + (cdone ? "high" : "low"));
+  console.log("**************************** TEST3 *******");
 
   //-----------------------------------------------------------
   //   VERYFICATION
   //-----------------------------------------------------------
 
-  console.log("reading.. for verification!!!!!!!!!!!!!!");
+  await ftdi.FLASH_release_power_down(device);
+
+  buffer_id = await ftdi.FLASH_read_id(device)
+  flash_id_str = id_to_string(buffer_id);
+  console.log("✅FLASH-ID: " + flash_id_str);
+
+  console.log("🚧 DEBUG 🚧");
+
+  console.log("Reading.. for verification!!!!!!!!!!!!!!");
   let addr = 0;
   
   //let buf_file = contents.slice(addr, addr + 256); 
