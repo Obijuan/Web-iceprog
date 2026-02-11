@@ -336,17 +336,26 @@ async function flash_power_down()
 
   async function flash_64kB_sector_erase(addr)
   {
-    //console.log("erase 64kB sector at 0x" + addr.toString(16) + "..");
+    console.log("erase 64kB sector at 0x" + addr.toString(16) + "..");
   
-    const command = new  Uint8Array(4);
-    command[0] = FC_BE64;
-    command[1] = (addr >> 16);
-    command[2] = (addr >> 8);
-    command[3] = addr;
-  
-    await flash_chip_select();
-    await mpsse_send_spi(command);
-    await flash_chip_deselect();
+    //-- Obtener los 3 bytes de la direccion
+    const addrH = (addr >> 16) & 0xFF;
+    const addrM = (addr >> 8) & 0xFF;
+    const addrL = addr & 0xFF;
+
+    //-- Activar el chip select de la flash
+    await ftdi.FLASH_cs_assert(device)
+
+    //-- Enviar a la flash el comando
+    let data = new Uint8Array([0x31, 3, 0, FC_BE64, addrH, addrM, addrL]);
+    await device.transferOut(IN_EP, data);
+
+    //-- Leer la respuest: 2 bytes del model + 1 del comando
+    //-- (se lee para vaciar el buffer)
+    let result = await device.transferIn(OUT_EP, 10);
+
+    //-- Desactivar el chip select de la flash
+    await ftdi.FLASH_cs_deassert(device);
   }
 
 
