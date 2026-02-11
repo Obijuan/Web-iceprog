@@ -720,3 +720,33 @@ export async function FLASH_block_64kB_erase(device, addr)
     await FLASH_cs_deassert(device);
   }
   
+  /**
+ * Escribe un solo byte en una dirección específica (Comando 0x02)
+ */
+export async function FLASH_write_byte(device, address, value) {
+    // 1. Habilitar escritura
+    await FLASH_write_enable(device);
+
+    // 2. Enviar comando Page Program + Dirección + Dato
+    await FLASH_cs_assert(device);
+    
+    const addrH = (address >> 16) & 0xFF;
+    const addrM = (address >> 8) & 0xFF;
+    const addrL = address & 0xFF;
+
+    // Trama: [0x11 (Data Out), Longitud L, Longitud H, 0x02 (Cmd), AddrH, AddrM, AddrL, Data]
+    // Son 5 bytes totales (Cmd + Addr + Data). MPSSE usa (n-1), por lo que enviamos 0x04.
+    const writeFrame = new Uint8Array([0x31, 0x04, 0x00, 0x02, addrH, addrM, addrL, value]);
+    await device.transferOut(OUT_EP, writeFrame);
+    
+    await FLASH_cs_deassert(device);
+    await FLASH_wait(device);
+
+
+    // 3. Esperar a que termine (Polling)
+    //let busy = true;
+    //while (busy) {
+    //    const status = await readStatus(device);
+    //    busy = (status & 0x01) !== 0; 
+    //}
+}
