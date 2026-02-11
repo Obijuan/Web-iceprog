@@ -31,7 +31,6 @@ const FC_JEDECID = 0x9F; // Read JEDEC ID
 const FC_PP = 0x02; // Page Program
 const FC_RD = 0x03; // Read Data
 const FC_PD = 0xB9; // Power-down
-const FC_BE64 = 0xD8; // Block Erase 64kb
 
 //-- Important information
 // ftdi->interface = 0;
@@ -334,31 +333,6 @@ async function flash_power_down()
 }
 
 
-  async function flash_64kB_sector_erase(addr)
-  {
-    console.log("erase 64kB sector at 0x" + addr.toString(16) + "..");
-  
-    //-- Obtener los 3 bytes de la direccion
-    const addrH = (addr >> 16) & 0xFF;
-    const addrM = (addr >> 8) & 0xFF;
-    const addrL = addr & 0xFF;
-
-    //-- Activar el chip select de la flash
-    await ftdi.FLASH_cs_assert(device)
-
-    //-- Enviar a la flash el comando
-    let data = new Uint8Array([0x31, 3, 0, FC_BE64, addrH, addrM, addrL]);
-    await device.transferOut(IN_EP, data);
-
-    //-- Leer la respuest: 2 bytes del model + 1 del comando
-    //-- (se lee para vaciar el buffer)
-    let result = await device.transferIn(OUT_EP, 10);
-
-    //-- Desactivar el chip select de la flash
-    await ftdi.FLASH_cs_deassert(device);
-  }
-
-
 //-- Implement flash_prog...
 async function flash_prog(addr, data, verbose)
 {
@@ -550,14 +524,14 @@ async function load_bitstream(contents)
   let begin_addr = rw_offset & ~0xffff;
   let end_addr = (rw_offset + file_size + 0xffff) & ~0xffff;
 
-  console.log("🚧 DEBUG 🚧");
-
   for (let addr = begin_addr; addr < end_addr; addr += 0x10000) {
      await ftdi.FLASH_write_enable(device); 
      await ftdi.FLASH_block_64kB_erase(device, addr);
      await ftdi.FLASH_wait(device);
   }
   console.log("✅Erase");
+
+  console.log("🚧 DEBUG 🚧");
 
   cdone = await get_cdone();
   console.log("cdone: " + (cdone ? "high" : "low"))
