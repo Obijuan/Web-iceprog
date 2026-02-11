@@ -535,14 +535,16 @@ async function load_bitstream(contents)
   console.log("Cdone: " + (cdone ? "high" : "low"));
   console.log("**************************** TEST1 *******");
 
+  await ftdi.FLASH_release_power_down(device);
+
+  buffer_id = await ftdi.FLASH_read_id(device)
+  flash_id_str = id_to_string(buffer_id);
+  console.log("✅FLASH-ID: " + flash_id_str);
+
+  
+
+  
   console.log("🚧 DEBUG 🚧");
-
-  //await flash_reset();
-  await flash_power_up();
-  await flash_read_id(); 
-
-
-
 
 
   let caddr = 0;
