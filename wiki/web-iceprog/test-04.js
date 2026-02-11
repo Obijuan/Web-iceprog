@@ -332,41 +332,6 @@ async function flash_power_down()
   console.log("FLASH: Power Down. STOP!");
 }
 
-
-//-- Implement flash_prog...
-async function flash_prog(device, addr, data)
-{
-
-  //-- Obtener los 3 bytes de la direccion
-  const addrH = (addr >> 16) & 0xFF;
-  const addrM = (addr >> 8) & 0xFF;
-  const addrL = addr & 0xFF;
-
-	await ftdi.FLASH_cs_assert(device);
-
-  //-- Enviar a la flash el comando
-  let cmd = new Uint8Array([0x31, 3, 0, FC_PP, 
-                             addrH, addrM, addrL]);
-  await device.transferOut(IN_EP, cmd);
-
-  //-- Enviar otra trama con los datos
-  //-- Primero cabecera y despues cuerpo
-  let n = data.byteLength;
-  let dlenL = (n-1) & 0xFF;
-  let dlenH = ((n-1) >> 8) & 0xFF;
-  let header2 = new Uint8Array([0x11, dlenL, dlenH]);
-  await device.transferOut(IN_EP, header2);
-
-  //-- Cuerpo
-  let block_data = new Uint8Array(data);
-  await device.transferOut(IN_EP, block_data); 
-
-
-	await ftdi.FLASH_cs_deassert(device);
-
-}
-
-
 //---------------------
 //-- UTILS
 //---------------------
@@ -547,16 +512,12 @@ async function load_bitstream(contents)
   flash_id_str = id_to_string(buffer_id);
   console.log("✅FLASH-ID: " + flash_id_str);
 
-
   let caddr = 0;
   
   let total_blocks = Math.trunc(file_size / 256);
   let remaining = Math.trunc(file_size % 256);
 
   console.log("Total 256 bytes blocks: " + total_blocks)
-
-  console.log("🚧 DEBUG 🚧");
-
 
   //-- Write complete blocks
   for (let b = 0; b < total_blocks; b++) {
@@ -582,6 +543,7 @@ async function load_bitstream(contents)
   }
   console.log("✅Program");
 
+  console.log("🚧 DEBUG 🚧");
 
 
 
