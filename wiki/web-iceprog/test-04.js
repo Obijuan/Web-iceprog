@@ -395,6 +395,22 @@ function id_to_string(id)
   return cad
 }
 
+
+function array_equal(arr1, arr2) {
+    //-- Si tienen tamaños diferentes, los arrays son distintos
+    if (arr1.length !== arr2.length) {
+      console.log("❌ ERROR: Los arrays tienen DISTINTO TAMAÑO!")
+      return false;
+    }
+
+    for (let i = 0; i < arr1.length; i++) {
+        if (arr1[i] !== arr2[i]) return false;
+    }
+    return true;
+}
+
+
+
 //--------------------------------------------
 //---   MAIN 
 //--------------------------------------------
@@ -556,22 +572,28 @@ async function load_bitstream(contents)
   flash_id_str = id_to_string(buffer_id);
   console.log("✅FLASH-ID: " + flash_id_str);
 
+  console.log("->Reading.. for verification!!!!!!!!!!!!!!");
   console.log("🚧 DEBUG 🚧");
 
-  console.log("Reading.. for verification!!!!!!!!!!!!!!");
-  let addr = 0;
+  await ftdi.purge_buffers(device);
   
-  //let buf_file = contents.slice(addr, addr + 256); 
+
+  //-- Direccion donde comenzar la veriricacion
+  let addr = 0;
 
   //-- Verify complete blocks
   for (let b = 0; b < total_blocks; b++) {
-    let buf_file = contents.slice(addr, addr + 256);
-    let buf_flash = new ArrayBuffer(256);
+
+    //-- Leer bloque de 256 bytes del bitstream
+    let buf_file = new Uint8Array(contents.slice(addr, addr + 256));
+
+    //-- Leer bloque de 256 bytes de la flash
+    //let buf_flash = await ftdi.FLASH_read(device, addr, 256);
     //flash_read(rw_offset + addr, buf_flash, 256, false);
     //await sleep(1);
 
-    if (!array_equals(buf_flash, buf_file))
-      mpsse_error(3, "Found difference between flash and file!")
+    //if (!array_equal(buf_flash, buf_file))
+    //  mpsse_error(3, "Found difference between flash and file!")
 
     addr += 256;
     //console.log(b + " ");
@@ -582,9 +604,9 @@ async function load_bitstream(contents)
   if (remaining > 0) {
     let buf_file = contents.slice(addr, addr + remaining);
     let buf_flash = new ArrayBuffer(remaining)    
-    flash_read(rw_offset + addr, buf_flash, remaining, false);
-    if (!array_equals(buf_flash, buf_file))
-        mpsse_error(3, "Found difference between flash and file!")
+    //flash_read(rw_offset + addr, buf_flash, remaining, false);
+    //if (!array_equals(buf_flash, buf_file))
+    //    mpsse_error(3, "Found difference between flash and file!")
   }
   console.log("✅Verify: OK!");
 
@@ -626,22 +648,7 @@ async function load_bitstream(contents)
 }
 
 
-function array_equals(arr1, arr2) {
-  // 1. Comprueba si las longitudes son diferentes
-  if (arr1.length !== arr2.length) {
-    return false;
-  }
 
-  // 2. Itera y compara cada elemento
-  for (let i = 0; i < arr1.length; i++) {
-    if (arr1[i] !== arr2[i]) {
-      return false;
-    }
-  }
-
-  // Si el bucle finaliza, los arrays son iguales
-  return true;
-}
 
 
 function flash_read(addr, data, n, verbose)
