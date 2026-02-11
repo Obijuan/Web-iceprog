@@ -593,10 +593,25 @@ async function updateHexdump(address) {
 }
 
 async function handleErase() {
-    //if (!confirm("¿Estás seguro de borrar 64KB a partir de 0x040000?")) return;
+
+    // 1. Obtener la dirección actual del input de lectura
+    let rawValue = addressInput.value.trim();
+    let address = rawValue.toLowerCase().startsWith('0x') 
+        ? parseInt(rawValue, 16) 
+        : parseInt(rawValue, 10);
+
+    if (isNaN(address)) {
+        log("Error: Dirección no válida para borrar", "error");
+        return;
+    }
+
+    // 2. Confirmación dinámica
+    const hexAddr = "0x" + address.toString(16).toUpperCase().padStart(6, '0');
+    if (!confirm(`¿Estás seguro de borrar el bloque de 64KB a partir de ${hexAddr}?`)) return;
+
 
     try {
-        log("Iniciando borrado de sector (0x040000)...", "system");
+        log(`Iniciando borrado de sector en ${hexAddr}...`, "system");
         eraseBtn.disabled = true;
         eraseBtn.textContent = "Borrando...";
 
@@ -610,20 +625,16 @@ async function handleErase() {
         //-- Medir tiempo de inicio
         const startTime = performance.now();
 
-        //-- DEBUG
-        console.log("TEST-3");
-        let status = await ftdi.FLASH_read_status(device);
-        console.log("Status: " + status);
 
         // Habilitar escritura en la flash
         await ftdi.FLASH_write_enable(device);
 
-        //-- DEBUG
-        status = await ftdi.FLASH_read_status(device);
-        console.log("Status: " + status);
 
         //-- Borrar bloque de 64KB
-        await ftdi.FLASH_block_64kB_erase(device, 0x040000);
+        await ftdi.FLASH_block_64kB_erase(device, address);
+
+        //-- Esperar a que la operción se complete
+        await ftdi.FLASH_wait(device);
 
         //-- Calcular la duracion del proceso
         const duration = ((performance.now() - startTime) / 1000).toFixed(2);
@@ -631,7 +642,6 @@ async function handleErase() {
         log(`Borrado completado en ${duration}s`, "success");
         
         // Actualizamos la vista para comprobar el borrado
-        addressInput.value = "0x040000";
         await handleRead8();
 
     } catch (err) {
@@ -641,7 +651,8 @@ async function handleErase() {
         await ftdi.FPGA_reset_deassert(device);
 
         eraseBtn.disabled = false;
-        eraseBtn.textContent = "Borrar Bloque 64KB (0x040000)";
+        eraseBtn.textContent = "Borrar Bloque 64KB";
+        eraseBtn.style.opacity = "1";
     }
 }
 
