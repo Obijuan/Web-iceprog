@@ -26,13 +26,11 @@ const MC_DATA_BITS = 0x02 // When set count bits not bytes
 // Flash command definitions
 // This command list is based on the Winbond W25Q128JV Datasheet
 
-const FC_WE = 0x06;  // Write Enable
 const FC_RPD = 0xAB; // Release Power-Down, returns Device ID
 const FC_JEDECID = 0x9F; // Read JEDEC ID
 const FC_PP = 0x02; // Page Program
 const FC_RD = 0x03; // Read Data
 const FC_PD = 0xB9; // Power-down
-const FC_RSR1 = 0x05; // Read Status Register 1
 const FC_BE64 = 0xD8; // Block Erase 64kb
 
 //-- Important information
@@ -335,53 +333,6 @@ async function flash_power_down()
   console.log("FLASH: Power Down. STOP!");
 }
 
-async function flash_read_status()
-  {
-    //console.log("FLASH: Read_status. START!");
-    let buff = new Uint8Array(2);
-    buff[0] = FC_RSR1;
-    await flash_chip_select();
-    await mpsse_xfer_spi(buff);
-    await flash_chip_deselect();
-
-    await sleep(1);
-
-    let status = buff[1];
-    //console.log("Status: " + status.toString(16));
-    //console.log("FLASH: Read_status. STOP!");
-
-    return status;
-  }
-
-  function flash_print_status(status)
-  {
-    console.log("SR1: 0x" + status.toString(16))
-    console.log(" - SPRL: " + ((status & (1 << 7)) == 0 ? "unlocked" : "locked"));
-    console.log(" -  SPM: " + (((status & (1 << 6)) == 0) ? "Byte/Page Prog Mode" : "Sequential Prog Mode"));
-    console.log(" -  EPE: " + (((status & (1 << 5)) == 0) ? "Erase/Prog success" : "Erase/Prog error"));
-    console.log("-  SPM: " +  (((status & (1 << 4)) == 0) ?  "~WP asserted" : "~WP deasserted"));
-  
-    var spm = "";
-    switch((status >> 2) & 0x3) {
-      case 0:
-        spm = "All sectors unprotected";
-        break;
-      case 1:
-        spm = "Some sectors protected";
-        break;
-      case 2:
-        spm = "Reserved (xxxx 10xx)";
-        break;
-      case 3:
-        spm = "All sectors protected";
-        break;
-    }
-  
-    console.log(" -  SWP: " + spm);
-    console.log(" -  WEL: " + (((status & (1 << 1)) == 0) ? "Not write enabled" : "Write enabled"));
-    console.log(" - ~RDY: " + (((status & 0x1) == 0) ? "Ready" : "Busy"));
-  }
-
 
   async function flash_64kB_sector_erase(addr)
   {
@@ -646,8 +597,9 @@ async function load_bitstream(contents)
   for (let b = 0; b < total_blocks; b++) {
       let buf = contents.slice(caddr, caddr + 256);
       //console.log("Bloque: " + b + ". Size: " + buf.byteLength);
-      await flash_write_enable(device, false);
-      await flash_write_enable(device, false);
+      await ftdi.FLASH_write_enable(device); 
+      await ftdi.FLASH_write_enable(device); 
+      //await flash_write_enable(device, false);
       await flash_prog(rw_offset + caddr, buf, false);
       await ftdi.FLASH_wait(device);
 
