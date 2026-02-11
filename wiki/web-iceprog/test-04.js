@@ -346,30 +346,24 @@ async function flash_prog(device, addr, data, verbose)
   const addrM = (addr >> 8) & 0xFF;
   const addrL = addr & 0xFF;
 
-  let command = new Uint8Array(4);
-  command[0] = FC_PP;
 
 	await ftdi.FLASH_cs_assert(device);
 
   //-- Enviar a la flash el comando
   let cmd = new Uint8Array([0x31, 3, 0, FC_PP, 
                              addrH, addrM, addrL]);
-
   await device.transferOut(IN_EP, cmd);
 
+  //-- Enviar otra trama con los datos
+  //-- Primero cabecera y despues cuerpo
   let dlenL = (n-1) & 0xFF;
   let dlenH = ((n-1) >> 8) & 0xFF;
   let header2 = new Uint8Array([0x11, dlenL, dlenH]);
   await device.transferOut(IN_EP, header2);
 
+  //-- Cuerpo
   let block_data = new Uint8Array(data);
   await device.transferOut(IN_EP, block_data); 
-  
-
-	//await mpsse_send_spi(command);
-	//await mpsse_send_spi(data);
-
-
 
 	await ftdi.FLASH_cs_deassert(device);
 
