@@ -357,9 +357,17 @@ async function flash_prog(device, addr, data, verbose)
 
   await device.transferOut(IN_EP, cmd);
 
+  let dlenL = (n-1) & 0xFF;
+  let dlenH = ((n-1) >> 8) & 0xFF;
+  let header2 = new Uint8Array([0x11, dlenL, dlenH]);
+  await device.transferOut(IN_EP, header2);
+
+  let block_data = new Uint8Array(data);
+  await device.transferOut(IN_EP, block_data); 
+  
 
 	//await mpsse_send_spi(command);
-	await mpsse_send_spi(data);
+	//await mpsse_send_spi(data);
 
 
 
