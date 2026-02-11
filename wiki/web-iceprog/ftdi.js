@@ -642,8 +642,10 @@ export async function FLASH_write_enable(device) {
 }
 
 
-
-export async function FLASH_read_status2(device) {
+/**
+ * Lee el Status Register (0x05) y devuelve el byte
+ */
+export async function FLASH_read_status(device) {
 
     await FLASH_cs_assert(device);
 
@@ -653,9 +655,6 @@ export async function FLASH_read_status2(device) {
 
       //-- Enviar trama para la lectura del status
       let r1 = await device.transferOut(OUT_EP, new Uint8Array([0x31, 1, 0, 0x05, 0])); 
-      if (r1.status != 'ok' || r1.bytesWritten != 5) {
-        throw("(----> FLASH_WAIT: Error en TransferOUT!");
-      }
 
       //-- Leer la respuesta
       r2 = await device.transferIn(IN_EP, 4);
@@ -671,41 +670,4 @@ export async function FLASH_read_status2(device) {
     return r2.data.getUint8(3);
 }
 
-
-/**
- * Lee el Status Register (0x05) y devuelve el byte
- */
-export async function FLASH_read_status(device) {
-
-    //-- Activar el chip select de la flash
-    await FLASH_cs_assert(device)
-
-    //-- Enviar a la flash el comando
-    let data = new Uint8Array([FTDI_SPI_WRITE, 1, 0, FLASH_READ_STATUS, 0]);
-    await device.transferOut(OUT_EP, data);
-
-    //-- Leer la respuest: 2 bytes del modem + 1 dummy del comando
-    //-- + 1 byte con la respuesta
-    //-- (se lee para vaciar el buffer)
-    let result = await device.transferIn(IN_EP, 4);
-
-    //-- Comprobar posibles errores
-    if (result.status != 'ok') {
-        throw("----> FLASH_read_status: ERROR en TransferIn")
-    }
-
-    //-- Esperar hasta recibir la trama de 4 bytes. Podría ocurrir
-    //-- que se reciba una menor a 4
-    if (result.byteLength < 4) {
-        console.log("---> FLASH_read_status: PROBLEMA: Leidos: " + r2.data.byteLength + "bytes");
-    }
-
-    //-- Desactivar el chip select de la flash
-    await FLASH_cs_deassert(device)
-
-    if (result.status === 'ok' && result.data.byteLength === 4) {
-        return result.data.getUint8(3); // El byte de la flash
-    }
-    throw new Error("Error leyendo byte de la Flash");
-}
 

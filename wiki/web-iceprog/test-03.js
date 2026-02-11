@@ -504,7 +504,7 @@ async function flash_wait(device) {
   while (1) {
 
 
-    let status = await ftdi.FLASH_read_status2(device);
+    let status = await ftdi.FLASH_read_status(device);
 
     if ((status & 0x01) == 0) {
       if (count < 2) {
@@ -656,7 +656,7 @@ async function load_bitstream(contents)
      //if (verbose)
      //  console.log("************ Status after block erase:");
      //let status = await flash_read_status()
-     let status = await ftdi.FLASH_read_status2(device);
+     let status = await ftdi.FLASH_read_status(device);
      //flash_print_status(status)
      await flash_wait(device);
   }
