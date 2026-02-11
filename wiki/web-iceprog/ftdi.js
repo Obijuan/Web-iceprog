@@ -42,6 +42,7 @@ const FLASH_READ_STATUS = 0x05; //-- Leer el estado de la eeprom (busy?)
 const FLASH_BLOCK_ERASE = 0xD8; // Borrar un bloque de 64KB
 
 
+
 //-- Máscaras de acceso a los pines de los gpios del FTDI
 const FPGA_RESET_PIN  = 0x80  //-- ADBUS7: Salida: Señal de reset de la FPGA
 const FPGA_CDONE_PINS = 0x40  //-- ADBUS6: Entrada: Señal cdone de la FPGA
@@ -692,3 +693,30 @@ export async function FLASH_wait(device) {
 
   } while (is_busy);
 }
+
+export async function FLASH_block_64kB_erase(device, addr)
+  {
+    console.log("erase 64kB sector at 0x" + addr.toString(16) + "..");
+  
+    //-- Obtener los 3 bytes de la direccion
+    const addrH = (addr >> 16) & 0xFF;
+    const addrM = (addr >> 8) & 0xFF;
+    const addrL = addr & 0xFF;
+
+    //-- Activar el chip select de la flash
+    await FLASH_cs_assert(device)
+
+    //-- Enviar a la flash el comando
+    let data = new Uint8Array([FTDI_SPI_WRITE, 3, 0, FLASH_BLOCK_ERASE, 
+                               addrH, addrM, addrL]);
+    await device.transferOut(OUT_EP, data);
+
+    //-- Leer la respuest: 2 bytes del model + 1 del comando
+    //-- + 3 de las direcciones
+    //-- (se lee para vaciar el buffer)
+    let result = await device.transferIn(IN_EP, 10);
+
+    //-- Desactivar el chip select de la flash
+    await FLASH_cs_deassert(device);
+  }
+  
