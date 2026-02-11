@@ -499,39 +499,22 @@ async function test_mode(device)
 
 async function flash_wait(device) {
 
-  let count = 0;
-      
-  while (1) {
+  let is_busy = false;
 
-
+  do {
+    //-- Leer status
     let status = await ftdi.FLASH_read_status(device);
 
-    if ((status & 0x01) == 0) {
-      if (count < 2) {
-        count++;
-        //if (verbose) {
-        //  console.log("r");
-        //}
-      } else {
-        //if (verbose) {
-        //  console.log("R");
-        //}
-        break;
-      }
-    } else {
-      //if (verbose) {
-      //  console.log(".");
-      //}
-      count = 0;
+    //-- Comprobar si esta ocupado
+    is_busy = ((status & 0x01) == 1);
+
+    //-- Si esta ocupado, realizamos una espera
+    if (is_busy) {
+      await sleep(10);
     }
 
-    //console.log("Data[1]: " + data[1]);
-    //console.log("***************************************************************PAUSA!!!!!!")
-    await sleep(10);
-  }
+  } while (is_busy);
 }
-
-
 
 
 //-------------------------------------------------------------
