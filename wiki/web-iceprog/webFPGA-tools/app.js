@@ -26,6 +26,8 @@ const hexdumpGrid = document.getElementById('hexdump-grid');
 const hexdumpContainer = document.getElementById('hexdump-container');
 const eraseBtn = document.getElementById('erase-btn');
 const writeTool = document.getElementById('write-tool');
+const writeByteBtn = document.getElementById('write-byte-btn');
+const byteInput = document.getElementById('byte-input');
 
 log("Aplicacion iniciada...", "system");
 
@@ -41,6 +43,9 @@ readByteBtn.onclick = handleRead8;
 prevBtn.onclick = () => stepAddress(-1);
 nextBtn.onclick = () => stepAddress(1);
 eraseBtn.onclick = handleErase;
+writeByteBtn.onclick = handleWriteByte;
+
+
 
 
 // -----------------------------------------------------
@@ -619,7 +624,7 @@ async function handleErase() {
         await ftdi.FPGA_reset_assert(device);
         await new Promise(r => setTimeout(r, 50));
 
-        //-- Sacar la EEPROM del modo sleep
+        //-- Sacar la FLASH del modo sleep
         await ftdi.FLASH_release_power_down(device);
 
         //-- Medir tiempo de inicio
@@ -656,3 +661,50 @@ async function handleErase() {
     }
 }
 
+// Opcional: Permitir ENTER en el input del byte para grabar
+byteInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') handleWriteByte();
+});
+
+async function handleWriteByte() {
+    try {
+        // 1. Obtener dirección del input de lectura
+        let addrRaw = addressInput.value.trim();
+        let address = addrRaw.toLowerCase().startsWith('0x') ? parseInt(addrRaw, 16) : parseInt(addrRaw, 10);
+
+        // 2. Obtener valor del nuevo input de byte
+        let byteRaw = byteInput.value.trim();
+        let value = byteRaw.toLowerCase().startsWith('0x') ? parseInt(byteRaw, 16) : parseInt(byteRaw, 10);
+
+        if (isNaN(address) || isNaN(value) || value < 0 || value > 255) {
+            log("Error: Dirección o valor de byte no válido", "error");
+            return;
+        }
+
+        log(`Grabando 0x${value.toString(16).toUpperCase()} en 0x${address.toString(16).toUpperCase()}...`, "system");
+        
+        writeByteBtn.disabled = true;
+        //-- Poner la FPGA en reset
+        await ftdi.FPGA_reset_assert(device);
+        await new Promise(r => setTimeout(r, 50));
+
+        //-- Sacar la FLASH del modo sleep
+        await ftdi.FLASH_release_power_down(device);
+
+        
+        // Operación de hardware
+        await ftdi.FLASH_write_enable(device);
+        await ftdi.FLASH_prog_page(device, address, [value]);
+        
+        log("Byte grabado correctamente", "success");
+
+        // 3. Verificación automática (Refresca el display y el hexdump)
+        await handleRead8();
+
+    } catch (err) {
+        log("Error al grabar: " + err.message, "error");
+    } finally {
+        await ftdi.setResetPin(device, true);
+        writeByteBtn.disabled = false;
+    }
+}

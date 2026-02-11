@@ -85,7 +85,18 @@
 
                 <div id="write-tool" class="read-tool hidden" style="border-color: #f97316; margin-top: 10px;">
                     <div class="label">Operaciones de Escritura</div>
-                    <button id="erase-btn" class="primary-btn" style="background: #f97316;">
+
+                    <div class="input-group" style="margin: 10px 0;">
+                        <label for="byte-input" class="label">Byte a grabar (Hex/Dec):</label>
+                        <div class="navigation-controls">
+                            <input type="text" id="byte-input" value="0xAA" style="border-color: #f97316; color: #f97316;">
+                            <button id="write-byte-btn" class="primary-btn" style="background: #f97316; margin: 0;">
+                                Grabar Byte
+                            </button>
+                        </div>
+                    </div>
+                
+                    <button id="erase-btn" class="primary-btn" style="background: #444; margin-top: 15px; font-size: 0.7rem;">
                         Borrar Bloque 64KB
                     </button>
                 </div>

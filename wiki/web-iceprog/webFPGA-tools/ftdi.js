@@ -29,6 +29,7 @@ const MC_READB_LOW   = 0x81;   // Read Data bits LowByte
 const MC_SET_CLK_DIV = 0x86;   // Set clock divisor
 const MC_TCK_D5      = 0x8B;   // Enable /5 div, backward compat to FT2232D
 const FTDI_SPI_WRITE = 0x31;
+const FTDI_SPI_WRITE_OUT = 0x11;
 
 
 //--------------- Comandos de la flash (enviados por el SPI del FTDI)
@@ -36,6 +37,7 @@ const FTDI_SPI_WRITE = 0x31;
 const FLASH_RPD     = 0xAB;  // Release Power-Down
 const FLASH_PD      = 0xB9;  // Power-down
 const FLASH_READ_ID = 0x9F;  // Leer el identificador de la flash
+const FLASH_PP      = 0x02;  // Page Program
 const FLASH_READ    = 0x03;  // Leer bytes de la flash
 const FLASH_WE      = 0x06;  // Habilitar la escritura de la flash
 const FLASH_READ_STATUS = 0x05; //-- Leer el estado de la eeprom (busy?)
@@ -720,3 +722,72 @@ export async function FLASH_block_64kB_erase(device, addr)
     await FLASH_cs_deassert(device);
   }
   
+  /**
+ * Escribe un solo byte en una dirección específica (Comando 0x02)
+ */
+export async function FLASH_write_byte(device, address, value) {
+    // 1. Habilitar escritura
+    await FLASH_write_enable(device);
+
+    // 2. Enviar comando Page Program + Dirección + Dato
+    await FLASH_cs_assert(device);
+    
+    const addrH = (address >> 16) & 0xFF;
+    const addrM = (address >> 8) & 0xFF;
+    const addrL = address & 0xFF;
+
+    // Trama: [0x11 (Data Out), Longitud L, Longitud H, 0x02 (Cmd), AddrH, AddrM, AddrL, Data]
+    // Son 5 bytes totales (Cmd + Addr + Data). MPSSE usa (n-1), por lo que enviamos 0x04.
+    const writeFrame = new Uint8Array([0x31, 0x04, 0x00, 0x02, addrH, addrM, addrL, value]);
+    await device.transferOut(OUT_EP, writeFrame);
+    
+    await FLASH_cs_deassert(device);
+    await FLASH_wait(device);
+
+
+    // 3. Esperar a que termine (Polling)
+    //let busy = true;
+    //while (busy) {
+    //    const status = await readStatus(device);
+    //    busy = (status & 0x01) !== 0; 
+    //}
+}
+
+//--------------------------------------------------------------
+//-- Programacion de una pagina de la flash (máximo 256 bytes)
+//-- ENTRADAS:
+//--   -device: Dispositivo usb
+//--   -addr: Direccion donde grabar el bloque
+//--   -data: Uint8Array de como máximo 256 bytes
+//--------------------------------------------------------------
+export async function FLASH_prog_page(device, addr, data)
+{
+
+  //-- Obtener los 3 bytes de la direccion
+  const addrH = (addr >> 16) & 0xFF;
+  const addrM = (addr >> 8) & 0xFF;
+  const addrL = addr & 0xFF;
+
+    await FLASH_cs_assert(device);
+
+  //-- Enviar a la flash el comando
+  let cmd = new Uint8Array([FTDI_SPI_WRITE_OUT, 3, 0, FLASH_PP, 
+                            addrH, addrM, addrL]);
+  await device.transferOut(OUT_EP, cmd);
+
+  //-- Enviar otra trama con los datos
+  //-- Primero cabecera y despues cuerpo
+  let n = data.byteLength;
+  let dlenL = (n-1) & 0xFF;
+  let dlenH = ((n-1) >> 8) & 0xFF;
+  let header2 = new Uint8Array([FTDI_SPI_WRITE_OUT, dlenL, dlenH]);
+  await device.transferOut(OUT_EP, header2);
+
+  //-- Cuerpo
+  let block_data = new Uint8Array(data);
+  await device.transferOut(OUT_EP, block_data); 
+
+
+  await FLASH_cs_deassert(device);
+
+}
