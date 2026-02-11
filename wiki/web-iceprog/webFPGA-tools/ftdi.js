@@ -34,11 +34,13 @@ const FTDI_SPI_WRITE = 0x31;
 //--------------- Comandos de la flash (enviados por el SPI del FTDI)
 //-- Leer el ID de la flash (3 bytes: fabricante, tipo, capacidad)
 const FLASH_RPD     = 0xAB;  // Release Power-Down
+const FLASH_PD      = 0xB9;  // Power-down
 const FLASH_READ_ID = 0x9F;  // Leer el identificador de la flash
 const FLASH_READ    = 0x03;  // Leer bytes de la flash
 const FLASH_WE      = 0x06;  // Habilitar la escritura de la flash
 const FLASH_READ_STATUS = 0x05; //-- Leer el estado de la eeprom (busy?)
 const FLASH_BLOCK_ERASE = 0xD8; // Borrar un bloque de 64KB
+
 
 
 //-- Máscaras de acceso a los pines de los gpios del FTDI
@@ -619,10 +621,11 @@ export async function FLASH_erase64KB(device, address) {
     }
 }
 
+
 /**
  * Envía el comando Write Enable (0x06)
  */
-export async function FLASH_writeEnable(device) {
+export async function FLASH_write_enable(device) {
 
     //-- Activar el chip select de la flash
     await FLASH_cs_assert(device)
@@ -639,29 +642,81 @@ export async function FLASH_writeEnable(device) {
     await FLASH_cs_deassert(device);
 }
 
+
 /**
  * Lee el Status Register (0x05) y devuelve el byte
  */
 export async function FLASH_read_status(device) {
 
+    await FLASH_cs_assert(device);
+
+    let r2;
+
+    do {
+
+      //-- Enviar trama para la lectura del status
+      let r1 = await device.transferOut(OUT_EP, new Uint8Array([0x31, 1, 0, 0x05, 0])); 
+
+      //-- Leer la respuesta
+      r2 = await device.transferIn(IN_EP, 4);
+
+      //-- Se deben recibir 4 bytes
+      //-- Si NO es así, se repite la lectura!
+        
+    } while (r2.data.byteLength < 4);
+
+    await FLASH_cs_deassert(device);
+
+    //-- Devolver el status
+    return r2.data.getUint8(3);
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+export async function FLASH_wait(device) {
+
+  let is_busy = false;
+
+  do {
+    //-- Leer status
+    let status = await FLASH_read_status(device);
+
+    //-- Comprobar si esta ocupado
+    is_busy = ((status & 0x01) == 1);
+
+    //-- Si esta ocupado, realizamos una espera
+    if (is_busy) {
+      await sleep(10);
+    }
+
+  } while (is_busy);
+}
+
+export async function FLASH_block_64kB_erase(device, addr)
+  {
+    console.log("erase 64kB sector at 0x" + addr.toString(16) + "..");
+  
+    //-- Obtener los 3 bytes de la direccion
+    const addrH = (addr >> 16) & 0xFF;
+    const addrM = (addr >> 8) & 0xFF;
+    const addrL = addr & 0xFF;
+
     //-- Activar el chip select de la flash
     await FLASH_cs_assert(device)
 
     //-- Enviar a la flash el comando
-    let data = new Uint8Array([FTDI_SPI_WRITE, 1, 0, FLASH_READ_STATUS, 0]);
+    let data = new Uint8Array([FTDI_SPI_WRITE, 3, 0, FLASH_BLOCK_ERASE, 
+                               addrH, addrM, addrL]);
     await device.transferOut(OUT_EP, data);
 
-    //-- Leer la respuest: 2 bytes del modem + 1 dummy del comando
-    //-- + 1 byte con la respuesta
+    //-- Leer la respuest: 2 bytes del model + 1 del comando
+    //-- + 3 de las direcciones
     //-- (se lee para vaciar el buffer)
     let result = await device.transferIn(IN_EP, 10);
 
     //-- Desactivar el chip select de la flash
-    await FLASH_cs_deassert(device)
-
-    if (result.status === 'ok' && result.data.byteLength === 4) {
-        return result.data.getUint8(3); // El byte de la flash
-    }
-    throw new Error("Error leyendo byte de la Flash");
-}
-
+    await FLASH_cs_deassert(device);
+  }
+  
