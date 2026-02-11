@@ -564,7 +564,7 @@ async function load_bitstream(contents)
       //console.log("Bloque: " + b + ". Size: " + buf.byteLength);
       await ftdi.FLASH_write_enable(device); 
       await ftdi.FLASH_write_enable(device); 
-      await flash_prog(device, rw_offset + caddr, buf);
+      await ftdi.FLASH_prog(device, rw_offset + caddr, buf);
       await ftdi.FLASH_wait(device);
 
       caddr += 256;
@@ -577,7 +577,7 @@ async function load_bitstream(contents)
   if (remaining > 0) {
       let buf = contents.slice(caddr, caddr + remaining);
       await ftdi.FLASH_write_enable(device); 
-      await flash_prog(device, rw_offset + caddr, buf);
+      await ftdi.FLASH_prog(device, rw_offset + caddr, buf);
       await ftdi.FLASH_wait(device);
   }
   console.log("✅Program");
