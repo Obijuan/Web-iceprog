@@ -616,14 +616,14 @@ async function handleErase() {
         console.log("Status: " + status);
 
         // Habilitar escritura en la flash
-        await ftdi.FLASH_writeEnable(device);
+        await ftdi.FLASH_write_enable(device);
 
         //-- DEBUG
         status = await ftdi.FLASH_read_status(device);
         console.log("Status: " + status);
 
         //-- Borrar bloque de 64KB
-        await ftdi.FLASH_erase64KB(device, 0x040000);
+        await ftdi.FLASH_block_64kB_erase(device, 0x040000);
 
         //-- Calcular la duracion del proceso
         const duration = ((performance.now() - startTime) / 1000).toFixed(2);
@@ -631,8 +631,8 @@ async function handleErase() {
         log(`Borrado completado en ${duration}s`, "success");
         
         // Actualizamos la vista para comprobar el borrado
-        //addressInput.value = "0x040000";
-        //await handleRead8();
+        addressInput.value = "0x040000";
+        await handleRead8();
 
     } catch (err) {
         log("Error al borrar: " + err.message, "error");
