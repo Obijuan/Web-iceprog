@@ -398,65 +398,6 @@ async function flash_read_status()
     await flash_chip_deselect();
   }
 
-  async function flash_wait(device) {
-
-      let count = 0;
-      let status = 0;
-      let frame_queue = [];
-
-      
-      while (1)
-      {
-
-        await ftdi.FLASH_cs_assert(device);
-
-        let r2;
-
-        do {
-
-          //-- Enviar trama para la lectura del status
-          let r1 = await device.transferOut(IN_EP, new Uint8Array([0x31, 1, 0, 0x05, 0])); 
-          if (r1.status != 'ok' || r1.bytesWritten != 5) {
-            throw("(----> FLASH_WAIT: Error en TransferOUT!");
-          }
-
-          //-- Leer la respuesta
-          r2 = await device.transferIn(OUT_EP, 4);
-
-          //-- Se deben recibir 4 bytes
-          //-- Si NO es así, se repite la lectura!
-        
-        } while (r2.data.byteLength < 4);
-
-        //-- Leer el status
-        status = r2.data.getUint8(3);
-
-        await ftdi.FLASH_cs_deassert(device);
-
-        if ((status & 0x01) == 0) {
-          if (count < 2) {
-            count++;
-            //if (verbose) {
-            //  console.log("r");
-            //}
-          } else {
-            //if (verbose) {
-            //  console.log("R");
-            //}
-            break;
-          }
-        } else {
-          //if (verbose) {
-          //  console.log(".");
-          //}
-          count = 0;
-        }
-
-        //console.log("Data[1]: " + data[1]);
-        //console.log("***************************************************************PAUSA!!!!!!")
-        await sleep(10);
-      }
-  }
 
 //-- Implement flash_prog...
 async function flash_prog(addr, data, verbose)
@@ -554,6 +495,69 @@ async function test_mode(device)
   await sleep(250);
   cdone = await ftdi.FPGA_get_cdone(device);  
 }
+
+
+async function flash_wait(device) {
+
+  let count = 0;
+  let status = 0;
+  let frame_queue = [];
+
+      
+  while (1) {
+
+    await ftdi.FLASH_cs_assert(device);
+
+    let r2;
+
+    do {
+
+      //-- Enviar trama para la lectura del status
+      let r1 = await device.transferOut(IN_EP, new Uint8Array([0x31, 1, 0, 0x05, 0])); 
+      if (r1.status != 'ok' || r1.bytesWritten != 5) {
+        throw("(----> FLASH_WAIT: Error en TransferOUT!");
+      }
+
+      //-- Leer la respuesta
+      r2 = await device.transferIn(OUT_EP, 4);
+
+      //-- Se deben recibir 4 bytes
+      //-- Si NO es así, se repite la lectura!
+        
+    } while (r2.data.byteLength < 4);
+
+    //-- Leer el status
+    status = r2.data.getUint8(3);
+
+    await ftdi.FLASH_cs_deassert(device);
+
+    if ((status & 0x01) == 0) {
+      if (count < 2) {
+        count++;
+        //if (verbose) {
+        //  console.log("r");
+        //}
+      } else {
+        //if (verbose) {
+        //  console.log("R");
+        //}
+        break;
+      }
+    } else {
+      //if (verbose) {
+      //  console.log(".");
+      //}
+      count = 0;
+    }
+
+    //console.log("Data[1]: " + data[1]);
+    //console.log("***************************************************************PAUSA!!!!!!")
+    await sleep(10);
+  }
+}
+
+
+
 
 //-------------------------------------------------------------
 //-- Convertir un array con los bytes de identificacion de
