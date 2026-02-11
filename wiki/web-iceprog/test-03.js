@@ -402,37 +402,34 @@ async function flash_read_status()
 
       let count = 0;
       let status = 0;
+      let frame_queue = [];
+
       
       while (1)
       {
 
         await ftdi.FLASH_cs_assert(device);
 
-        let r1 = await device.transferOut(IN_EP, new Uint8Array([0x31, 1, 0, 0x05, 0])); 
-        if (r1.status != 'ok' || r1.bytesWritten != 5) {
-          throw("(----> FLASH_WAIT: Error en TransferOUT!");
-        }
+        let r2;
 
-        let r2 = await device.transferIn(OUT_EP, 4096);
+        do {
 
-        if (r2.status != 'ok') {
-          throw("----> FLASH_WAIT: Error en TransferIN!. Status NO OK!")
-        }
+          //-- Enviar trama para la lectura del status
+          let r1 = await device.transferOut(IN_EP, new Uint8Array([0x31, 1, 0, 0x05, 0])); 
+          if (r1.status != 'ok' || r1.bytesWritten != 5) {
+            throw("(----> FLASH_WAIT: Error en TransferOUT!");
+          }
 
-        if (r2.data.byteLength != 4) {
-          //console.log("PROBLEMA: Leidos: " + r2.data.byteLength + "bytes");
-          for (let i=0; i < r2.data.byteLength; i++) {
-            //console.log("  * " + r2.data.getUint8(i));
-          } 
-          //-- Esto es una ñapa. Si no se lee la trama de 4 bytes, devolvemos un 0
-          //-- en el registro de status, para que se repita la opercion
-          //-- En algun momento se sincronizará otra vez...
-          status = 0;
-        }
-        else {
-          //-- Trama ok. Devolver el byte de status
-          status = r2.data.getUint8(3); // El byte de la flash
-        }
+          //-- Leer la respuesta
+          r2 = await device.transferIn(OUT_EP, 4);
+
+          //-- Se deben recibir 4 bytes
+          //-- Si NO es así, se repite la lectura!
+        
+        } while (r2.data.byteLength < 4);
+
+        //-- Leer el status
+        status = r2.data.getUint8(3);
 
         await ftdi.FLASH_cs_deassert(device);
 
