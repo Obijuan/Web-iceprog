@@ -365,6 +365,7 @@ async function flash_prog(device, addr, data, verbose)
   let block_data = new Uint8Array(data);
   await device.transferOut(IN_EP, block_data); 
 
+
 	await ftdi.FLASH_cs_deassert(device);
 
 	if (verbose) {
