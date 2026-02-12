@@ -1,0 +1,572 @@
+/* ------------------------------------------------  */
+/*  Variables globales situadas en el top del DOM    */
+/* ------------------------------------------------- */
+:root {
+    --bg: #0f172a;
+    --glass: rgba(255, 255, 255, 0.05);
+    --primary: #38bdf8;  /* Color primero de la interfaz */
+    --success: #22c55e;
+}
+
+/* --------------------------------------------- */
+/*  Estilos generales para las etiquetas HTML    */
+/* --------------------------------------------- */
+
+h1 { 
+    font-size: 1.5rem; 
+    margin-bottom: 2rem; 
+    font-weight: 300; 
+}
+
+/* Resaltar palabras dentro de h1 */
+h1 span { 
+    color: var(--primary); 
+    font-weight: 700; 
+}
+
+
+body {
+    background-color: var(--bg);
+    color: white;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+/* ------------------------------------------------------------------- */
+/*            Estilos para las diferentes clasess CSS                  */
+/* ------------------------------------------------------------------- */
+
+/* --------------------------------------- */
+/* Error del panel: Navegador NO soportado */
+/* --------------------------------------- */
+.error-panel {
+    background: rgba(220, 38, 38, 0.1);
+    border: 2px solid #ef4444;
+    padding: 2.5rem;
+    border-radius: 24px;
+    width: 350px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+}
+
+/* Elementos h2 dentro del panel de error */
+.error-panel h2 {
+    color: #ef4444;
+    margin-top: 0;
+}
+
+/* Párrafos dentro del panel de error */
+.error-panel p {
+    color: #fca5a5;
+    line-height: 1.5;
+    font-size: 0.9rem;
+}
+
+/*  Clases para los iconos de error */
+.error-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+
+/* ---------------------------------- */
+/* -- Estilo del panel principal   -- */
+/* ---------------------------------- */
+/* Modificación del contenedor base */
+.glass-container {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    
+    /* Añadimos esto para asegurar que no se pegue al borde pero use el espacio */
+    margin: 1rem; 
+    transition: all 0.3s ease;
+}
+
+/* --- AJUSTES PARA MÓVIL --- */
+@media (max-width: 480px) {
+    body {
+        padding: 0.5rem; /* Reducimos el margen del cuerpo */
+        align-items: flex-start; /* Opcional: que empiece arriba en lugar de centrado */
+        padding-top: 2rem;
+    }
+
+    .glass-container {
+        margin: 0;           /* Eliminamos el margen exterior */
+        width: 100%;         /* Que ocupe todo el ancho disponible */
+        padding: 1.5rem 1rem; /* Reducimos padding interno para ganar espacio */
+        border-radius: 16px; /* Esquinas un poco más cerradas para aprovechar bordes */
+    }
+    
+    h1 {
+        font-size: 1.5rem;   /* Título un poco más pequeño para que no rompa línea */
+    }
+
+    .primary-btn, .secondary-btn {
+        padding: 1.2rem;     /* Botones más grandes (más fáciles de tocar con el dedo) */
+        font-size: 1rem;
+    }
+}
+
+
+/* ---------------------------------- */
+/* --  Tarjeta de estado USB       -- */
+/* ---------------------------------- */
+.status-card {
+    background: rgba(0,0,0,0.2);
+    padding: 1.5rem;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.info p { 
+    margin: 0; 
+    font-size: 0.8rem; 
+    color: #94a3b8; 
+}
+
+.info h2 { 
+    margin: 0; 
+    font-size: 1.1rem; 
+}
+
+.indicator {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: #475569;
+}
+
+/* Estilo cuando está conectado */
+.status-card.connected .indicator {
+    background: var(--success);
+    box-shadow: 0 0 15px var(--success);
+}
+
+
+/* Estilo de los botones principales */
+.primary-btn {
+    background: var(--primary);
+    color: #0f172a; /* Texto oscuro para contraste */
+    border: none;
+    width: 100%;
+    padding: 1rem;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 0.5rem;
+}
+
+.primary-btn:hover {
+    filter: brightness(1.2);
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+    transform: translateY(-2px);
+}
+
+.primary-btn:disabled {
+    background: #475569;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Estilo para oculatar los elementos */
+.hidden { 
+    display: none !important;
+}
+
+
+.status-card.error-active {
+    border: 1px solid rgba(239, 68, 68, 0.5); /* Borde rojo suave */
+    background: rgba(127, 29, 29, 0.2); /* Fondo rojizo translúcido */
+}
+
+.status-card.error-active .indicator {
+    background: #ef4444; /* Indicador rojo */
+    box-shadow: 0 0 10px #ef4444;
+}
+
+.status-card.error-active #status-text {
+    color: #fca5a5; /* Texto del error en rojo claro */
+    font-weight: bold;
+}
+
+/* Estilos para el mensaje de diagnóstico en Linux */
+.linux-error {
+    text-align: left;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.linux-error p {
+    margin: 8px 0 4px 0;
+    color: #fca5a5;
+}
+
+.linux-error code {
+    display: block;
+    background: #000;
+    color: #38bdf8; /* Color primario para el texto del comando */
+    padding: 8px;
+    border-radius: 6px;
+    font-family: 'Courier New', Courier, monospace;
+    margin-top: 5px;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    user-select: all; /* Facilita que el usuario lo seleccione con un clic */
+}
+
+
+/* Botón de desconexión mejorado */
+/* .secondary-btn.danger {
+    background: rgba(245, 158, 11, 0.1); / Fondo ámbar muy sutil /
+    border: 1px solid #f59e0b;           / Borde ámbar sólido /
+    color: #fbbf24;                      / Texto ámbar brillante /
+    font-weight: 600;
+    margin-top: 1rem;
+    width: 100%;
+    padding: 1rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.secondary-btn.danger:hover {
+    background: #f59e0b;                /* Se vuelve sólido al pasar el ratón /
+    color: #0f172a;                     /* Texto oscuro para máximo contraste /
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+    transform: translateY(-2px);
+} */
+
+/* Opción B: Rojo Neón - Versión Compacta */
+.secondary-btn.danger {
+    background: rgba(255, 68, 68, 0.05);
+    border: 1px solid #ff4444;           /* Borde más fino (1px) */
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.75rem;                  /* Fuente más pequeña */
+    font-weight: 700;
+    
+    margin: 1rem auto;                   /* Centrado con margen */
+    display: block;                      /* Necesario para centrar con auto */
+    width: fit-content;                  /* Solo ocupa lo que mide el texto */
+    padding: 0.5rem 1.2rem;              /* Mucho más estrecho */
+    
+    border-radius: 8px;                  /* Esquinas un poco menos redondeadas */
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.secondary-btn.danger:hover {
+    background: #ff4444;
+    box-shadow: 0 0 12px rgba(255, 68, 68, 0.4);
+    transform: translateY(-1px);         /* Elevación muy sutil */
+}
+
+/*------------------------------------- */
+/* -- Estilos para la consola de log -- */ 
+/*------------------------------------- */
+
+.console-section {
+    margin-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+
+.toggle-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    width: 100%;
+    padding: 0.8rem 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+
+.console-wrapper {
+    display: grid;
+    grid-template-rows: 0fr; /* Plegado */
+    transition: grid-template-rows 0.3s ease-out;
+}
+
+/* 5. Estado cuando está abierto */
+.console-wrapper.expanded .console-log {
+    height: 120px; /* Altura fija para forzar el scroll si hay muchos mensajes */
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.console-wrapper.expanded {
+    grid-template-rows: 1fr; /* Desplegado */
+}
+
+/* 4. La "caja" del log (El interior) */
+.console-log {
+    min-height: 0; /* CRUCIAL: permite que el contenido se colapse */
+    overflow-y: auto; /* Habilita el scroll vertical */
+    display: flex;
+    flex-direction: column; /* Mensajes uno debajo de otro */
+    gap: 4px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.7rem;
+    padding: 0; /* Se ajustará cuando se expanda */
+    transition: padding 0.3s, margin 0.3s;
+}
+
+/* 5. Estado cuando está abierto */
+.console-wrapper.expanded .console-log {
+    height: 120px; /* Altura fija para forzar el scroll si hay muchos mensajes */
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 6. Estilo de los mensajes */
+.log-entry {
+    display: block;
+    word-break: break-all;
+    line-height: 1.2;
+}
+
+
+ /* General */
+.log-entry.system { 
+    color: #38bdf8; 
+}
+/* Conexión/Sincronización */
+.log-entry.success { 
+    color: #4ade80; 
+}
+/* Reset exitoso */
+.log-entry.error { 
+    color: #fb7185; 
+} /* Fallos */
+
+
+.toggle-btn:hover { color: var(--primary); }
+
+.chevron { transition: transform 0.3s ease; }
+.toggle-btn.active .chevron { transform: rotate(180deg); }
+
+.console-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 0.5rem;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.icon-btn:hover {
+    color: #fb7185; /* Un tono rojizo suave para indicar "borrar" */
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Ajustamos el toggle-btn para que no ocupe todo el ancho ahora que hay otro botón */
+.toggle-btn {
+    flex-grow: 1;
+    justify-content: flex-start; /* Alineado a la izquierda */
+    padding-left: 0.5rem;
+}
+
+
+.flash-info {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(30, 41, 59, 0.8);
+    border-radius: 8px;
+    border: 1px solid #a855f7;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.chips-container {
+    display: flex;
+    gap: 10px;
+}
+
+.hex-chip {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    background: #1e293b;
+    color: #a855f7; /* Púrpura como el botón */
+    border: 1px solid #a855f7;
+    padding: 5px 10px;
+    border-radius: 4px;
+    box-shadow: 0 0 8px rgba(168, 85, 247, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.hex-chip::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 20%;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: #94a3b8;
+    letter-spacing: 1px;
+}
+
+.label::after {
+    content: " [Enter]";
+    font-size: 0.6rem;
+    opacity: 0.5;
+}
+
+
+.read-tool {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(30, 41, 59, 0.5);
+    border-radius: 8px;
+    border: 1px solid #10b981;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+#address-input {
+    background: #0f172a;
+    border: 1px solid #10b981;
+    color: #10b981;
+    padding: 8px;
+    border-radius: 4px;
+    text-align: center;
+    font-family: 'Courier New', monospace;
+    width: 120px;
+}
+
+#address-input:focus {
+    outline: none;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+}
+
+.data-display {
+    margin: 15px 0;
+    padding: 10px 20px;
+    background: #020617;
+    border: 2px solid #10b981;
+    border-radius: 6px;
+    text-align: center;
+    min-width: 100px;
+    box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.2), 0 0 15px rgba(16, 185, 129, 0.1);
+}
+
+.data-label {
+    font-size: 0.6rem;
+    color: #10b981;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+    opacity: 0.8;
+}
+
+.byte-hex {
+    font-family: 'Courier New', monospace;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #10b981;
+    text-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+}
+
+.navigation-controls {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.nav-btn {
+    background: #0f172a;
+    border: 1px solid #10b981;
+    color: #10b981;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+}
+
+.nav-btn:hover {
+    background: #10b981;
+    color: #020617;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+}
+
+.nav-btn:active {
+    transform: scale(0.9);
+}
+
+.hexdump-area {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: rgba(15, 23, 42, 0.9);
+    border-top: 1px solid rgba(16, 185, 129, 0.3);
+    width: 100%;
+}
+
+.hexdump-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr); /* 8 columnas por fila */
+    gap: 8px;
+    margin-top: 10px;
+    font-family: 'Courier New', monospace;
+}
+
+.dump-byte {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    padding: 4px;
+    text-align: center;
+    border-radius: 2px;
+    font-size: 0.9rem;
+}
+
+/* Resaltar el primer byte (la dirección base) */
+.dump-byte.active {
+    background: rgba(16, 185, 129, 0.3);
+    border-color: #10b981;
+    font-weight: bold;
+}
+
