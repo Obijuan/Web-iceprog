@@ -102,6 +102,13 @@
             "name": "WebFPGA-02",
             "url": "https://localhost:4443/webFPGA-tools-02/",
             "webRoot": "${workspaceFolder}"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "WebFPGA-03",
+            "url": "https://localhost:4443/webFPGA-tools-03/",
+            "webRoot": "${workspaceFolder}"
         }
     ]
 }
