@@ -187,7 +187,7 @@ async function updateUI(connected) {
         document.getElementById('byte-input').value = '0xAA';
 
         fileInfoArea.classList.add('hidden');
-        document.getElementById('file-name').textContent = 'Archivo: ---';
+        //document.getElementById('file-name').textContent = 'Archivo: ---';
         progressBar.style.width = '0%';
 
        
