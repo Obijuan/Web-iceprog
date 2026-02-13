@@ -488,7 +488,10 @@ btn_usb.onclick = async () => {
     await erase(device, contents);
 
     //-- Programar el bitstream!
-    await load_bitstream(contents);
+    await load_bitstream(device, contents);
+
+    //-- Verificar!
+    await verification(device, contents);
   }
 }
 
@@ -531,9 +534,7 @@ async function erase(device, contents)
   console.log("**************************** TEST1 *******");
 }
 
-
-
-async function load_bitstream(contents)
+async function load_bitstream(device, contents)
 {
 
   await ftdi.FLASH_release_power_down(device);
@@ -583,15 +584,18 @@ async function load_bitstream(contents)
   let cdone = await ftdi.FPGA_get_cdone(device);
   console.log("Cdone: " + (cdone ? "high" : "low"));
   console.log("**************************** TEST3 *******");
+}
 
+async function verification (device, contents)
+{
   //-----------------------------------------------------------
   //   VERYFICATION
   //-----------------------------------------------------------
 
   await ftdi.FLASH_release_power_down(device);
 
-  buffer_id = await ftdi.FLASH_read_id(device)
-  flash_id_str = id_to_string(buffer_id);
+  let buffer_id = await ftdi.FLASH_read_id(device)
+  let flash_id_str = id_to_string(buffer_id);
   console.log("✅FLASH-ID: " + flash_id_str);
 
   console.log("->Reading.. for verification!!!!!!!!!!!!!!");
@@ -599,6 +603,11 @@ async function load_bitstream(contents)
 
   await ftdi.purge_buffers(device);
   
+  let file_size = contents.byteLength;
+  console.log("Length: " + file_size)
+  
+  let total_blocks = Math.trunc(file_size / 256);
+  let remaining = Math.trunc(file_size % 256);
 
   //-- Direccion donde comenzar la veriricacion
   let addr = 0;
@@ -634,7 +643,7 @@ async function load_bitstream(contents)
 
 
 
-  cdone = await get_cdone();
+  let cdone = await get_cdone();
   console.log("cdone: " + (cdone ? "high" : "low"))
   console.log("**************************** TEST4 *******");
 
