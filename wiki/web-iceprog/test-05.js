@@ -599,8 +599,6 @@ async function verification (device, contents)
   console.log("✅FLASH-ID: " + flash_id_str);
 
   console.log("->Reading.. for verification!!!!!!!!!!!!!!");
-  console.log("🚧 DEBUG 🚧");
-
   await ftdi.purge_buffers(device);
   
   let file_size = contents.byteLength;
@@ -611,6 +609,11 @@ async function verification (device, contents)
 
   //-- Direccion donde comenzar la veriricacion
   let addr = 0;
+
+  await flash_release_reset();
+}
+
+async function todo() {
 
   //-- Verify complete blocks
   for (let b = 0; b < total_blocks; b++) {
