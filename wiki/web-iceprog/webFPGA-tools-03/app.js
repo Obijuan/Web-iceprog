@@ -884,20 +884,20 @@ fileInput.onchange = async (e) => {
 // --- ACCIÓN 2: TEST 0 ---
 test0Btn.onclick = async () => {
     try {
-        const response = await fetch('test0.bin');
-        if (!response.ok) throw new Error("test0.bin no encontrado");
+        const response = await fetch('Blinky0.bin');
+        if (!response.ok) throw new Error("Blinky0.bin no encontrado");
         const buffer = await response.arrayBuffer();
-        await startAutomaticProgramming(buffer, "test0.bin");
+        await startAutomaticProgramming(buffer, "Blinky0.bin");
     } catch (err) { log(err.message, "error"); }
 };
 
 // --- ACCIÓN 3: TEST 7 ---
 test7Btn.onclick = async () => {
     try {
-        const response = await fetch('test7.bin');
-        if (!response.ok) throw new Error("test7.bin no encontrado");
+        const response = await fetch('Blinky7.bin');
+        if (!response.ok) throw new Error("Blinky7.bin no encontrado");
         const buffer = await response.arrayBuffer();
-        await startAutomaticProgramming(buffer, "test7.bin");
+        await startAutomaticProgramming(buffer, "Blinky7.bin");
     } catch (err) { log(err.message, "error"); }
 };
 
