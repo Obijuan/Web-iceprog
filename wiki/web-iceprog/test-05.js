@@ -484,14 +484,14 @@ btn_usb.onclick = async () => {
     //-- Obtener contenidos del fichero
     let contents = e.target.result;
 
-    await next(device);
+    await next(device, contents);
 
 
     await load_bitstream(contents);
   }
 }
 
-async function next(device)
+async function next(device, contents)
 {
   console.log("reset..");
   await ftdi.FLASH_cs_deassert(device);
@@ -505,20 +505,10 @@ async function next(device)
   let buffer_id = await ftdi.FLASH_read_id(device)
   let flash_id_str = id_to_string(buffer_id);
   console.log("✅FLASH-ID: " + flash_id_str);
-}
 
-async function load_bitstream(contents)
-{
-
-
-
-
-
-  // ---------------------------------------------------------
-  // Program
-  // ---------------------------------------------------------
   let file_size = contents.byteLength;
   console.log("Length: " + file_size)
+
 
   let rw_offset = 0;
 
@@ -532,15 +522,27 @@ async function load_bitstream(contents)
   }
   console.log("✅Erase");
 
-  let cdone = await ftdi.FPGA_get_cdone(device);
+  cdone = await ftdi.FPGA_get_cdone(device);
   console.log("Cdone: " + (cdone ? "high" : "low"));
   console.log("**************************** TEST1 *******");
+}
+
+async function load_bitstream(contents)
+{
 
   await ftdi.FLASH_release_power_down(device);
 
   let buffer_id = await ftdi.FLASH_read_id(device)
   let flash_id_str = id_to_string(buffer_id);
   console.log("✅FLASH-ID: " + flash_id_str);
+
+  // ---------------------------------------------------------
+  // Program
+  // ---------------------------------------------------------
+  let file_size = contents.byteLength;
+  console.log("Length: " + file_size)
+
+  let rw_offset = 0;
 
   let caddr = 0;
   
@@ -572,7 +574,7 @@ async function load_bitstream(contents)
   console.log("✅Program");
 
 
-  cdone = await ftdi.FPGA_get_cdone(device);
+  let cdone = await ftdi.FPGA_get_cdone(device);
   console.log("Cdone: " + (cdone ? "high" : "low"));
   console.log("**************************** TEST3 *******");
 
