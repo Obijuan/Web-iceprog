@@ -471,7 +471,7 @@ btn_usb.onclick = async () => {
   //-- Test Mode
   await test_mode(device);
 
-  //------ Open the bitstream file
+  //--------- Open the bitstream file
   const filename = bitstream.files[0];
   console.log("File: " + bitstream.value);
 
@@ -484,14 +484,18 @@ btn_usb.onclick = async () => {
     //-- Obtener contenidos del fichero
     let contents = e.target.result;
 
-    await next(device, contents);
+    //-- Borrar la flash 
+    await erase(device, contents);
 
-
+    //-- Programar el bitstream!
     await load_bitstream(contents);
   }
 }
 
-async function next(device, contents)
+//------------------------------------------
+//-- Borrar la flash
+//------------------------------------------
+async function erase(device, contents)
 {
   console.log("reset..");
   await ftdi.FLASH_cs_deassert(device);
@@ -526,6 +530,8 @@ async function next(device, contents)
   console.log("Cdone: " + (cdone ? "high" : "low"));
   console.log("**************************** TEST1 *******");
 }
+
+
 
 async function load_bitstream(contents)
 {
