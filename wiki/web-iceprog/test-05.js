@@ -465,31 +465,33 @@ let queue = [];
 
 btn_usb.onclick = async () => {
 
+  //-- Initial operations
   device = await preludio();
 
-  //------- Test Mode
+  //-- Test Mode
   await test_mode(device);
 
-  //--------- Programing the FPGA
-
-  //-- Open the bitstream file
+  //------ Open the bitstream file
   const filename = bitstream.files[0];
   console.log("File: " + bitstream.value);
 
   let reader = new FileReader();
-
-  reader.onload = async (e) => {
-    let contents = e.target.result;
-    await load_bitstream(contents);
-  }
-
   reader.readAsArrayBuffer(filename);
 
+  //-- Fichero LEIDO
+  reader.onload = async (e) => {
+
+    //-- Obtener contenidos del fichero
+    let contents = e.target.result;
+
+
+
+    await load_bitstream(contents);
+  }
 }
 
 async function load_bitstream(contents)
 {
-  console.log("-----> FUNCTION LOAD-BITSTREAM --- ");
 
   let file_size = contents.byteLength;
   console.log("Length: " + file_size);
