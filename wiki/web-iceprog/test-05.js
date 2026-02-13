@@ -410,20 +410,11 @@ function array_equal(arr1, arr2) {
 }
 
 
-
-//--------------------------------------------
-//---   MAIN 
-//--------------------------------------------
-let device;
-
-//-- Buffer for storing incomming data from usb
-let queue = [];
-
-btn_usb.onclick = async () => {
-
+async function preludio()
+{
   //-- Pedir permiso explicito al usuario para
   //-- conectarse
-  device = await ftdi.connect();
+  let device = await ftdi.connect();
 
   //-- Abrir dispositivo
   await ftdi.initialize(device);
@@ -437,7 +428,7 @@ btn_usb.onclick = async () => {
   await ftdi.spi_init(device);
   console.log("✅ MPSSE: INIT: OK!")
 
-  //-- Para enviar cualquier comando a la flash
+    //-- Para enviar cualquier comando a la flash
   //-- la FPGA debe estar en estado de reset
   await ftdi.FPGA_reset_assert(device);
 
@@ -460,6 +451,21 @@ btn_usb.onclick = async () => {
   console.log("Cdone: " + (cdone ? "high" : "low"));
 
   await sleep(100);
+
+  return device;
+}
+
+//--------------------------------------------
+//---   MAIN 
+//--------------------------------------------
+let device;
+
+//-- Buffer for storing incomming data from usb
+let queue = [];
+
+btn_usb.onclick = async () => {
+
+  device = await preludio();
 
   //------- Test Mode
   await test_mode(device);
