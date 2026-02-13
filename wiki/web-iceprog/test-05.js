@@ -409,6 +409,39 @@ function array_equal(arr1, arr2) {
     return true;
 }
 
+//----------------------------------------------------
+//-- Leer de la flash un bloque de exactamente 256
+//-- bytes
+//----------------------------------------------------
+async function FLASH_read256(device, addr) {
+
+  let remainder = 256;
+  let offset = 0;
+  let buf_flash = new Uint8Array(256);
+
+  do {
+
+    //-- Leer bloque de 256 bytes de la flash
+    let chunk = await ftdi.FLASH_read(device, addr, remainder);
+
+    buf_flash.set(chunk, offset);
+    offset = offset + chunk.byteLength;
+    
+
+    console.log("Leidos en flash: " + chunk.byteLength);
+
+    remainder = remainder - chunk.byteLength;
+    addr = addr + chunk.byteLength;
+
+  } while (remainder > 0);
+
+  return buf_flash;
+}
+
+
+
+
+
 
 async function preludio()
 {
@@ -591,7 +624,7 @@ async function verification (device, contents)
   //-----------------------------------------------------------
   //   VERYFICATION
   //-----------------------------------------------------------
-
+  await ftdi.FPGA_reset_assert(device);
   await ftdi.FLASH_release_power_down(device);
 
   let buffer_id = await ftdi.FLASH_read_id(device)
@@ -610,7 +643,23 @@ async function verification (device, contents)
   //-- Direccion donde comenzar la veriricacion
   let addr = 0;
 
-  await flash_release_reset();
+  //-- Leer bloque de 256 bytes del bitstream
+  let buf_file = new Uint8Array(contents.slice(addr, addr + 256));
+
+  //-- Leer bloque de 256 bytes de la flash
+  let buf_flash = await FLASH_read256(device, addr);
+
+  //-- Si los buffers son diferentes, hay un error de verificación
+  //-- Lo que hay en flash difiere de lo que tiene el fichero
+  if (array_equal(buf_flash, buf_file)) {
+    console.log("* Bloque: 0: OK!")
+  }
+  else {
+    console.log("❌ Bloque incorrecto!!!")
+  }
+
+
+  await ftdi.FPGA_reset_deassert(device);
 }
 
 async function todo() {

@@ -579,9 +579,25 @@ export async function FLASH_read(device, address, count) {
     await FLASH_cs_deassert(device)
 
     if (result.status === 'ok') {
-        // Devolvemos solo los datos de la flash
-        return new Uint8Array(result.data.buffer, 6);
+
+        let tam = result.data.buffer.byteLength;
+
+        if (tam > 6) {
+            // Devolvemos solo los datos de la flash
+            return new Uint8Array(result.data.buffer, 6);
+        }
+        else {
+            console.log("Caso RARO: Recibido: " + tam);
+            return new Uint8Array([]);
+        }
+
+        
     }
+
+    if (result.status == 'babble') {
+        return new Uint8Array([]);
+    }
+
     throw new Error("Error en lectura burst");
 }
 
