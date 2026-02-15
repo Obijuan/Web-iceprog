@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPGA-Retrohub | Alhambra-II</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <h1>FPGA-RETROHUB</h1>
+            <div class="status-badge">
+                <span class="dot"></span> Alhambra-II Detectada
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <section class="card zx" id="card-zx">
+            <div class="card-content">
+                <h2>ZX Spectrum</h2>
+                <p>Core de 48K/128K. Optimizado para la SRAM de la Alhambra-II.</p>
+            </div>
+            <div class="progress-container" id="prog-cont-zx">
+                <div class="progress-bar" id="prog-bar-zx" style="background: var(--zx-color);"></div>
+            </div>
+            <button class="btn-flash" id="btn-zx" onclick="flash('zx')">Grabar Bitstream</button>
+        </section>
+
+
+        <section class="card amstrad" id="card-amstrad">
+            <div class="card-content">
+                <h2>Amstrad CPC</h2>
+                <p>Emulación del CPC464 con salida de vídeo VGA directa.</p>
+            </div>
+            <div class="progress-container" id="prog-cont-amstrad">
+                <div class="progress-bar" id="prog-bar-amstrad" style="background: var(--zx-color);"></div>
+            </div>
+            <button class="btn-flash" id="btn-amstrad" onclick="flash('amstrad')">Grabar Bitstream</button>
+        </section>
+
+        <section class="card defender" id="card-defender">
+            <div class="card-content">
+                <h2>Defender</h2>
+                <p>Arcade original de Williams (1981). Recreación lógica fiel.</p>
+            </div>
+            <div class="progress-container" id="prog-cont-defender">
+                <div class="progress-bar" id="prog-bar-defender" style="background: var(--zx-color);"></div>
+            </div>
+            <button class="btn-flash" id="btn-defender" onclick="flash('defender')">Grabar Bitstream</button>
+        </section>
+
+        <section class="card invaders" id="card-invaders">
+            <div class="card-content">
+                <h2>Space Invaders</h2>
+                <p>El clásico de Taito. Frecuencia de CPU original a 2MHz.</p>
+            </div>
+            <div class="progress-container" id="prog-cont-invaders">
+                <div class="progress-bar" id="prog-bar-invaders" style="background: var(--zx-color);"></div>
+            </div>
+            <button class="btn-flash" id ="btn-invaders" onclick="flash('invaders')">Grabar Bitstream</button>
+        </section>
+    </main>
+
+    <!-- Script MAIN -->
+    <script src="app.js"></script>
+</body>
+</html>
+
