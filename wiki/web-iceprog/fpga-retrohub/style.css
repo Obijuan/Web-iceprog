@@ -354,3 +354,42 @@ body {
 
 .btn-reset:active { transform: scale(0.95); }
 
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Espacio entre el logo y el texto */
+}
+
+.logo-img {
+    width: 45px;   /* Tamaño compacto para el header */
+    height: 45px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    box-shadow: 0 0 10px rgba(68, 255, 68, 0.2); /* Sutil brillo verde */
+    transition: transform 0.3s ease;
+}
+
+.logo-img:hover {
+    transform: rotate(5deg) scale(1.1); /* Pequeña interacción al pasar el ratón */
+    border-color: var(--amstrad-color);
+}
+
+h1 {
+    font-size: 1.4rem;
+    letter-spacing: 2px;
+    background: linear-gradient(90deg, #fff, #888);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+}
+
+/* Ajuste para dispositivos móviles */
+@media (max-width: 600px) {
+    .logo-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+    h1 { font-size: 1.2rem; }
+}
+

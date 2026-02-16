@@ -109,6 +109,8 @@ async function updateUI(connected) {
         disconnectBtn.style.display = 'block';
         statusBadge.classList.remove('offline');
         statusText.innerText = 'Alhambra-II Conectada';
+        
+        statusText2.innerHTML = ``;
 
     } else {
 
