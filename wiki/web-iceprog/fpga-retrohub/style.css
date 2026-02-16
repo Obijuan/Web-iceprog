@@ -9,7 +9,7 @@
     --zx-color: #ff0055;
     --amstrad-color: #00ff99;
     --defender-color: #ffcc00;
-    --space-color: #00d4ff;
+    --invaders-color: #00d4ff;
 }
 
 /******************************************************/
@@ -182,9 +182,9 @@ body {
 .defender .btn-flash { color: var(--defender-color); border-color: var(--defender-color); }
 .defender .btn-flash:hover { background: var(--defender-color); color: #000; box-shadow: 0 0 20px rgba(255, 204, 0, 0.4); }
 
-.invaders { border-top: 4px solid var(--space-color); }
-.invaders .btn-flash { color: var(--space-color); border-color: var(--space-color); }
-.invaders .btn-flash:hover { background: var(--space-color); color: #000; box-shadow: 0 0 20px rgba(0, 212, 255, 0.4); }
+.invaders { border-top: 4px solid var(--invaders-color); }
+.invaders .btn-flash { color: var(--invaders-color); border-color: var(--invaders-color); }
+.invaders .btn-flash:hover { background: var(--invaders-color); color: #000; box-shadow: 0 0 20px rgba(0, 212, 255, 0.4); }
 
 /* Contenedor de la barra de progreso (oculto por defecto) */
 .progress-container {
@@ -203,6 +203,23 @@ body {
     background: #fff; /* El color se heredará o cambiará por JS */
     transition: width 0.1s ease;
 }
+
+#prog-bar-zx {
+    background: var(--zx-color);
+}
+
+#prog-bar-amstrad {
+    background: var(--amstrad-color);
+}
+
+#prog-bar-defender {
+    background: var(--defender-color);
+}
+
+#prog-bar-invaders {
+    background: var(--invaders-color);
+}
+
 
 /* Estado de desactivado para el botón mientras graba */
 .btn-flash:disabled {

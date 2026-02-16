@@ -24,11 +24,19 @@ const statusText2 = document.getElementById('status-text2');
 //-- Botones de grabación
 const Btn_zx = document.getElementById('btn-zx');
 const Btn_amstrad = document.getElementById('btn-amstrad');
+const Btn_defender = document.getElementById('btn-defender');
+const Btn_invaders = document.getElementById('btn-invaders');
+
+
 
 
 //-- Establecer funciones de retrollamada
 Btn_zx.onclick = Handle_Btn_zx;
 Btn_amstrad.onclick = Handle_Btn_amstrad;
+Btn_defender.onclick = Handle_Btn_defender;
+Btn_invaders.onclick = Handle_Btn_invaders;
+
+
 
 const disconnectBtn = document.getElementById('disconnect-btn');
 const statusBadge = document.getElementById('status-badge');
@@ -205,6 +213,7 @@ async function start_programming(buffer, sistema) {
         }
 
         // 2. PROGRAMACIÓN
+        console.log("Configurando FPGA...");
         const pageSize = 256;
         for (let addr = 0; addr < totalSize; addr += pageSize) {
             const chunk = data.slice(addr, addr + pageSize);
@@ -222,6 +231,7 @@ async function start_programming(buffer, sistema) {
 
         //-- Quitar el Reset de la FPGA (opcional)
         await ftdi.FPGA_reset_deassert(device);
+        console.log("LISTO!")
     }  catch (err) {
         log("Error durante la carga: " + err.message, "error");
     } finally {
@@ -266,11 +276,40 @@ async function Handle_Btn_amstrad()
         const response = await fetch(filename);
         if (!response.ok) throw new Error(filename + " no encontrado");
         const buffer = await response.arrayBuffer();
-        await start_programming(buffer, "zx");
+        await start_programming(buffer, "amstrad");
     } catch(err) {
         console.error("Error: " + err.message);
     }
 }
+
+async function Handle_Btn_defender()
+{
+    console.log("Grabacion del defender!");
+    let filename = 'image-defender.bin';
+    try {
+        const response = await fetch(filename);
+        if (!response.ok) throw new Error(filename + " no encontrado");
+        const buffer = await response.arrayBuffer();
+        await start_programming(buffer, "defender");
+    } catch(err) {
+        console.error("Error: " + err.message);
+    }
+}
+
+async function Handle_Btn_invaders()
+{
+    console.log("Grabacion del invaders!");
+    let filename = 'image-invaders.bin';
+    try {
+        const response = await fetch(filename);
+        if (!response.ok) throw new Error(filename + " no encontrado");
+        const buffer = await response.arrayBuffer();
+        await start_programming(buffer, "invaders");
+    } catch(err) {
+        console.error("Error: " + err.message);
+    }
+}
+
 
 
 
