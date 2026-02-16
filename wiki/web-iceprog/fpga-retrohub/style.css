@@ -439,3 +439,24 @@ h1 {
     color: #777;
 }
 
+.card-image-container {
+    width: 100%;
+    height: 140px;
+    overflow: hidden;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    background: #000;
+}
+
+.card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ajusta la imagen sin deformarla */
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.card:hover .card-image {
+    opacity: 1;
+}
+
