@@ -399,36 +399,40 @@ function id_to_string(id)
 function array_equal(arr1, arr2) {
     //-- Si tienen tamaños diferentes, los arrays son distintos
     if (arr1.length !== arr2.length) {
-      console.log("❌ ERROR: Los arrays tienen DISTINTO TAMAÑO!")
+      console.log("❌ ERROR: Los arrays tienen DISTINTO TAMAÑO!");
+      console.log("  -Arr1: " + arr1.length);
+      console.log("  -Arr2: " + arr2.legnth);
       return false;
     }
 
     for (let i = 0; i < arr1.length; i++) {
-        if (arr1[i] !== arr2[i]) return false;
-    }
+        if (arr1[i] !== arr2[i]) {
+          console.log("Origen: " + arr1[i]);
+          return false;
+        }
     return true;
+    }
 }
 
 //----------------------------------------------------
-//-- Leer de la flash un bloque de exactamente 256
-//-- bytes
+//-- Leer de la flash un bloque exacto del tamaño
+//-- Indicado
 //----------------------------------------------------
-async function FLASH_read256(device, addr) {
+async function FLASH_read_exact(device, addr, size) {
 
-  let remainder = 256;
+  let remainder = size;
   let offset = 0;
-  let buf_flash = new Uint8Array(256);
+  let buf_flash = new Uint8Array(size);
 
   do {
 
-    //-- Leer bloque de 256 bytes de la flash
+    //-- Leer bloque de bytes de la flash
     let chunk = await ftdi.FLASH_read(device, addr, remainder);
 
     buf_flash.set(chunk, offset);
     offset = offset + chunk.byteLength;
     
-
-    console.log("Leidos en flash: " + chunk.byteLength);
+    //console.log("Leidos en flash: " + chunk.byteLength);
 
     remainder = remainder - chunk.byteLength;
     addr = addr + chunk.byteLength;
@@ -518,13 +522,17 @@ btn_usb.onclick = async () => {
     let contents = e.target.result;
 
     //-- Borrar la flash 
-    await erase(device, contents);
+    //await erase(device, contents);
 
     //-- Programar el bitstream!
-    await load_bitstream(device, contents);
+    //await load_bitstream(device, contents);
 
     //-- Verificar!
     await verification(device, contents);
+
+    //-- Hemos terminado: Quitar el reset
+    await ftdi.FPGA_reset_deassert(device);
+    console.log('Fin!');
   }
 }
 
@@ -643,27 +651,6 @@ async function verification (device, contents)
   //-- Direccion donde comenzar la veriricacion
   let addr = 0;
 
-  //-- Leer bloque de 256 bytes del bitstream
-  let buf_file = new Uint8Array(contents.slice(addr, addr + 256));
-
-  //-- Leer bloque de 256 bytes de la flash
-  let buf_flash = await FLASH_read256(device, addr);
-
-  //-- Si los buffers son diferentes, hay un error de verificación
-  //-- Lo que hay en flash difiere de lo que tiene el fichero
-  if (array_equal(buf_flash, buf_file)) {
-    console.log("* Bloque: 0: OK!")
-  }
-  else {
-    console.log("❌ Bloque incorrecto!!!")
-  }
-
-
-  await ftdi.FPGA_reset_deassert(device);
-}
-
-async function todo() {
-
   //-- Verify complete blocks
   for (let b = 0; b < total_blocks; b++) {
 
@@ -671,17 +658,38 @@ async function todo() {
     let buf_file = new Uint8Array(contents.slice(addr, addr + 256));
 
     //-- Leer bloque de 256 bytes de la flash
-    //let buf_flash = await ftdi.FLASH_read(device, addr, 256);
-    //flash_read(rw_offset + addr, buf_flash, 256, false);
-    //await sleep(1);
+    let buf_flash = await FLASH_read_exact(device, addr, 256);
 
-    //if (!array_equal(buf_flash, buf_file))
-    //  mpsse_error(3, "Found difference between flash and file!")
+    //-- Si los buffers son diferentes, hay un error de verificación
+    //-- Lo que hay en flash difiere de lo que tiene el fichero
+    if (!array_equal(buf_flash, buf_file)) {
+      console.log("❌ Bloque " + b + "incorrecto!!!")
+      return
+    }
 
+    //-- Pasar al siguiente bloque
     addr += 256;
-    //console.log(b + " ");
   }
 
+  //-- Verify the remaining block
+  if (remaining > 0) {
+    let buf_file = new Uint8Array(contents.slice(addr, addr + remaining));
+    let buf_flash = await FLASH_read_exact(device, addr, remaining);
+  
+    if (!array_equal(buf_flash, buf_file)) {
+      console.log("❌ Bloque " + b+ "incorrecto!!!");
+      console.log("❌ ERROR en Verificación!");
+      return
+    }
+  }
+
+  console.log("✅Verify: OK!");
+
+
+  await ftdi.FPGA_reset_deassert(device);
+}
+
+async function todo() {
 
   //-- Verify the remaining block
   if (remaining > 0) {
@@ -811,6 +819,3 @@ navigator.usb.addEventListener('disconnect', event => {
 //   };
 
 //   reader.readAsArrayBuffer(file);
-// }
-
-
