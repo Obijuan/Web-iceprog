@@ -266,7 +266,7 @@ async function start_programming(buffer, sistema) {
             cont.style.display = "none";
             bar.style.width = "0%";
             btn.disabled = false;
-            btn.innerText = "Grabar Bitstream";
+            btn.innerText = "ACTIVAR";
             btn.style.borderColor = ""; 
             btn.style.color = "";
         }, 3000); 
