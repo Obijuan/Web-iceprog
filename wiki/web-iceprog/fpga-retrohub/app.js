@@ -26,7 +26,8 @@ const Btn_zx = document.getElementById('btn-zx');
 const Btn_amstrad = document.getElementById('btn-amstrad');
 const Btn_defender = document.getElementById('btn-defender');
 const Btn_invaders = document.getElementById('btn-invaders');
-
+const Btn_test = document.getElementById('btn-test');
+const Btn_reset = document.getElementById('id-btn-reset');
 
 
 
@@ -35,6 +36,9 @@ Btn_zx.onclick = Handle_Btn_zx;
 Btn_amstrad.onclick = Handle_Btn_amstrad;
 Btn_defender.onclick = Handle_Btn_defender;
 Btn_invaders.onclick = Handle_Btn_invaders;
+Btn_test.onclick = Handle_Btn_test;
+Btn_reset.onclick = Handle_Btn_reset;
+
 
 
 
@@ -168,6 +172,26 @@ async function handleConnectionError(err)
     `;
 }
 
+function showToast(mensaje) {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = `<span>✔</span> ${mensaje}`;
+
+    container.appendChild(toast);
+
+    // Auto-eliminar después de 4 segundos
+    setTimeout(() => {
+        toast.classList.add('fade-out');
+        toast.addEventListener('animationend', () => {
+            toast.remove();
+        });
+    }, 4000);
+}
+
+// Ejemplo de integración en tu función flash anterior:
+// ... cuando progreso == 100 ...
+// showToast(`${sistema.toUpperCase()} grabado con éxito.`);
 
 /**
  * Lógica central que borra y programa el buffer recibido
@@ -229,13 +253,6 @@ async function start_programming(buffer, sistema) {
             bar.style.width = progreso + "%";
         }
 
-        //-- Quitar el Reset de la FPGA (opcional)
-        await ftdi.FPGA_reset_deassert(device);
-        console.log("LISTO!")
-    }  catch (err) {
-        log("Error durante la carga: " + err.message, "error");
-    } finally {
-
         // 3. Finalización
         bar.style.width = "100%";
         btn.innerText = "¡Completado!";
@@ -251,6 +268,15 @@ async function start_programming(buffer, sistema) {
             btn.style.borderColor = ""; 
             btn.style.color = "";
         }, 3000); 
+
+        console.log("LISTO!")
+        showToast("FPGA configurada con éxito!");
+
+    }  catch (err) {
+        log("Error durante la carga: " + err.message, "error");
+    } finally {
+        //-- Quitar el Reset de la FPGA (opcional)
+        await ftdi.FPGA_reset_deassert(device);
     }   
 }
 
@@ -310,6 +336,78 @@ async function Handle_Btn_invaders()
     }
 }
 
+async function Handle_Btn_test()
+{
+    console.log("Grabacion del Blinky0");
+    let filename = 'image-blinky0.bin';
+    try {
+        const response = await fetch(filename);
+        if (!response.ok) throw new Error(filename + " no encontrado");
+        const buffer = await response.arrayBuffer();
+        await start_programming(buffer, "test");
+    } catch(err) {
+        console.error("Error: " + err.message);
+    }
+}
+
+async function Handle_Btn_reset()
+{
+    console.log("Reset de la FPGA!");
+    
+    if (!device || !device.opened) {
+        log("Error: Dispositivo no inicializado.", "error");
+        return;
+    }
+
+    try {
+        Btn_reset.disabled = true;
+        Btn_reset.textContent = "Verificando...";
+        console.log("--- Iniciando secuencia de Reset ---");
+
+        console.log("Bajando CRESET (Reset activado)...", "system");
+        await ftdi.FPGA_reset_assert(device);
+        
+        // Espera de 100ms para asegurar que la FPGA detecta el flanco
+        await new Promise(r => setTimeout(r, 100));
+        
+        console.log("Subiendo CRESET (Liberando FPGA)...");
+        await ftdi.FPGA_reset_deassert(device)
+
+        // 3. Feedback final
+        console.log("Reset completado con éxito.");
+        statusText.textContent = "✅ FPGA Reiniciada";
+
+        // Esperamos a que la FPGA cargue desde la Flash
+        await new Promise(r => setTimeout(r, 200)); 
+        await checkFPGAStatus();
+        
+
+    } catch (err) {
+        log(`FALLO: ${err.message}`, "error");
+    } finally {
+        // Restauramos el botón tras un segundo
+        setTimeout(() => {
+            if (device) {
+                Btn_reset.disabled = false;
+                Btn_reset.textContent = "Resetear FPGA";
+            }
+        }, 800);
+    }
+}
+
+
+async function checkFPGAStatus() {
+    
+    //-- Leer señal CDONE
+    const isDone = await ftdi.FPGA_get_cdone(device);
+
+    if (isDone) {
+        console.log("Estado FPGA: DONE (Diseño cargado con éxito)");
+    } else {
+        console.log("Estado FPGA: IDLE (No hay diseño o fallo de carga)");
+    }
+    return isDone;
+}
 
 
 

@@ -99,10 +99,33 @@
             </div>
             <button class="btn-flash" id ="btn-invaders">Grabar Bitstream</button>
         </section>
+
+        <section class="card test" id="card-test">
+            <div class="card-content">
+                <div class="badge-test">HERRAMIENTA</div>
+                <h2>Hardware TEST</h2>
+                <p>Verifica la Alhambra-II cargando un parpadeo (Blinky) o reinicia la placa actual.</p>
+            </div>
+
+            <div class="progress-container" id="prog-cont-test">
+                <div class="progress-bar" id="prog-bar-test"></div>
+            </div>
+        
+            <div class="test-controls">
+                <button class="btn-flash btn-test" id="btn-test">
+                    Cargar Blinky
+                </button>
+                <button class="btn-reset" id="id-btn-reset">
+                    RESET FPGA
+                </button>
+            </div>
+        </section>
     </main>
 
     <!-- Script MAIN -->
     <script type="module" src="app.js"></script>
+
+    <div id="toast-container" class="toast-container"></div>
 </body>
 </html>
 

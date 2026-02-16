@@ -10,6 +10,9 @@
     --amstrad-color: #00ff99;
     --defender-color: #ffcc00;
     --invaders-color: #00d4ff;
+
+    --test-color: #ffffff;
+    --reset-color: #ff4444;
 }
 
 /******************************************************/
@@ -220,6 +223,10 @@ body {
     background: var(--invaders-color);
 }
 
+#prog-bar-test {
+    background: var(--test-color);
+}
+
 
 /* Estado de desactivado para el botón mientras graba */
 .btn-flash:disabled {
@@ -259,4 +266,91 @@ body {
     transform: scale(1.05);
     box-shadow: 0 0 30px rgba(68, 255, 68, 0.5);
 }
+
+.toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.toast {
+    background: #1a1a1a;
+    color: #44ff44;
+    border: 1px solid #44ff44;
+    padding: 16px 24px;
+    border-radius: 8px;
+    margin-top: 10px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    /* Animación de entrada */
+    animation: slideIn 0.3s ease-out forwards;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.toast.fade-out {
+    animation: slideOut 0.3s ease-in forwards;
+}
+
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+
+.test { border-top: 4px solid var(--test-color); }
+
+.badge-test {
+    font-size: 0.6rem;
+    background: #333;
+    padding: 2px 8px;
+    border-radius: 4px;
+    width: fit-content;
+    margin-bottom: 10px;
+}
+
+.test-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Botón Blinky */
+.btn-test {
+    margin-top: 0 !important;
+    color: var(--test-color) !important;
+    border-color: var(--test-color) !important;
+}
+.btn-test:hover {
+    background: var(--test-color) !important;
+    color: #000 !important;
+}
+
+/* Botón Reset */
+.btn-reset {
+    background: transparent;
+    border: 2px solid var(--reset-color);
+    color: var(--reset-color);
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+}
+
+.btn-reset:hover {
+    background: var(--reset-color);
+    color: white;
+    box-shadow: 0 0 15px rgba(255, 68, 68, 0.4);
+}
+
+.btn-reset:active { transform: scale(0.95); }
 
