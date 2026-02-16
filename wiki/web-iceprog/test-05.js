@@ -400,18 +400,20 @@ function array_equal(arr1, arr2) {
     //-- Si tienen tamaños diferentes, los arrays son distintos
     if (arr1.length !== arr2.length) {
       console.log("❌ ERROR: Los arrays tienen DISTINTO TAMAÑO!");
-      console.log("  -Arr1: " + arr1.length);
-      console.log("  -Arr2: " + arr2.legnth);
+      console.log("  -Flash: " + arr1.length);
+      console.log("  -Fich: " + arr2.legnth);
       return false;
     }
 
     for (let i = 0; i < arr1.length; i++) {
         if (arr1[i] !== arr2[i]) {
-          console.log("Origen: " + arr1[i]);
+          console.log("❌ Offset: " + i);
+          console.log("❌ Flash:  " + arr1[i]);
+          console.log("❌ Fichero: " + arr2[i]);
           return false;
         }
-    return true;
     }
+    return true;
 }
 
 //----------------------------------------------------
@@ -663,12 +665,14 @@ async function verification (device, contents)
     //-- Si los buffers son diferentes, hay un error de verificación
     //-- Lo que hay en flash difiere de lo que tiene el fichero
     if (!array_equal(buf_flash, buf_file)) {
-      console.log("❌ Bloque " + b + "incorrecto!!!")
+      console.log("❌ Error en bloque " + b)
       return
     }
 
     //-- Pasar al siguiente bloque
     addr += 256;
+    if (b % 50 == 0) 
+      console.log(b + " ");
   }
 
   //-- Verify the remaining block
@@ -677,7 +681,7 @@ async function verification (device, contents)
     let buf_flash = await FLASH_read_exact(device, addr, remaining);
   
     if (!array_equal(buf_flash, buf_file)) {
-      console.log("❌ Bloque " + b+ "incorrecto!!!");
+      console.log("❌ Bloque " + b + " incorrecto!!!");
       console.log("❌ ERROR en Verificación!");
       return
     }
