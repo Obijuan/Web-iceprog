@@ -12,13 +12,9 @@
     --space-color: #00d4ff;
 }
 
-body {
-    background-color: var(--bg-color);
-    color: var(--text-main);
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    margin: 0;
-    padding: 0;
-}
+/******************************************************/
+/* ESTILO PARA LA CABECERA SUPERIOR DE LA APLICACION  */
+/******************************************************/
 
 header {
     background-color: rgba(0, 0, 0, 0.8);
@@ -45,6 +41,7 @@ h1 {
     margin: 0;
 }
 
+/*  Estado de la conexion */
 .status-badge {
     font-size: 0.8rem;
     background: #1a1a1a;
@@ -57,12 +54,67 @@ h1 {
 .dot {
     height: 8px;
     width: 8px;
-    background-color: #44ff44;
+    background: #475569;
+    /*background-color: #44ff44;*/
     border-radius: 50%;
     display: inline-block;
     margin-right: 5px;
-    box-shadow: 0 0 8px #44ff44;
+    /*box-shadow: 0 0 8px #44ff44;*/
+    box-shadow: 0 0 8px #475569;
 }
+
+
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* Badge cuando está desconectado */
+.status-badge.offline {
+    color: #ff4444;
+    border-color: #442222;
+}
+.status-badge.offline .dot {
+    background-color: #ff4444;
+    box-shadow: 0 0 8px #ff4444;
+}
+
+/* Botón de desconexión sutil */
+.btn-disconnect-link {
+    background: transparent;
+    border: 1px solid #444;
+    color: #888;
+    padding: 5px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    transition: all 0.2s;
+}
+
+.btn-disconnect-link:hover {
+    border-color: #ff4444;
+    color: #ff4444;
+    background: rgba(255, 68, 68, 0.1);
+}
+
+
+
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+
+
+
+
+
 
 .container {
     display: grid;
@@ -157,5 +209,37 @@ h1 {
     opacity: 0.5;
     cursor: not-allowed;
     filter: grayscale(1);
+}
+
+.error-container {
+    text-align: center;
+    padding: 50px;
+    color: #ff4444;
+}
+
+.setup-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 60vh;
+}
+
+.btn-connect {
+    background: #44ff44;
+    color: black;
+    border: none;
+    padding: 20px 40px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(68, 255, 68, 0.3);
+    transition: all 0.3s;
+}
+
+.btn-connect:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(68, 255, 68, 0.5);
 }
 

@@ -3,21 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,
+      <svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22>
+      <text y=%22.9em%22 font-size=%2290%22>🕹️</text></svg>">
+
     <title>FPGA-Retrohub | Alhambra-II</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
+
 <body>
 
+    <!-- Cabecera de la interfaz. Nombre de la app. Estado de la conexion -->
     <header>
         <div class="logo-container">
             <h1>FPGA-RETROHUB</h1>
-            <div class="status-badge">
-                <span class="dot"></span> Alhambra-II Detectada
+            <div class="header-controls">
+                <div id="status-badge" class="status-badge offline">
+                    <span class="dot"></span> <span id="status-text">Desconectada</span>
+                </div>
+                <button id="disconnect-btn" class="btn-disconnect-link" style="display: none;">
+                    Desconectar
+                </button>
             </div>
         </div>
     </header>
 
-    <main class="container">
+    <!-- 1. Pantalla que indica que NO hay acceso al WEBUSB -->
+    <div id="no-usb-error" class="error-container" style="display: none;">
+        <h2>⚠️ WebUSB no soportado</h2>
+        <p>Tu navegador no es compatible con la tecnología necesaria para grabar la Alhambra-II. Por favor, usa Chrome, Edge o Opera.</p>
+    </div>
+
+    <!-- 2. Panel inicial, una vez detectado el webusb -->
+    <div id="setup-panel" class="setup-container">
+        <button id="connect-btn" class="btn-connect">Conectar Alhambra-II</button>
+        <p>Conecta tu placa mediante USB para empezar</p>
+        <div id="status-card" class="status-card">
+            <div class="indicator"></div>
+            <div class="info">
+                <p id="status-text2">Buscando dispositivo...</p>
+                <h2 id="device-name">Placa no conectada</h2>
+            </div>
+        </div>
+    </div>
+
+    <!----------------------------------------------> 
+    <!-------   Aplicacion principal!!           --->
+    <!---------------------------------------------->
+    <main id="main-app" class="container" style="display: none;">
 
         <section class="card zx" id="card-zx">
             <div class="card-content">
@@ -27,7 +63,7 @@
             <div class="progress-container" id="prog-cont-zx">
                 <div class="progress-bar" id="prog-bar-zx" style="background: var(--zx-color);"></div>
             </div>
-            <button class="btn-flash" id="btn-zx" onclick="flash('zx')">Grabar Bitstream</button>
+            <button class="btn-flash" id="btn-zx">Grabar Bitstream</button>
         </section>
 
 
@@ -66,7 +102,7 @@
     </main>
 
     <!-- Script MAIN -->
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
 </html>
 
