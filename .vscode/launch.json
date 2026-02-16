@@ -109,6 +109,13 @@
             "name": "WebFPGA-03",
             "url": "https://localhost:4443/webFPGA-tools-03/",
             "webRoot": "${workspaceFolder}"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "FPGA-retrohub",
+            "url": "https://localhost:4443/fpga-retrohub/",
+            "webRoot": "${workspaceFolder}"
         }
     ]
 }
