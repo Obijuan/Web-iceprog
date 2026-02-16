@@ -393,3 +393,49 @@ h1 {
     h1 { font-size: 1.2rem; }
 }
 
+.site-footer {
+    width: 100%;
+    margin-top: auto; /* Empuja el footer al fondo si hay poco contenido */
+    padding: 30px 0;
+    border-top: 1px solid #1a1a1a;
+    background: #050505;
+}
+
+.footer-content {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.footer-links {
+    display: flex;
+    gap: 30px;
+}
+
+.footer-links a {
+    color: #666;
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.footer-links a:hover {
+    color: var(--amstrad-color);
+}
+
+.footer-info {
+    color: #444;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+}
+
+.footer-info strong {
+    color: #777;
+}
+
