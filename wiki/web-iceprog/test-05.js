@@ -143,9 +143,6 @@ btn_usb.onclick = async () => {
     //-- Verificar!
     await verification(device, contents);
 
-    let cdone = await ftdi.FPGA_get_cdone(device);
-    console.log("Cdone: " + (cdone ? "high" : "low"));
-
     //-- Poner la flash en bajo consumo
     console.log("FLASH: Power down...");
     await ftdi.FLASH_power_down(device);
@@ -155,6 +152,8 @@ btn_usb.onclick = async () => {
 
     //-- Esperar a que la FPGA se configure
     console.log("Configurando FPGA...");
+    
+    let cdone;
     do {
 
       //-- Leer estado de la FPGA
@@ -237,8 +236,6 @@ async function verification (device, contents)
   //-----------------------------------------------------------
   //   VERYFICATION
   //-----------------------------------------------------------
-  await ftdi.FPGA_reset_assert(device);
-  await ftdi.FLASH_release_power_down(device);
 
   //-- Array con el bitstream leido del fichero
   let buf_file = new Uint8Array(contents);
