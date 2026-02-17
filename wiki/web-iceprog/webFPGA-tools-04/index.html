@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" 
+      content="width=device-width, 
+               initial-scale=1.0, 
+               maximum-scale=1.0, 
+               user-scalable=no">
+    <title>Alhambra-WEBTools</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+
+<body>
+
+    <!-- Panel de Error: Navegador NO SOPORTADO -->
+    <div id="no-support" class="error-panel hidden">
+        <div class="error-icon">⚠️</div>
+        <h2>Navegador no compatible</h2>
+        <p>Esta aplicación requiere <strong>WebUSB</strong> para comunicarse 
+           con la Alhambra-II. Utiliza Chrome u otro navegador 
+           basado en Chromium.</p>
+    </div>
+
+    <!-- PANEL PRINCIPAL (transparente) -->
+    <div id="main-app" class="glass-container">
+
+        <!-- Título del panel -->
+        <header>
+            <h1>Alhambra-II <span>WebFPGA Tools</span></h1>
+        </header>
+
+        <!-- Cuerpo del panel -->
+        <main>
+            <div id="status-card" class="status-card">
+                <div class="indicator"></div>
+                <div class="info">
+                    <p id="status-text">Buscando dispositivo...</p>
+                    <h2 id="device-name">Placa no conectada</h2>
+                </div>
+            </div>
+
+            
+
+            <div id="actions-area" class="actions-area">
+                
+                <button id="connect-btn" class="primary-btn">Conectar</button>
+                <button id="reset-btn" class="primary-btn hidden">Reset FPGA</button>
+
+                <div id="flash-info" class="flash-info hidden">
+                    <span class="label">FLASH ID:</span>
+                    <div id="id-chips-container" class="chips-container">
+                    </div>
+                </div>
+                <button id="flash-id-btn" class="primary-btn hidden" style="background: #a855f7;">
+                    Identificar Flash
+                </button>
+
+                <div id="read-tool" class="read-tool hidden">
+                    <div class="input-group">
+                       <label for="address-input" class="label">Dirección (Hex/Dec):</label>
+                       <div class="navigation-controls">
+                           <button id="prev-addr-btn" class="nav-btn">◀</button>
+                           <input type="text" id="address-input" value="0" spellcheck="false" autocomplete="off">
+                           <button id="next-addr-btn" class="nav-btn">▶</button>
+                       </div>
+                    </div>
+
+                    <div class="data-display">
+                        <div class="data-label">VALOR LEÍDO</div>
+                        <div id="byte-value-display" class="byte-hex">--</div>
+                    </div>
+
+                    <div id="hexdump-container" class="hexdump-area hidden">
+                        <div class="label">Volcado de Memoria (16 bytes)</div>
+                        <div id="hexdump-grid" class="hexdump-grid">
+                            </div>
+                    </div>
+                
+                    <button id="read-byte-btn" class="primary-btn" style="background: #10b981;">
+                        Leer Byte
+                    </button>
+                </div>
+
+                <div id="write-tool" class="read-tool hidden" style="border-color: #f97316; margin-top: 10px;">
+                    <div class="label">Operaciones de Escritura</div>
+
+                    <div class="input-group" style="margin: 10px 0;">
+                        <label for="byte-input" class="label">Byte a grabar (Hex/Dec):</label>
+                        <div class="navigation-controls">
+                            <input type="text" id="byte-input" value="0xAA" style="border-color: #f97316; color: #f97316;">
+                            <button id="write-byte-btn" class="primary-btn" style="background: #f97316; margin: 0;">
+                                Grabar Byte
+                            </button>
+                        </div>
+                    </div>
+                
+                    <button id="erase-btn" class="primary-btn" style="background: #444; margin-top: 15px; font-size: 0.7rem;">
+                        Borrar Bloque 64KB
+                    </button>
+                </div>
+
+                <div id="file-tool" class="read-tool hidden" style="border-color: #3b82f6; margin-top: 10px;">
+                    <div class="label" style="color: #3b82f6;">Programación Directa</div>
+
+                    <div class="action-grid" style="display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 15px;">
+                        <input type="file" id="file-input" accept=".bin" style="display: none;">
+                        <button id="custom-file-btn" class="primary-btn" style="background: #3b82f6;">
+                            📂 Cargar Bitstream Local
+                        </button>
+                    
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <button id="test7-btn" class="primary-btn" style="background: #a855f7; margin: 0;">
+                                🚀 Blinky7
+                            </button>
+                            <button id="test0-btn" class="primary-btn" style="background: #8b5cf6; margin: 0;">
+                                🚀 Blinky0
+                            </button>
+                        </div>
+                        <div class="verify-group" style="margin-top: 10px; display: flex; align-items: center; gap: 8px; justify-content: center;">
+                            <input type="checkbox" id="verify-checkbox" checked style="cursor: pointer; width: 18px; height: 18px;">
+                            <label for="verify-checkbox" class="label" style="cursor: pointer; font-size: 0.8rem; color: #cbd5e1;">
+                                Verificar tras programar
+                            </label>
+                        </div>
+                    </div>
+                
+                    <div id="progress-container" class="hidden" style="width: 100%; background: #0f172a; height: 12px; border-radius: 6px; margin-top: 15px; overflow: hidden; border: 1px solid #3b82f6;">
+                        <div id="progress-bar" style="width: 0%; height: 100%; background: #3b82f6; transition: width 0.1s;"></div>
+                    </div>
+                    <div id="file-status" class="label" style="margin-top: 8px; text-align: center; font-size: 0.7rem;"></div>
+                </div>
+
+
+
+
+                <button id="disconnect-btn" class="secondary-btn danger hidden">
+                    ✕ Desconectar
+                </button>
+            </div>
+
+            
+
+            <div class="console-section">
+                <div class="console-header">
+                    <button id="toggle-log" class="toggle-btn">
+                        <span>Ver Log de Sistema</span>
+                        <svg class="chevron" viewBox="0 0 24 24" width="16" height="16">
+                            <path d="M7 10l5 5 5-5" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                    
+                    <button id="clear-log" class="icon-btn" title="Limpiar consola">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div id="console-wrapper" class="console-wrapper">
+                    <div id="console-log" class="console-log"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Script MAIN -->
+    <script type="module" src="app.js"></script>
+</body>
+</html>
+
