@@ -28,8 +28,6 @@ const MC_DATA_BITS = 0x02 // When set count bits not bytes
 
 const FC_RPD = 0xAB; // Release Power-Down, returns Device ID
 const FC_JEDECID = 0x9F; // Read JEDEC ID
-const FC_PP = 0x02; // Page Program
-const FC_RD = 0x03; // Read Data
 const FC_PD = 0xB9; // Power-down
 
 //-- Important information
@@ -49,13 +47,6 @@ async function ftdi_write_data(device, buff)
   //console.log("  -> Written: " + result.bytesWritten + " byte(s)");
 
   return result.bytesWritten;
-}
-
-function mpsse_error(ret, msg) {
-  console.log(msg);
-  //console.log("Error: xxx");
-  //console.log("Operation code: " + ret);
-  //console.log("Abort!!!!!!!!.");
 }
 
 //-- MPSSE: Send one byte
@@ -176,23 +167,6 @@ async function mpsse_xfer_spi(buff)
 
   //console.log("MPSSE: xfer_spi. Written: " + rc + " byte(s)!");
   //console.log("MPSSE: xfer_spio. STOP!----------------")
-}
-
-//------ MPSSE: send_spi
-async function mpsse_send_spi(buff)
-{
-  //console.log("MPSSE: send_spi. START!---------")
-  if (buff.byteLength < 1)
-    return;
-
-  // Output only, update data on negative clock edge.
-  await mpsse_send_byte(MC_DATA_OUT | MC_DATA_OCN);
-  await mpsse_send_byte(buff.byteLength - 1);
-  await mpsse_send_byte((buff.byteLength - 1) >> 8);
-
-  let rc = await ftdi_write_data(device, buff);
-  //-- Todo! Check the correct number of bytes has been written....
-  //console.log("MPSSE: send_spi. STOP!---------")
 }
 
 // ---------------------------------------------------------
@@ -339,29 +313,6 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function ReadFile(file) {
-    let reader = new FileReader();
-
-    reader.onload = (e) => {
-       let contents = e.target.result;
-       console.log("Terminamos de leer");
-       return contents;
-    };
-    console.log("Vamos a comenzar a leer");
-    reader.readAsArrayBuffer(file);
-}
-
-
-function print_buffer(buff)
-{
-  let cad = "[ ";
-  for (let i=0; i<buff.byteLength; i = i + 1) {
-    cad += "0x" + buff.getUint8(i).toString(16) + " ";
-  }
-  cad += "]";
-  console.log(cad);
-}
-
 
 async function test_mode(device) 
 {
@@ -413,40 +364,6 @@ function array_equal(arr1, arr2, size) {
     }
     return true;
 }
-
-
-//----------------------------------------------------
-//-- Leer de la flash un bloque exacto del tamaño
-//-- Indicado
-//----------------------------------------------------
-async function FLASH_read_exact(device, addr, size) {
-
-  let remainder = size;
-  let offset = 0;
-  let buf_flash = new Uint8Array(size);
-
-  do {
-
-    //-- Leer bloque de bytes de la flash
-    let chunk = await ftdi.FLASH_read(device, addr, remainder);
-
-    buf_flash.set(chunk, offset);
-    offset = offset + chunk.byteLength;
-    
-    //console.log("Leidos en flash: " + chunk.byteLength);
-
-    remainder = remainder - chunk.byteLength;
-    addr = addr + chunk.byteLength;
-
-  } while (remainder > 0);
-
-  return buf_flash;
-}
-
-
-
-
-
 
 async function preludio()
 {
