@@ -132,7 +132,24 @@
                     <div id="file-status" class="label" style="margin-top: 8px; text-align: center; font-size: 0.7rem;"></div>
                 </div>
 
+                <div id="uart-tool" class="read-tool hidden" style="border-color: #10b981; margin-top: 10px;">
+                    <div class="label" style="color: #10b981;">Consola Serie (Interfaz B)</div>
+                    
+                    <div class="navigation-controls" style="margin-top: 10px;">
+                        <button id="open-uart-btn" class="primary-btn" style="background: #10b981;">
+                            Abrir Canal Serie
+                        </button>
+                    </div>
 
+                    <div id="uart-console" style="background: #000; color: #0f0; font-family: monospace; height: 100px; overflow-y: auto; padding: 10px; margin-top: 10px; border-radius: 4px; font-size: 0.8rem; text-align: left;">
+                        Esperando conexión...
+                    </div>
+
+                    <div class="input-group" style="margin-top: 10px;">
+                        <input type="text" id="uart-input" placeholder="Escribir mensaje..." style="border-color: #10b981;">
+                        <button id="send-uart-btn" class="primary-btn" style="background: #10b981; margin: 0;">Enviar</button>
+                    </div>
+                </div>
 
 
                 <button id="disconnect-btn" class="secondary-btn danger hidden">

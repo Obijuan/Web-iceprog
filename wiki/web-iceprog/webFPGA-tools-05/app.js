@@ -41,7 +41,12 @@ const test0Btn = document.getElementById('test0-btn');
 const test7Btn = document.getElementById('test7-btn');
 const fileStatus = document.getElementById('file-status');
 const verifyCheckbox = document.getElementById('verify-checkbox');
+const uartTool = document.getElementById('uart-tool');
 
+const openUartBtn = document.getElementById('open-uart-btn');
+const uartConsole = document.getElementById('uart-console');
+const uartInput = document.getElementById('uart-input');
+const sendUartBtn = document.getElementById('send-uart-btn');
 
 log("Aplicacion iniciada...", "system");
 
@@ -60,6 +65,8 @@ eraseBtn.onclick = handleErase;
 writeByteBtn.onclick = handleWriteByte;
 let selectedFileBuffer = null;
 
+openUartBtn.onclick = handleOpenUART;
+sendUartBtn.onclick = handleSendUART;
 
 // -----------------------------------------------------
 //-- Comprobar si el navegador soporta WebUSB
@@ -133,6 +140,7 @@ async function updateUI(connected) {
         hexdumpContainer.classList.remove('hidden');
         writeTool.classList.remove('hidden');
         fileTool.classList.remove('hidden');
+        uartTool.classList.remove('hidden');
 
 
         //-- TEST
@@ -169,6 +177,7 @@ async function updateUI(connected) {
         hexdumpContainer.classList.add('hidden');
         writeTool.classList.add('hidden');
         fileTool.classList.add('hidden');
+        uartTool.classList.add('hidden');
 
         // --- RESET DE ESTADOS INTERNOS ---
         // Limpiamos los valores para que no aparezcan datos viejos al reconectar
@@ -1004,4 +1013,49 @@ async function verifyProgramming(originalData) {
     progressBar.style.width = '100%';
     progressBar.style.background = '#10b981'; // Volver a verde al éxito
     log("✅ Verificación completada: ¡Los datos coinciden al 100%!", "success");
+}
+
+async function handleOpenUART() {
+    try {
+        log("Abriendo Interfaz B en modo UART...", "system");
+        await ftdi.openUART(device, 115200);
+        uartConsole.textContent = "> Canal abierto. Escuchando...\n";
+        
+        // Iniciamos el bucle de lectura
+        readUARTLoop();
+    } catch (err) {
+        log("Error al abrir UART: " + err.message, "error");
+    }
+}
+
+// Bucle para leer datos que vienen de la FPGA
+async function readUARTLoop() {
+    while (device && device.opened) {
+        try {
+            // El endpoint de lectura para la Interfaz B suele ser el 3 (o el 1 de la interf. 2)
+            // FTDI envía 2 bytes de status al principio de cada transferencia
+            const result = await device.transferIn(3, 64); 
+            if (result.data && result.data.byteLength > 2) {
+                // Quitamos los 2 bytes de status y convertimos a texto
+                const data = result.data.buffer.slice(2);
+                const text = new TextDecoder().decode(data);
+                uartConsole.textContent += text;
+                uartConsole.scrollTop = uartConsole.scrollHeight;
+            }
+        } catch (err) {
+            console.error("Error en lectura UART:", err);
+            break;
+        }
+    }
+}
+
+// Enviar datos a la FPGA
+async function handleSendUART() {
+    const text = uartInput.value;
+    if (!text) return;
+    
+    const data = new TextEncoder().encode(text);
+    // El endpoint de escritura para la Interfaz B es el 4 (o el 2 de la interf. 2)
+    await device.transferOut(4, data);
+    uartInput.value = "";
 }
