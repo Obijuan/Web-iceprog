@@ -1018,7 +1018,7 @@ async function verifyProgramming(originalData) {
 async function handleOpenUART() {
     try {
         log("Abriendo Interfaz B en modo UART...", "system");
-        await ftdi.openUART(device, 115200);
+        //await ftdi.openUART(device, 115200);
         uartConsole.textContent = "> Canal abierto. Escuchando...\n";
         
         // Iniciamos el bucle de lectura
