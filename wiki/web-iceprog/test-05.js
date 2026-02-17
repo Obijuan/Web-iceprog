@@ -152,14 +152,14 @@ async function mpsse_xfer_spi(buff)
 // FLASH function implementations
 // ---------------------------------------------------------
 
-async function flash_power_down()
-{
-  let buff = new Uint8Array(1);
-  buff[0] = FC_PD;
-  await ftdi.FLASH_cs_assert(device);
-  await mpsse_xfer_spi(buff);
-  await ftdi.FLASH_cs_deassert(device);
-}
+//async function flash_power_down()
+//{
+//  let buff = new Uint8Array(1);
+//  buff[0] = FC_PD;
+//  await ftdi.FLASH_cs_assert(device);
+//  await mpsse_xfer_spi(buff);
+//  await ftdi.FLASH_cs_deassert(device);
+//}
 
 //---------------------
 //-- UTILS
@@ -307,8 +307,8 @@ btn_usb.onclick = async () => {
     console.log("Cdone: " + (cdone ? "high" : "low"));
 
     //-- Poner la flash en bajo consumo
-    console.log("FLASH: Power down...")
-    await flash_power_down();
+    console.log("FLASH: Power down...");
+    await ftdi.FLASH_power_down(device);
     
     //-- Hemos terminado: Quitar el reset
     await ftdi.FPGA_reset_deassert(device);

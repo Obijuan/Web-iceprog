@@ -333,6 +333,27 @@ export async function FLASH_cs_deassert(device)
     await set_gpio(device, FLASH_CS_PIN, FPGA_RESET_PIN | FLASH_CS_PIN | 3);
 }
 
+//------------------------------------------------------------
+//-- Volver a meter la flash en modo de bajo consumo (sleep)
+//------------------------------------------------------------
+export async function FLASH_power_down(device)
+{
+    //-- Activar el chip select de la flash
+    await FLASH_cs_assert(device)
+
+    //-- Enviar comando
+    const data = new Uint8Array([FTDI_SPI_WRITE, 0x00, 0x00, FLASH_PD]);
+    await device.transferOut(OUT_EP, data);
+
+    //-- Leer respuesta al comando
+    //-- Deben ser 3 bytes. Los 2 primeros son el estado del model. 
+    //-- El tercero es 0xFF, que es lo que devuelve la flash con esta operacion
+    let result = await device.transferIn(IN_EP, 3);
+
+    //-- Desactivar el chip select de la flash
+    await FLASH_cs_deassert(device)    
+}
+
 //-------------------------------------------------------------
 //-- Sacar la flash del modo sleep (power_down)
 //-- Es necesario enviar este comando a la flash antes de hacer
@@ -361,26 +382,6 @@ export async function FLASH_release_power_down(device)
     //                  .map(byte => byte.toString(16).toUpperCase().padStart(2, '0'))
     //                  .join(' ');
     // console.log("POWER-DOWN2: " + cad)
-
-    //-- Desactivar el chip select de la flash
-    await FLASH_cs_deassert(device)
-}
-
-//-------------------------------------------------------------
-//-- Poner la flash otra vez en modo sleep
-//--------------------------------------------------------------
-export async function FLASH_power_down(device)
-{
-    
-    //-- Activar el chip select de la flash
-    await FLASH_cs_assert(device)
-
-    //-- Enviar comando 
-    const data = new Uint8Array([FTDI_SPI_WRITE, 0x00, 0x00, FLASH_PD]);
-    await device.transferOut(OUT_EP, data);
-
-    //-- Leer respuesta al comando
-    let result = await device.transferIn(IN_EP, 3);
 
     //-- Desactivar el chip select de la flash
     await FLASH_cs_deassert(device)
