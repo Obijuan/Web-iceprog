@@ -1,32 +1,85 @@
 import * as ftdi from './ftdi.js';
 
+//-------------------------------------------------
+//-- Elementos de interfaz
+//-------------------------------------------------
 const btn_usb = document.getElementById('btn_usb');
 const display = document.getElementById('display');
-const btn_list = document.getElementById('btn_list');
 const btn_close = document.getElementById('btn_close');
 const bitstream = document.getElementById('bitstream');
 
+//--------------------------------------------
+//---   MAIN 
+//--------------------------------------------
+let device;
 
-btn_list.onclick = async () => {
-    let devices = await navigator.usb.getDevices();
-    devices.forEach(device => {
-      console.log(device.productName);
-    });
+//--------------------------------
+//-- Boton de OPEN apretado
+//-- ¡Que comience la fiesta!
+//--------------------------------
+btn_usb.onclick = async () => {
+
+  //-- Initial operations
+  device = await preludio();
+
+  //--------- Open the bitstream file
+  const filename = bitstream.files[0];
+  console.log("File: " + bitstream.value);
+
+  let reader = new FileReader();
+  reader.readAsArrayBuffer(filename);
+
+  //-- Fichero LEIDO
+  reader.onload = async (e) => {
+
+    //-- Obtener contenidos del fichero
+    let contents = e.target.result;
+
+    //-- Borrar la flash 
+    await erase(device, contents);
+
+    //-- Programar el bitstream!
+    await load_bitstream(device, contents);
+
+    //-- Verificar!
+    await verification(device, contents);
+
+    //-- Poner la flash en bajo consumo
+    console.log("FLASH: Power down...");
+    await ftdi.FLASH_power_down(device);
+    
+    //-- Hemos terminado: Quitar el reset
+    await ftdi.FPGA_reset_deassert(device);
+
+    //-- Esperar a que la FPGA se configure
+    console.log("Configurando FPGA...");
+
+    let cdone;
+    do {
+
+      //-- Leer estado de la FPGA
+      cdone = await ftdi.FPGA_get_cdone(device);
+      //console.log("Cdone: " + (cdone ? "high" : "low"));
+
+      //-- Esperar
+      await sleep(100);
+    } while (cdone == false);
+
+    console.log("cdone: " + (cdone ? "high" : "low"));
+    console.log("✅FPGA Lista!");
+    console.log("Bye.");
+  }
 }
 
+//-----------------------------------
+//-- Boton para cerrar el usb
+//-----------------------------------
 btn_close.onclick = () => {
+  if (device) {
     device.close();
+  }
     display.innerHTML = "Close!";
 }
-
-navigator.usb.addEventListener('connect', event => {
-  console.log("Conectado!!!");
-});
-
-navigator.usb.addEventListener('disconnect', event => {
-    console.log("DESCONECTADO!!!");
-    display.innerHTML = "";
-})
 
 
 //---------------------
@@ -109,65 +162,6 @@ async function preludio()
   await sleep(100);
 
   return device;
-}
-
-//--------------------------------------------
-//---   MAIN 
-//--------------------------------------------
-let device;
-
-btn_usb.onclick = async () => {
-
-  //-- Initial operations
-  device = await preludio();
-
-  //--------- Open the bitstream file
-  const filename = bitstream.files[0];
-  console.log("File: " + bitstream.value);
-
-  let reader = new FileReader();
-  reader.readAsArrayBuffer(filename);
-
-  //-- Fichero LEIDO
-  reader.onload = async (e) => {
-
-    //-- Obtener contenidos del fichero
-    let contents = e.target.result;
-
-    //-- Borrar la flash 
-    await erase(device, contents);
-
-    //-- Programar el bitstream!
-    await load_bitstream(device, contents);
-
-    //-- Verificar!
-    await verification(device, contents);
-
-    //-- Poner la flash en bajo consumo
-    console.log("FLASH: Power down...");
-    await ftdi.FLASH_power_down(device);
-    
-    //-- Hemos terminado: Quitar el reset
-    await ftdi.FPGA_reset_deassert(device);
-
-    //-- Esperar a que la FPGA se configure
-    console.log("Configurando FPGA...");
-    
-    let cdone;
-    do {
-
-      //-- Leer estado de la FPGA
-      cdone = await ftdi.FPGA_get_cdone(device);
-      //console.log("Cdone: " + (cdone ? "high" : "low"));
-
-      //-- Esperar
-      await sleep(100);
-    } while (cdone == false);
-
-    console.log("cdone: " + (cdone ? "high" : "low"));
-    console.log("✅FPGA Lista!");
-    console.log("Bye.");
-  }
 }
 
 //------------------------------------------
