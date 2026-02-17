@@ -399,8 +399,9 @@ function id_to_string(id)
 //-------------------------------------
 //-- arr1: Bytes en flash
 //-- arr2: Bytes en fichero
+//-- size: Tamaño a comprobar 
 //-------------------------------------
-function array_equal2(arr1, arr2, size) {
+function array_equal(arr1, arr2, size) {
 
     for (let i = 0; i < size; i++) {
         if (arr1[i] !== arr2[i]) {
@@ -413,30 +414,6 @@ function array_equal2(arr1, arr2, size) {
     return true;
 }
 
-
-//-------------------------------------
-//-- arr1: Bytes en flash
-//-- arr2: Bytes en fichero
-//-------------------------------------
-function array_equal(arr1, arr2) {
-    //-- Si tienen tamaños diferentes, los arrays son distintos
-    //if (arr1.length !== arr2.length) {
-    //  console.log("❌ ERROR: Los arrays tienen DISTINTO TAMAÑO!");
-    //  console.log("  -Flash: " + arr1.length);
-    //  console.log("  -Fich: " + arr2.length);
-    //  return false;
-    //}
-
-    for (let i = 0; i < arr1.length; i++) {
-        if (arr1[i] !== arr2[i]) {
-          console.log("❌ Offset: " + i);
-          console.log("❌ Flash:  " + arr1[i]);
-          console.log("❌ Fichero: " + arr2[i]);
-          return false;
-        }
-    }
-    return true;
-}
 
 //----------------------------------------------------
 //-- Leer de la flash un bloque exacto del tamaño
@@ -546,13 +523,16 @@ btn_usb.onclick = async () => {
     let contents = e.target.result;
 
     //-- Borrar la flash 
-    //await erase(device, contents);
+    await erase(device, contents);
 
     //-- Programar el bitstream!
-    //await load_bitstream(device, contents);
+    await load_bitstream(device, contents);
 
     //-- Verificar!
     await verification(device, contents);
+
+    let cdone = await ftdi.FPGA_get_cdone(device);
+    console.log("Cdone: " + (cdone ? "high" : "low"));
 
     //-- Hemos terminado: Quitar el reset
     await ftdi.FPGA_reset_deassert(device);
@@ -718,7 +698,7 @@ async function verification (device, contents)
   //console.log("* Remainder: " + remainder);
   console.log("* Verificando...");
 
-  if (!array_equal2(buf_flash, buf_file, offset)) {
+  if (!array_equal(buf_flash, buf_file, offset)) {
     console.log("❌ Error en verificación!");
   } else {
     console.log("✅Verify: OK!");
