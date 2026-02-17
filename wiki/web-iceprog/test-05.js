@@ -396,14 +396,36 @@ function id_to_string(id)
 }
 
 
+//-------------------------------------
+//-- arr1: Bytes en flash
+//-- arr2: Bytes en fichero
+//-------------------------------------
+function array_equal2(arr1, arr2, size) {
+
+    for (let i = 0; i < size; i++) {
+        if (arr1[i] !== arr2[i]) {
+          console.log("❌ Offset: " + i);
+          console.log("❌ Flash:  " + arr1[i]);
+          console.log("❌ Fichero: " + arr2[i]);
+          return false;
+        }
+    }
+    return true;
+}
+
+
+//-------------------------------------
+//-- arr1: Bytes en flash
+//-- arr2: Bytes en fichero
+//-------------------------------------
 function array_equal(arr1, arr2) {
     //-- Si tienen tamaños diferentes, los arrays son distintos
-    if (arr1.length !== arr2.length) {
-      console.log("❌ ERROR: Los arrays tienen DISTINTO TAMAÑO!");
-      console.log("  -Flash: " + arr1.length);
-      console.log("  -Fich: " + arr2.legnth);
-      return false;
-    }
+    //if (arr1.length !== arr2.length) {
+    //  console.log("❌ ERROR: Los arrays tienen DISTINTO TAMAÑO!");
+    //  console.log("  -Flash: " + arr1.length);
+    //  console.log("  -Fich: " + arr2.length);
+    //  return false;
+    //}
 
     for (let i = 0; i < arr1.length; i++) {
         if (arr1[i] !== arr2[i]) {
@@ -530,7 +552,7 @@ btn_usb.onclick = async () => {
     //await load_bitstream(device, contents);
 
     //-- Verificar!
-    await verification(device, contents);
+    await verification2(device, contents);
 
     //-- Hemos terminado: Quitar el reset
     await ftdi.FPGA_reset_deassert(device);
@@ -629,6 +651,77 @@ async function load_bitstream(device, contents)
   console.log("**************************** TEST3 *******");
 }
 
+
+async function verification2 (device, contents)
+{
+  //-----------------------------------------------------------
+  //   VERYFICATION
+  //-----------------------------------------------------------
+  await ftdi.FPGA_reset_assert(device);
+  await ftdi.FLASH_release_power_down(device);
+
+  //-- Direccion donde comenzar la veriricacion
+  let addr = 0;
+  let size = 64;
+  let offset = 0;
+
+  //-- Leer bloque de 256 bytes del bitstream
+  let buf_file = new Uint8Array(contents);
+  let buf_flash = new Uint8Array(buf_file.byteLength);
+
+  let remainder = buf_file.byteLength;
+  
+
+  while (remainder > size) {
+
+    //-- Borrar buffers: TEST
+    await ftdi.purge_buffers(device);
+
+    //-- Leer bloque de bytes de la flash
+    let chunk = await ftdi.FLASH_read(device, offset, size);
+  
+    //-- Añadir bloque leido al buffer de la flash
+    buf_flash.set(chunk, offset);
+    offset = offset + chunk.byteLength;
+
+    console.log("* Tamano: " + offset);
+
+    remainder = buf_file.byteLength - offset;
+  }
+
+  console.log("Remainder: " + remainder);
+
+  if (!array_equal2(buf_flash, buf_file, offset)) {
+    console.log("  - ❌ Error en bloque ");
+  } else {
+    console.log("  - Bloque OK");
+  }
+
+  //-- Borrar buffers: TEST
+  await ftdi.purge_buffers(device);
+
+  //-- Leer bloque de bytes de la flash
+  let chunk = await ftdi.FLASH_read(device, offset, remainder);
+  
+  //-- Añadir bloque leido al buffer de la flash
+  buf_flash.set(chunk, offset);
+  offset = offset + chunk.byteLength;
+
+  remainder = buf_file.byteLength - offset;
+  console.log("* Tamano: " + offset);
+  console.log("* Remainder: " + remainder);
+
+  if (!array_equal2(buf_flash, buf_file, buf_file.byteLength)) {
+    console.log("  - ❌ Error en bloque ");
+  } else {
+    console.log("  - Bloque OK");
+  }
+  
+  console.log("TEST...");
+
+}
+
+
 async function verification (device, contents)
 {
   //-----------------------------------------------------------
@@ -666,11 +759,11 @@ async function verification (device, contents)
     //-- Lo que hay en flash difiere de lo que tiene el fichero
     if (!array_equal(buf_flash, buf_file)) {
       console.log("❌ Error en bloque " + b)
-      return
+      //return
     }
 
     //-- Pasar al siguiente bloque
-    addr += 256;
+    //addr += 256;
     if (b % 50 == 0) 
       console.log(b + " ");
   }
@@ -681,7 +774,7 @@ async function verification (device, contents)
     let buf_flash = await FLASH_read_exact(device, addr, remaining);
   
     if (!array_equal(buf_flash, buf_file)) {
-      console.log("❌ Bloque " + b + " incorrecto!!!");
+      console.log("❌ Bloque " + total_blocks + " incorrecto!!!");
       console.log("❌ ERROR en Verificación!");
       return
     }
