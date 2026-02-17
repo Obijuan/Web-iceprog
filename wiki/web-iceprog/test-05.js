@@ -477,7 +477,22 @@ btn_usb.onclick = async () => {
 
     //-- Hemos terminado: Quitar el reset
     await ftdi.FPGA_reset_deassert(device);
-    console.log('Fin!');
+
+    //-- Esperar a que la FPGA se configure
+    console.log("Configurando FPGA...");
+    do {
+
+      //-- Leer estado de la FPGA
+      cdone = await ftdi.FPGA_get_cdone(device);
+      //console.log("Cdone: " + (cdone ? "high" : "low"));
+
+      //-- Esperar
+      await sleep(100);
+    } while (cdone == false);
+
+    console.log("cdone: " + (cdone ? "high" : "low"));
+    console.log("✅FPGA Lista!");
+    console.log("Bye.");
   }
 }
 
