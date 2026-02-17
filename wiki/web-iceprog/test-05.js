@@ -404,9 +404,9 @@ function array_equal2(arr1, arr2, size) {
 
     for (let i = 0; i < size; i++) {
         if (arr1[i] !== arr2[i]) {
-          console.log("❌ Offset: " + i);
-          console.log("❌ Flash:  " + arr1[i]);
-          console.log("❌ Fichero: " + arr2[i]);
+          console.log("  🔴 Direccion: " + i);
+          console.log("  🔴 Flash:  " + arr1[i]);
+          console.log("  🔴 Fichero: " + arr2[i]);
           return false;
         }
     }
@@ -660,20 +660,36 @@ async function verification2 (device, contents)
   await ftdi.FPGA_reset_assert(device);
   await ftdi.FLASH_release_power_down(device);
 
-  //-- Direccion donde comenzar la veriricacion
-  let addr = 0;
+  //-- Array con el bitstream leido del fichero
+  let buf_file = new Uint8Array(contents);
+
+  //-- Tamaño del bloque a leer cada vez
   let size = 64;
+
+  //-- Tamano total del bitstream
+  let total_size = buf_file.byteLength;
+
+  //-- Buffer donde almacenar los bytes leidos de la flash
+  let buf_flash = new Uint8Array(total_size);
+
+  //-- Posicion actual del buffer de lectura de flash
+  //-- Comenzamos por el principio
   let offset = 0;
 
-  //-- Leer bloque de 256 bytes del bitstream
-  let buf_file = new Uint8Array(contents);
-  let buf_flash = new Uint8Array(buf_file.byteLength);
-
-  let remainder = buf_file.byteLength;
+  //-- Bytes pendientes de leer de la flash
+  let remainder = total_size;
   
   console.log("* Leyendo bitstream de la flash...");
 
+  //-- Numero de bloques leidos
+  let blocks = 0;
+
+  //-- Repetir hasta que no queden más bytes a leer en la flash
   while (remainder > 0) {
+
+    //-- Dar feedback
+    if (blocks % 200 == 0) 
+      console.log("  -Leidos: " + offset);
 
     //-- Borrar buffers: TEST
     await ftdi.purge_buffers(device);
@@ -688,8 +704,15 @@ async function verification2 (device, contents)
 
     //console.log("* Tamano: " + offset);
 
+    //-- Calcular los bytes restantes
     remainder = buf_file.byteLength - offset;
+
+    //-- Un bloque mas leido
+    blocks = blocks + 1;
   }
+
+  //-- Dar feedback
+  console.log("  -Leidos: " + offset);
 
   //console.log("* Tamano: " + offset);
   //console.log("* Remainder: " + remainder);
