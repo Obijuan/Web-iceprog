@@ -9,7 +9,6 @@ const btn_list = document.getElementById('btn_list');
 const btn_close = document.getElementById('btn_close');
 const bitstream = document.getElementById('bitstream');
 
-
 /* Mode commands */
 const	MC_SETB_LOW = 0x80;    // Set Data bits LowByte
 const MC_READB_LOW = 0x81;   // Read Data bits LowByte
@@ -35,6 +34,31 @@ const FC_PD = 0xB9; // Power-down
 // ftdi->index     = INTERFACE_A;
 const IN_EP = 0x02; //-- Endpoint for transfering data from host to device
 const OUT_EP = 0x01; //-- Endpoint!  0x81
+
+btn_list.onclick = async () => {
+    let devices = await navigator.usb.getDevices();
+    devices.forEach(device => {
+      console.log(device.productName);
+    });
+}
+
+btn_close.onclick = () => {
+    device.close();
+    display.innerHTML = "Close!";
+}
+
+navigator.usb.addEventListener('connect', event => {
+  console.log("Conectado!!!");
+});
+
+navigator.usb.addEventListener('disconnect', event => {
+    console.log("DESCONECTADO!!!");
+    display.innerHTML = "";
+})
+
+
+
+
 
 //----- FTDI: Write_data
 //-- Escribir un buffer en el FTDI
@@ -660,25 +684,4 @@ async function todo() {
   //--mpsse_close(ctx)
 }
 
-
-btn_list.onclick = async () => {
-    let devices = await navigator.usb.getDevices();
-    devices.forEach(device => {
-      console.log(device.productName);
-    });
-}
-
-btn_close.onclick = () => {
-    device.close();
-    display.innerHTML = "Close!";
-}
-
-navigator.usb.addEventListener('connect', event => {
-  console.log("Conectado!!!");
-});
-
-navigator.usb.addEventListener('disconnect', event => {
-    console.log("DESCONECTADO!!!");
-    display.innerHTML = "";
-})
 
