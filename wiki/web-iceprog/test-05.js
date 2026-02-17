@@ -9,14 +9,9 @@ const btn_list = document.getElementById('btn_list');
 const btn_close = document.getElementById('btn_close');
 const bitstream = document.getElementById('bitstream');
 
-/* Mode commands */
-const	MC_SETB_LOW = 0x80;    // Set Data bits LowByte
-const MC_READB_LOW = 0x81;   // Read Data bits LowByte
-
 const MC_DATA_IN  =  0x20 // When set read data (Data IN)
 const MC_DATA_OUT =  0x10 // When set write data (Data OUT)
 const MC_DATA_OCN = 0x01  // When set update data on negative clock edge
-const MC_DATA_BITS = 0x02 // When set count bits not bytes
 
 // ---------------------------------------------------------
 // FLASH definitions
@@ -24,9 +19,6 @@ const MC_DATA_BITS = 0x02 // When set count bits not bytes
 
 // Flash command definitions
 // This command list is based on the Winbond W25Q128JV Datasheet
-
-const FC_RPD = 0xAB; // Release Power-Down, returns Device ID
-const FC_JEDECID = 0x9F; // Read JEDEC ID
 const FC_PD = 0xB9; // Power-down
 
 //-- Important information
@@ -55,9 +47,6 @@ navigator.usb.addEventListener('disconnect', event => {
     console.log("DESCONECTADO!!!");
     display.innerHTML = "";
 })
-
-
-
 
 
 //----- FTDI: Write_data
@@ -134,41 +123,6 @@ async function mpsse_recv_byte(device) {
 }
 
 
-//-------- MPSSE: readb_low()
-async function mpsse_readb_low(device) 
-{
-  await mpsse_send_byte(MC_READB_LOW);
-  let data = await mpsse_recv_byte(device);
-  //console.log("MPSSE: readb_low(): 0x" + data.toString(16));
-}
-
-//-------- MPSSE: set_gpio()
-async function mpsse_set_gpio(gpio, direction)
-{
-	await mpsse_send_byte(MC_SETB_LOW);
-	await mpsse_send_byte(gpio); // Value
-	await mpsse_send_byte(direction); // Direction
-
-  //console.log("MPSSE: set_gpio: " + gpio.toString(16) + 
-  //            ", Dir: " + direction.toString(16));
-}
-
-//--------- MPSSE: xfer_spi_bits()
-async function mpsse_xfer_spi_bits(device, data, n)
-{
-  if (n < 1)
-    return 0;
-
-  // Input and output, update data on negative edge read on positive, bits.
-  await mpsse_send_byte(MC_DATA_IN | MC_DATA_OUT | MC_DATA_OCN | MC_DATA_BITS);
-  await mpsse_send_byte(n - 1);
-  await mpsse_send_byte(data);
-
-  let rcv = await mpsse_recv_byte(device);
-  //console.log("MPSSE: xfer_spi_bits. Received: 0x" + rcv.toString(16));
-  return rcv;
-}
-
 //------ MPSSE: xfer_spi()
 async function mpsse_xfer_spi(buff)
 {
@@ -193,139 +147,18 @@ async function mpsse_xfer_spi(buff)
   //console.log("MPSSE: xfer_spio. STOP!----------------")
 }
 
-// ---------------------------------------------------------
-// Hardware specific CS, CReset, CDone functions
-// ---------------------------------------------------------
-
-
-async function get_cdone()
-{
-  let data = await mpsse_readb_low(device);
-  let cdone = (data & 0x40) != 0;
-
-  //console.log("MPSSE: get_cdone(): " + cdone);
-  return cdone;
- }
-
- async function set_cs_creset(cs_b, creset_b)
- {
-   let gpio = 0;
-   const direction = 0x93;
- 
-   if (cs_b) {
-     // ADBUS4 (GPIOL0)
-     gpio |= 0x10;
-   }
- 
-   if (creset_b) {
-     // ADBUS7 (GPIOL3)
-     gpio |= 0x80;
-   }
- 
-   await mpsse_set_gpio(gpio, direction);
-
-   //console.log("MPSEE: set_cs_creset: cs_b: " + cs_b.toString(16) + 
-   //            ", creset_b: " + creset_b.toString(16));
- }
 
 // ---------------------------------------------------------
 // FLASH function implementations
 // ---------------------------------------------------------
-// the FPGA reset is released so also FLASH chip select should be deasserted
-async function flash_release_reset()
-{
-  //console.log("FLASH: release_reset() START!");
-  await set_cs_creset(1, 1);
-
-  //console.log("FLASH: release_reset() STOP!");
-}
-
-// FLASH chip select deassert
-async function flash_chip_deselect()
-{
-  //console.log("FLASH: chip_deselect() START!");
-	await set_cs_creset(1, 0);
-  //console.log("FLASH: chip_deselect() STOP!");
-}
-
-// FLASH chip select assert
-// should only happen while FPGA reset is asserted
-async function flash_chip_select()
-{
-  //console.log("FLASH: chip_select() START!");
-	await set_cs_creset(0, 0);
-  //console.log("FLASH: chip_select() STOP!");
-}
-
-async function flash_reset()
-   {
-     //console.log("FLASH: Reset. START!");
-     await flash_chip_select();
-     await mpsse_xfer_spi_bits(device, 0xFF, 8);
-     await flash_chip_deselect();
-     await flash_chip_select();
-     await mpsse_xfer_spi_bits(device, 0xFF, 2);
-     await flash_chip_deselect();
-     //console.log("FLASH: Reset. STOP!");
-   }
-
-
-async function flash_power_up()
-{
-  //console.log("FLASH: Power UP. START!");
-  let buff = new Uint8Array(1);
-  buff[0] = FC_RPD;
-  await flash_chip_select();
-  await mpsse_xfer_spi(buff);
-  await flash_chip_deselect();
-  //console.log("FLASH: Power UP. START!");
-}
-
-
-async function flash_read_id()
-{
-  /* JEDEC ID structure:
-  * Byte No. | Data Type
-  * ---------+----------
-  *        0 | FC_JEDECID Request Command
-  *        1 | MFG ID
-  *        2 | Dev ID 1
-  *        3 | Dev ID 2
-  *        4 | Ext Dev Str Len
-  */
-
-  //console.log("FLASH: READ-ID. START!");
-
-  let buff = new Uint8Array(5); //-- command + 4 response bytes
-  buff[0] = FC_JEDECID;
-
-  await flash_chip_select();
-
-  // Write command and read first 4 bytes
-  await mpsse_xfer_spi(buff);
-
-  if (buff[4] == 0xFF)
-      //console.log("Extended Device String Length is 0xFF, " +
-      //            "this is likely a read error. Ignorig...");
-
-  await flash_chip_deselect();
-
-  // TODO: Add full decode of the JEDEC ID.
-  let flash_id_str = "flash ID: ";
-  for (let i = 1; i < buff.byteLength; i++)
-    flash_id_str += " 0x" + buff[i].toString(16);
-
-  console.log("✅FLASH-ID: " + flash_id_str);
-  //console.log("FLASH: READ-ID. STOP!");
-}
 
 async function flash_power_down()
 {
   let buff = new Uint8Array(1);
   buff[0] = FC_PD;
-  await flash_chip_select();
+  await ftdi.FLASH_cs_assert(device);
   await mpsse_xfer_spi(buff);
-  await flash_chip_deselect();
+  await ftdi.FLASH_cs_deassert(device);
 }
 
 //---------------------
@@ -588,7 +421,6 @@ async function load_bitstream(device, contents)
   console.log("Cdone: " + (cdone ? "high" : "low"));
   console.log("**************************** TEST3 *******");
 }
-
 
 async function verification (device, contents)
 {
