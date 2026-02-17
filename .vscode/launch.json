@@ -120,6 +120,13 @@
         {
             "type": "chrome",
             "request": "launch",
+            "name": "WebFPGA-05",
+            "url": "https://localhost:4443/webFPGA-tools-05/",
+            "webRoot": "${workspaceFolder}"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
             "name": "FPGA-retrohub",
             "url": "https://localhost:4443/fpga-retrohub/",
             "webRoot": "${workspaceFolder}"
