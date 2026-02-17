@@ -475,6 +475,10 @@ btn_usb.onclick = async () => {
     let cdone = await ftdi.FPGA_get_cdone(device);
     console.log("Cdone: " + (cdone ? "high" : "low"));
 
+    console.log("Llamando a Power down...");
+    await flash_power_down();
+    console.log("Llega bien aquí tras power_down....")
+
     //-- Hemos terminado: Quitar el reset
     await ftdi.FPGA_reset_deassert(device);
 
@@ -664,39 +668,11 @@ async function verification (device, contents)
 
 async function todo() {
 
-  let cdone = await get_cdone();
-  console.log("cdone: " + (cdone ? "high" : "low"))
-  console.log("**************************** TEST4 *******");
 
-  await flash_reset();
-  await flash_power_up();
-  await flash_read_id(); 
-
-
-
-  //-- RESET
-  console.log("Hay que hacer reset!")
-
-  
-
-  // ---------------------------------------------------------
-  // Reset
-  // ---------------------------------------------------------
   console.log("Llamando a Power down...");
   await flash_power_down();
   console.log("Llega bien aquí tras power_down....")
-  await flash_release_reset();
-  await sleep(250);
-  cdone = await get_cdone()
 
-
-
-  //--set_cs_creset(1, 1);
-  //--sleep.usleep(250000);
-
-  console.log("cdone: " + (cdone ? "high" : "low"))
-  console.log("Bye.")
-  //--mpsse_close(ctx)
 }
 
 
