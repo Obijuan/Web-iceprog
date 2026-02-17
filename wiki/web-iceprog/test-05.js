@@ -321,13 +321,11 @@ async function flash_read_id()
 
 async function flash_power_down()
 {
-  console.log("FLASH: Power Down. START!");
   let buff = new Uint8Array(1);
   buff[0] = FC_PD;
   await flash_chip_select();
   await mpsse_xfer_spi(buff);
   await flash_chip_deselect();
-  console.log("FLASH: Power Down. STOP!");
 }
 
 //---------------------
@@ -475,10 +473,10 @@ btn_usb.onclick = async () => {
     let cdone = await ftdi.FPGA_get_cdone(device);
     console.log("Cdone: " + (cdone ? "high" : "low"));
 
-    console.log("Llamando a Power down...");
+    //-- Poner la flash en bajo consumo
+    console.log("FLASH: Power down...")
     await flash_power_down();
-    console.log("Llega bien aquí tras power_down....")
-
+    
     //-- Hemos terminado: Quitar el reset
     await ftdi.FPGA_reset_deassert(device);
 
@@ -663,16 +661,6 @@ async function verification (device, contents)
   } else {
     console.log("✅Verify: OK!");
   }
-}
-
-
-async function todo() {
-
-
-  console.log("Llamando a Power down...");
-  await flash_power_down();
-  console.log("Llega bien aquí tras power_down....")
-
 }
 
 
