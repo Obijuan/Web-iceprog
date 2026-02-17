@@ -671,25 +671,30 @@ async function verification2 (device, contents)
 
   let remainder = buf_file.byteLength;
   
+  console.log("* Leyendo bitstream de la flash...");
 
-  while (remainder > size) {
+  while (remainder > 0) {
 
     //-- Borrar buffers: TEST
     await ftdi.purge_buffers(device);
 
     //-- Leer bloque de bytes de la flash
-    let chunk = await ftdi.FLASH_read(device, offset, size);
+    let n = (remainder < size) ? remainder : size;
+    let chunk = await ftdi.FLASH_read(device, offset, n);
   
     //-- Añadir bloque leido al buffer de la flash
     buf_flash.set(chunk, offset);
     offset = offset + chunk.byteLength;
 
-    console.log("* Tamano: " + offset);
+    //console.log("* Tamano: " + offset);
 
     remainder = buf_file.byteLength - offset;
   }
 
-  console.log("Remainder: " + remainder);
+  console.log("* Tamano: " + offset);
+  console.log("* Remainder: " + remainder);
+
+  console.log("* Verificando...");
 
   if (!array_equal2(buf_flash, buf_file, offset)) {
     console.log("  - ❌ Error en bloque ");
@@ -697,28 +702,7 @@ async function verification2 (device, contents)
     console.log("  - Bloque OK");
   }
 
-  //-- Borrar buffers: TEST
-  await ftdi.purge_buffers(device);
-
-  //-- Leer bloque de bytes de la flash
-  let chunk = await ftdi.FLASH_read(device, offset, remainder);
-  
-  //-- Añadir bloque leido al buffer de la flash
-  buf_flash.set(chunk, offset);
-  offset = offset + chunk.byteLength;
-
-  remainder = buf_file.byteLength - offset;
-  console.log("* Tamano: " + offset);
-  console.log("* Remainder: " + remainder);
-
-  if (!array_equal2(buf_flash, buf_file, buf_file.byteLength)) {
-    console.log("  - ❌ Error en bloque ");
-  } else {
-    console.log("  - Bloque OK");
-  }
-  
   console.log("TEST...");
-
 }
 
 
