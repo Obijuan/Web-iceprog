@@ -552,7 +552,7 @@ btn_usb.onclick = async () => {
     //await load_bitstream(device, contents);
 
     //-- Verificar!
-    await verification2(device, contents);
+    await verification(device, contents);
 
     //-- Hemos terminado: Quitar el reset
     await ftdi.FPGA_reset_deassert(device);
@@ -652,7 +652,7 @@ async function load_bitstream(device, contents)
 }
 
 
-async function verification2 (device, contents)
+async function verification (device, contents)
 {
   //-----------------------------------------------------------
   //   VERYFICATION
@@ -723,87 +723,10 @@ async function verification2 (device, contents)
   } else {
     console.log("✅Verify: OK!");
   }
-
 }
 
-
-async function verification (device, contents)
-{
-  //-----------------------------------------------------------
-  //   VERYFICATION
-  //-----------------------------------------------------------
-  await ftdi.FPGA_reset_assert(device);
-  await ftdi.FLASH_release_power_down(device);
-
-  let buffer_id = await ftdi.FLASH_read_id(device)
-  let flash_id_str = id_to_string(buffer_id);
-  console.log("✅FLASH-ID: " + flash_id_str);
-
-  console.log("->Reading.. for verification!!!!!!!!!!!!!!");
-  await ftdi.purge_buffers(device);
-  
-  let file_size = contents.byteLength;
-  console.log("Length: " + file_size)
-  
-  let total_blocks = Math.trunc(file_size / 256);
-  let remaining = Math.trunc(file_size % 256);
-
-  //-- Direccion donde comenzar la veriricacion
-  let addr = 0;
-
-  //-- Verify complete blocks
-  for (let b = 0; b < total_blocks; b++) {
-
-    //-- Leer bloque de 256 bytes del bitstream
-    let buf_file = new Uint8Array(contents.slice(addr, addr + 256));
-
-    //-- Leer bloque de 256 bytes de la flash
-    let buf_flash = await FLASH_read_exact(device, addr, 256);
-
-    //-- Si los buffers son diferentes, hay un error de verificación
-    //-- Lo que hay en flash difiere de lo que tiene el fichero
-    if (!array_equal(buf_flash, buf_file)) {
-      console.log("❌ Error en bloque " + b)
-      //return
-    }
-
-    //-- Pasar al siguiente bloque
-    //addr += 256;
-    if (b % 50 == 0) 
-      console.log(b + " ");
-  }
-
-  //-- Verify the remaining block
-  if (remaining > 0) {
-    let buf_file = new Uint8Array(contents.slice(addr, addr + remaining));
-    let buf_flash = await FLASH_read_exact(device, addr, remaining);
-  
-    if (!array_equal(buf_flash, buf_file)) {
-      console.log("❌ Bloque " + total_blocks + " incorrecto!!!");
-      console.log("❌ ERROR en Verificación!");
-      return
-    }
-  }
-
-  console.log("✅Verify: OK!");
-
-
-  await ftdi.FPGA_reset_deassert(device);
-}
 
 async function todo() {
-
-  //-- Verify the remaining block
-  if (remaining > 0) {
-    let buf_file = contents.slice(addr, addr + remaining);
-    let buf_flash = new ArrayBuffer(remaining)    
-    //flash_read(rw_offset + addr, buf_flash, remaining, false);
-    //if (!array_equals(buf_flash, buf_file))
-    //    mpsse_error(3, "Found difference between flash and file!")
-  }
-  console.log("✅Verify: OK!");
-
-
 
   let cdone = await get_cdone();
   console.log("cdone: " + (cdone ? "high" : "low"))
@@ -841,35 +764,6 @@ async function todo() {
 }
 
 
-
-
-
-function flash_read(addr, data, n, verbose)
-{
- 	  if (verbose)
-       console.log("read 0x" + addr.toString(16) + " 0x" + n.toString(16));
-
-    let command = new Uint8Array(4);  //new Buffer.alloc(4);
-    command[0] = FC_RD;
-    command[1] = (addr >> 16);
-    command[2] = (addr >> 8);
-    command[3] = addr;
-
- 	  flash_chip_select();
- 	  mpsse_send_spi(command, 4);
- 	  //memset(data, 0, n);
- 	  mpsse_xfer_spi(data, n);
- 	  flash_chip_deselect();
-
-    if (verbose) {
-      let str = ""
- 		  for (let i = 0; i < n; i++)
- 			  str += data[i].toString(16) + (i == n - 1 || i % 32 == 31 ? '\n' : ' ');
-        console.log(str);
-    }
-}
-
-
 btn_list.onclick = async () => {
     let devices = await navigator.usb.getDevices();
     devices.forEach(device => {
@@ -891,33 +785,3 @@ navigator.usb.addEventListener('disconnect', event => {
     display.innerHTML = "";
 })
 
-// bitstream.onchange = (e) => {
-//   console.log("File selected!");
-
-//   let file = e.target.files[0];
- 
-//   const reader = new FileReader();
-
-//   reader.onload = (e) => {
-//     let contents = e.target.result;
-
-//     let file_size = contents.byteLength;
-//     console.log("Length: " + file_size);
-
-//     let addr = 0;
-//     let total_blocks = Math.trunc(file_size / 256);
-//     let remaining = Math.trunc(file_size % 256);
-
-//     console.log("Total 256 bytes blocks: " + total_blocks)
-
-//     let buf = contents.slice(addr, addr + 256);
-//     console.log(buf);
-
-//     //-- Write complete blocks
-//     for (let b = 0; b < total_blocks; b++) {
-//       let buf = contents.slice(addr, addr + 256);
-//       console.log("Bloque: " + b + ". Size: " + buf.byteLength);
-//     }
-//   };
-
-//   reader.readAsArrayBuffer(file);
