@@ -186,8 +186,8 @@ async function updateUI(connected) {
         document.getElementById('hexdump-grid').innerHTML = '';
         
         // Reset del panel de archivos
-        document.getElementById('file-name').textContent = 'Ningún archivo seleccionado';
-        document.getElementById('upload-btn').classList.add('hidden');
+        //document.getElementById('file-name').textContent = 'Ningún archivo seleccionado';
+        //document.getElementById('upload-btn').classList.add('hidden');
         document.getElementById('progress-bar').style.width = '0%';
         document.getElementById('progress-container').classList.add('hidden');
         
@@ -195,7 +195,7 @@ async function updateUI(connected) {
         document.getElementById('address-input').value = '0';
         document.getElementById('byte-input').value = '0xAA';
 
-        fileInfoArea.classList.add('hidden');
+        //fileInfoArea.classList.add('hidden');
         //document.getElementById('file-name').textContent = 'Archivo: ---';
         progressBar.style.width = '0%';
 
