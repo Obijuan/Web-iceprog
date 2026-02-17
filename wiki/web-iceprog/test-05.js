@@ -691,18 +691,16 @@ async function verification2 (device, contents)
     remainder = buf_file.byteLength - offset;
   }
 
-  console.log("* Tamano: " + offset);
-  console.log("* Remainder: " + remainder);
-
+  //console.log("* Tamano: " + offset);
+  //console.log("* Remainder: " + remainder);
   console.log("* Verificando...");
 
   if (!array_equal2(buf_flash, buf_file, offset)) {
-    console.log("  - ❌ Error en bloque ");
+    console.log("❌ Error en verificación!");
   } else {
-    console.log("  - Bloque OK");
+    console.log("✅Verify: OK!");
   }
 
-  console.log("TEST...");
 }
 
 
